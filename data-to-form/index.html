@@ -263,12 +263,12 @@
       <span class="trust-pill"><span class="tp-check">✓</span> Ne soumet jamais le formulaire</span>
       <span class="trust-pill"><span class="tp-check">✓</span> Fonctionne sur n'importe quel formulaire HTTPS, sans API</span>
       <span class="trust-pill"><span class="tp-check">✓</span> Fichier Excel jamais stocké sur disque</span>
-      <span class="trust-pill"><span class="tp-check">✓</span> LLM gratuit et local par défaut (Ollama)</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Matching local d'abord — LLM seulement en dernier recours</span>
       <span class="trust-pill"><span class="tp-check">✓</span> Connexion au formulaire faite à la main par l'utilisateur</span>
     </div>
     <div class="chips">
       <span class="chip">Playwright / Chromium réel</span>
-      <span class="chip">Mapping colonnes → champs par IA</span>
+      <span class="chip">Matching à 4 niveaux, IA en dernier recours</span>
       <span class="chip">Validation champ par champ</span>
       <span class="chip">Selects en cascade gérés</span>
     </div>
@@ -376,7 +376,7 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" fill="currentColor"/></svg>
           <span class="step-check">✓</span>
         </span>
-        <span class="step-label">Mapping suggéré par l'IA</span>
+        <span class="step-label">Mapping suggéré (moteur local, IA en dernier recours)</span>
       </div>
       <div class="step-line"></div>
       <div class="step-item done">
@@ -401,7 +401,7 @@
       <div class="demo-card">
         <div class="dc-label">Champ détecté sur le formulaire</div>
         <div class="dc-q">Nom du client (input texte, requis)</div>
-        <div class="dc-a">Le LLM propose « Client » comme colonne source pour ce champ, sur la seule base des noms de colonnes et des labels — jamais des données réelles.</div>
+        <div class="dc-a">« Client » correspond à un synonyme connu du champ « Nom du client » — reconnu instantanément par le dictionnaire de synonymes, sans aucun appel au LLM. Si aucun des trois niveaux locaux n'avait été assez confiant, le LLM aurait été sollicité en dernier recours, sur la seule base des noms de colonnes et des labels — jamais des données réelles.</div>
         <span class="demo-score">Score de confiance : 0.92</span>
       </div>
       <div class="v-connector"></div>
@@ -420,9 +420,20 @@
       <div class="feature-card"><div class="f-title">Fenêtre de navigateur réelle</div><p>Playwright ouvre Chromium sur l'URL du formulaire cible — pas de simulation, le formulaire réel est inspecté et rempli.</p></div>
       <div class="feature-card"><div class="f-title">Connexion gérée par l'utilisateur</div><p>Si le formulaire est derrière une authentification, l'utilisateur se connecte lui-même dans la fenêtre ; aucun mot de passe ne transite par le serveur.</p></div>
       <div class="feature-card"><div class="f-title">Détection automatique des champs</div><p>Texte, select, multi-select, checkbox, radio, y compris les selects en cascade — sans configuration préalable.</p></div>
-      <div class="feature-card"><div class="f-title">Mapping IA avec score de confiance</div><p>Chaque champ reçoit une colonne Excel suggérée et un score ; l'utilisateur valide, corrige ou ignore avant tout remplissage.</p></div>
-      <div class="feature-card"><div class="f-title">Extraction Excel intelligente</div><p>Pour les documents non tabulaires (plans de charge, rapports), un premier appel LLM détecte et structure les données avant le mapping.</p></div>
-      <div class="feature-card"><div class="f-title">Provider LLM interchangeable</div><p>Ollama local et gratuit par défaut ; Anthropic, OpenAI ou HuggingFace disponibles avec votre propre clé, sans changement de flux.</p></div>
+      <div class="feature-card"><div class="f-title">Matching à 4 niveaux, avec score de confiance</div><p>Synonymes, cache appris, puis similarité sémantique locale ; chaque champ reçoit une colonne Excel suggérée et un score. L'utilisateur valide, corrige ou ignore avant tout remplissage.</p></div>
+      <div class="feature-card"><div class="f-title">Extraction Excel intelligente</div><p>Pour les documents non tabulaires (plans de charge, rapports), un appel LLM ponctuel détecte et structure les données avant le mapping.</p></div>
+      <div class="feature-card"><div class="f-title">Provider LLM interchangeable, sollicité en dernier recours</div><p>Ollama local et gratuit par défaut ; Anthropic, OpenAI ou HuggingFace disponibles avec votre propre clé — appelés seulement quand le matching local ne suffit pas.</p></div>
+    </div>
+
+    <div class="callout" style="margin-top:1.4rem;">
+      <strong>Comment le mapping reste rapide et (presque) gratuit :</strong> chaque colonne Excel traverse jusqu'à quatre niveaux, dans l'ordre — dès qu'un niveau répond avec assez de confiance, les suivants sont sautés.
+      <ul>
+        <li><strong>Niveau 1 — Synonymes :</strong> un dictionnaire d'environ 190 libellés connus (FR/EN/ES) reconnaît instantanément les colonnes courantes (nom, email, adresse, date de naissance…)</li>
+        <li><strong>Niveau 2 — Mémoire :</strong> les correspondances déjà validées pour un formulaire (par un utilisateur ou par l'IA) sont mémorisées et réutilisées automatiquement la fois suivante</li>
+        <li><strong>Niveau 3 — Compréhension locale :</strong> un modèle d'analyse de texte compact, exécuté sur le serveur sans appel externe, rapproche les libellés qui se ressemblent sans être identiques</li>
+        <li><strong>Niveau 4 — IA en ligne, si nécessaire :</strong> seules les colonnes encore sans correspondance après les trois premiers niveaux sont envoyées à un LLM — et son résultat est mémorisé pour ne plus jamais y revenir</li>
+      </ul>
+      En pratique, une fois un formulaire déjà rencontré, la quasi-totalité des colonnes se résout aux niveaux 1 à 3 — l'appel à un LLM externe devient l'exception, pas la règle.
     </div>
   </section>
 
@@ -483,11 +494,11 @@
       <table>
         <thead><tr><th>Dimension</th><th>Copier-coller manuel</th><th>Macro / RPA classique</th><th>DataToForm</th><th>Bot 100% autonome</th></tr></thead>
         <tbody>
-          <tr><td>Mapping colonnes → champs</td><td class="dim">Fait de tête, à chaque ligne</td><td class="dim">Codé en dur, cassé au moindre changement de formulaire</td><td class="hl">Suggéré par IA, validé une fois par un humain</td><td class="dim">Automatique, sans validation</td></tr>
+          <tr><td>Mapping colonnes → champs</td><td class="dim">Fait de tête, à chaque ligne</td><td class="dim">Codé en dur, cassé au moindre changement de formulaire</td><td class="hl">4 niveaux locaux (synonymes, mémoire, similarité) ; IA seulement en dernier recours, validé une fois par un humain</td><td class="dim">Automatique, sans validation</td></tr>
           <tr><td>Nécessite une API</td><td class="dim">Non</td><td class="dim">Non, mais scripts fragiles</td><td class="hl">Non — fonctionne sur tout formulaire HTTPS</td><td class="dim">Non</td></tr>
           <tr><td>Formulaire derrière connexion</td><td class="dim">Connexion normale</td><td class="dim">Identifiants stockés dans le script</td><td class="hl">L'utilisateur se connecte lui-même, rien n'est stocké</td><td class="dim">Identifiants automatisés</td></tr>
           <tr><td>Soumission du formulaire</td><td class="dim">Manuelle</td><td class="dim">Souvent automatisée</td><td class="hl">Toujours manuelle, par conception</td><td class="dim">Automatique</td></tr>
-          <tr><td>Coût par ligne traitée</td><td class="dim">Temps humain uniquement</td><td class="dim">Développement + maintenance du script</td><td class="hl">Gratuit avec le LLM local par défaut</td><td class="dim">Variable selon plateforme</td></tr>
+          <tr><td>Coût par ligne traitée</td><td class="dim">Temps humain uniquement</td><td class="dim">Développement + maintenance du script</td><td class="hl">Gratuit — matching local dans l'immense majorité des cas, LLM local par défaut sinon</td><td class="dim">Variable selon plateforme</td></tr>
         </tbody>
       </table>
     </div>
@@ -534,9 +545,10 @@
       <strong>Garanties par conception :</strong>
       <ul>
         <li>Le fichier Excel est parsé en mémoire, jamais écrit sur disque ni envoyé à un tiers</li>
-        <li>Seuls les noms de colonnes et les labels de champs sont envoyés au LLM — jamais le contenu réel des lignes</li>
+        <li>Le mapping colonnes → champs se résout d'abord en local (synonymes, mémoire, similarité) ; un LLM n'est sollicité qu'en dernier recours, pour les colonnes restées sans correspondance</li>
+        <li>Quand un LLM est sollicité, seuls les noms de colonnes et les labels de champs lui sont envoyés — jamais le contenu réel des lignes</li>
         <li>Le formulaire n'est jamais soumis automatiquement, à aucune étape</li>
-        <li>Le LLM local (Ollama) est utilisé par défaut, sans coût variable ni sortie de données</li>
+        <li>Le LLM local (Ollama) est utilisé par défaut pour ce dernier recours, sans coût variable ni sortie de données</li>
       </ul>
     </div>
     <div class="table-wrap" style="margin-top:1rem;">

@@ -278,7 +278,7 @@ body {
 }
 .ai-steps {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1px;
   background: #bbf7d0;
 }
@@ -351,6 +351,56 @@ body {
 .ai-io-val {
   color: #166534;
 }
+.ai-step-badge.rare {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+code.inline-code {
+  font-family: ui-monospace, monospace;
+  background: #dcfce7;
+  color: #14532d;
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+/* ── Matching pipeline (4 layers) ── */
+.layer-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: #bbf7d0;
+  margin-top: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.layer-row {
+  background: #f0fdf4;
+  padding: 8px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.layer-num {
+  flex-shrink: 0;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.layer-num.llm { background: #d97706; }
+.layer-body { flex: 1; min-width: 0; }
+.layer-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 2px; }
+.layer-title { font-size: 0.72rem; font-weight: 700; color: #14532d; }
+.layer-desc { font-size: 0.64rem; color: #166534; line-height: 1.42; }
+.layer-tech { font-family: ui-monospace, monospace; font-size: 0.57rem; color: #15803d; margin-top: 3px; }
 
 /* ── LLM providers ── */
 .llm-providers {
@@ -420,25 +470,25 @@ body {
   <div class="card-header">
     <div>
       <div class="card-title"><em>DataToForm</em> — Architecture Technique</div>
-      <div class="card-tagline">Remplissage automatique de formulaires web à partir de fichiers Excel, piloté par IA</div>
+      <div class="card-tagline">Remplissage automatique de formulaires web à partir de fichiers Excel — matching local d'abord, LLM en dernier recours</div>
     </div>
     <div class="card-meta">
       <div class="card-author">Arnaud BRETON</div>
-      Full-stack · Node.js · Playwright · LLM<br>
-      <span class="version-badge">v2.0</span>2026
+      Full-stack · Node.js · Playwright · ONNX<br>
+      <span class="version-badge">v2.1</span>2026
     </div>
   </div>
 
   <!-- AI callout banner -->
   <div class="ai-banner">
-    <div class="ai-banner-icon">🤖</div>
+    <div class="ai-banner-icon">🧩</div>
     <div class="ai-banner-text">
-      L'IA intervient à <strong>2 étapes précises</strong> du flux —
+      Le LLM n'est que le <strong>4ᵉ et dernier niveau</strong> du matching —
     </div>
-    <span class="ai-step-pill">① Extraction Excel intelligente</span>
-    <span class="ai-step-pill">② Mapping colonnes ↔ champs</span>
+    <span class="ai-step-pill">① Extraction Excel (LLM, si complexe)</span>
+    <span class="ai-step-pill">② Mapping — 3 niveaux locaux gratuits, LLM en repli</span>
     <div class="ai-banner-text" style="margin-left:4px;">
-      — uniquement sur les <strong>noms de colonnes et labels</strong>, jamais sur les données réelles.
+      — et uniquement sur les <strong>noms de colonnes et labels</strong>, jamais sur les données réelles.
     </div>
   </div>
 
@@ -502,11 +552,11 @@ body {
         </div>
       </div>
 
-      <!-- AI section -->
+      <!-- AI + matching section -->
       <div class="ai-section">
         <div class="ai-section-header">
-          <div class="ai-section-header-text">🤖 Moteur IA — 2 appels LLM</div>
-          <div class="ai-section-header-sub">source interchangeable · lib/llm.js</div>
+          <div class="ai-section-header-text">🧩 Extraction + matching — LLM en dernier recours</div>
+          <div class="ai-section-header-sub">lib/field-matcher.js + lib/llm.js</div>
         </div>
         <div class="ai-steps">
 
@@ -516,7 +566,7 @@ body {
               <div class="ai-step-num">1</div>
               <div>
                 <div class="ai-step-title">Extraction Excel intelligente</div>
-                <span class="ai-step-badge">Si document complexe</span>
+                <span class="ai-step-badge">Si document complexe · LLM</span>
               </div>
             </div>
             <div class="ai-step-desc">Détecte les tableaux dans les documents non tabulaires (plans de charge, rapports…) et extrait les données structurées.</div>
@@ -537,26 +587,52 @@ body {
             <div class="ai-step-header">
               <div class="ai-step-num">2</div>
               <div>
-                <div class="ai-step-title">Mapping colonnes ↔ champs</div>
+                <div class="ai-step-title">Mapping colonnes ↔ champs — pipeline à 4 niveaux</div>
                 <span class="ai-step-badge">Toujours · validé humain</span>
               </div>
             </div>
-            <div class="ai-step-desc">Fait correspondre sémantiquement chaque colonne Excel à un champ du formulaire, avec score de confiance. L'utilisateur valide avant tout remplissage.</div>
-            <div class="ai-io">
-              <div class="ai-io-row">
-                <span class="ai-io-label">IN</span>
-                <span class="ai-io-val">Noms de colonnes + labels des champs</span>
+            <div class="ai-step-desc">Chaque colonne Excel traverse les niveaux dans l'ordre — dès qu'un niveau répond au-dessus du seuil, les suivants sont sautés. Le LLM (niveau 4) n'est appelé que pour les colonnes encore sans correspondance, et de moins en moins souvent : chaque résultat retourne dans le cache SQLite.</div>
+
+            <div class="layer-pipeline">
+              <div class="layer-row">
+                <span class="layer-num">1</span>
+                <div class="layer-body">
+                  <div class="layer-top"><span class="layer-title">Exact / synonyme</span><span class="ai-step-badge">Gratuit · instantané</span></div>
+                  <div class="layer-desc">Normalisation (accents, casse, séparateurs, camelCase) puis lookup dans un dictionnaire d'environ 190 synonymes FR/EN/ES écrit à la main (identité, contact, adresse, dates, e-commerce…).</div>
+                  <div class="layer-tech">confiance = 1.0 · source: <code class="inline-code">exact</code></div>
+                </div>
               </div>
-              <div class="ai-io-row">
-                <span class="ai-io-label">OUT</span>
-                <span class="ai-io-val">Mapping JSON + score de confiance</span>
+              <div class="layer-row">
+                <span class="layer-num">2</span>
+                <div class="layer-body">
+                  <div class="layer-top"><span class="layer-title">Cache SQLite appris</span><span class="ai-step-badge">Gratuit · s'auto-enrichit</span></div>
+                  <div class="layer-desc">Recherche dans <code class="inline-code">data/field-cache.db</code> (table <code class="inline-code">field_mappings</code>) une correspondance déjà validée pour cette colonne — par un utilisateur ou par un appel LLM antérieur.</div>
+                  <div class="layer-tech">seuil ≥ 0.92 · source: <code class="inline-code">cache</code> / <code class="inline-code">user</code></div>
+                </div>
+              </div>
+              <div class="layer-row">
+                <span class="layer-num">3</span>
+                <div class="layer-body">
+                  <div class="layer-top"><span class="layer-title">Embeddings ONNX locaux</span><span class="ai-step-badge">Gratuit · local</span></div>
+                  <div class="layer-desc">Similarité cosinus entre l'embedding de la colonne et ceux des champs du formulaire (et des colonnes déjà en cache), via un modèle ONNX quantifié exécuté dans le process Node — aucun appel réseau.</div>
+                  <div class="layer-tech">Xenova/all-MiniLM-L6-v2 (~23 Mo) · seuil ≥ 0.92 · source: <code class="inline-code">embedding</code></div>
+                </div>
+              </div>
+              <div class="layer-row">
+                <span class="layer-num llm">4</span>
+                <div class="layer-body">
+                  <div class="layer-top"><span class="layer-title">LLM — dernier recours</span><span class="ai-step-badge rare">Rare · colonnes non résolues seulement</span></div>
+                  <div class="layer-desc">Seules les colonnes encore sans correspondance après les niveaux 1 à 3 sont envoyées au LLM, avec la liste des champs du formulaire. Le résultat accepté est réinjecté dans le cache SQLite : la même colonne ne redemandera plus jamais de LLM sur un formulaire aux champs équivalents.</div>
+                  <div class="layer-tech">confiance min. 0.55 · source: <code class="inline-code">llm</code></div>
+                </div>
               </div>
             </div>
+
           </div>
 
         </div>
         <div class="llm-providers">
-          <span class="llm-label">Providers</span>
+          <span class="llm-label">Providers (niveau 4 uniquement)</span>
           <span class="llm-chip local">Ollama local</span>
           <span class="llm-sep">·</span>
           <span class="llm-chip api">HuggingFace</span>
@@ -618,8 +694,9 @@ body {
     <span class="footer-chip">Vanilla JS</span>
     <span class="footer-chip">HTML5 Canvas</span>
     <span class="footer-dot">·</span>
-    <span class="footer-chip">LLM local / API</span>
-    <span class="footer-chip">Prompt engineering</span>
+    <span class="footer-chip">SQLite (better-sqlite3)</span>
+    <span class="footer-chip">ONNX (@xenova/transformers)</span>
+    <span class="footer-chip">LLM local / API — dernier recours</span>
     <span class="footer-dot">·</span>
     <span class="footer-chip">PostHog</span>
     <span class="footer-chip">GTM</span>
