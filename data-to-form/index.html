@@ -217,6 +217,15 @@
   .demo-card .dc-a { color: var(--text-dim); font-size: 0.86rem; line-height: 1.5; }
   .demo-score { display: inline-block; margin-top: 0.65rem; font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.78rem; background: var(--good-bg); color: var(--good-text); border: 1px solid var(--good-border); padding: 0.22rem 0.65rem; border-radius: 100px; }
   .demo-final { text-align: center; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.4rem; }
+  .demo-card.highlight { border: 1.5px solid var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
+  .fill-progress { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.7rem; }
+  .fill-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text); }
+  .fill-row.pending { color: var(--text-dim); }
+  .fill-check { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--good-border); color: #fff; font-size: 10px; font-weight: 800; flex: none; }
+  .fill-spin { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--border); border-top-color: var(--accent); flex: none; animation: spin 0.8s linear infinite; }
+  .fill-dot { display: inline-block; width: 16px; height: 16px; flex: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .fill-spin { animation: none; } }
 
   /* ---------- Features ---------- */
   .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.9rem; }
@@ -250,25 +259,26 @@
 
   <header class="hero">
     <div class="hero-blobs"><span class="blob blob-a"></span><span class="blob blob-b"></span></div>
-    <p class="eyebrow">Remplissage de formulaires piloté par IA</p>
-    <h1>Le pont entre votre <em>Excel</em> et n'importe quel formulaire web, sans API</h1>
+    <p class="eyebrow">Remplissage automatique de formulaires web</p>
+    <h1>Le pont entre <em>vos données</em> et n'importe quel formulaire web, sans API</h1>
     <p class="subtitle">
       Des milliers d'outils métier — logiciels de billetterie, extranets fédéraux, back-offices e-commerce,
       portails immobiliers, CRM médico-sociaux — n'exposent aucune API d'import. La seule porte d'entrée
       reste leur formulaire web. DataToForm ouvre une vraie fenêtre de navigateur sur ce formulaire,
-      comprend ses champs, et les remplit ligne par ligne à partir d'un fichier Excel — sans jamais cliquer
-      sur « Envoyer » à la place de l'utilisateur.
+      comprend ses champs, et les remplit automatiquement, ligne par ligne, à partir de vos données —
+      un fichier Excel ou CSV aujourd'hui, une autre source demain — sans jamais cliquer sur « Envoyer »
+      à la place de l'utilisateur.
     </p>
     <div class="trust-pills">
       <span class="trust-pill"><span class="tp-check">✓</span> Ne soumet jamais le formulaire</span>
       <span class="trust-pill"><span class="tp-check">✓</span> Fonctionne sur n'importe quel formulaire HTTPS, sans API</span>
-      <span class="trust-pill"><span class="tp-check">✓</span> Fichier Excel jamais stocké sur disque</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Fichier source jamais stocké sur disque</span>
       <span class="trust-pill"><span class="tp-check">✓</span> Matching local d'abord — LLM seulement en dernier recours</span>
       <span class="trust-pill"><span class="tp-check">✓</span> Connexion au formulaire faite à la main par l'utilisateur</span>
     </div>
     <div class="chips">
       <span class="chip">Playwright / Chromium réel</span>
-      <span class="chip">Matching à 4 niveaux, IA en dernier recours</span>
+      <span class="chip">Remplissage automatique ligne par ligne</span>
       <span class="chip">Validation champ par champ</span>
       <span class="chip">Selects en cascade gérés</span>
     </div>
@@ -280,7 +290,7 @@
 
   <nav class="toc">
     <div class="inner">
-      <div class="nav-brand"><span class="nb-name">DataToForm</span><span class="nb-tag">Excel → n'importe quel formulaire</span></div>
+      <div class="nav-brand"><span class="nb-name">DataToForm</span><span class="nb-tag">Vos données → n'importe quel formulaire</span></div>
       <div class="nav-sep"></div>
       <a href="#usages">Cas d'usage</a>
       <a href="#demo">Comment ça marche</a>
@@ -352,7 +362,7 @@
 
   <section class="block" id="demo">
     <div class="block-head"><span class="block-num">02</span><h2>Comment ça marche</h2></div>
-    <p class="block-desc">Le parcours réel de l'application, tel qu'il se déroule pour une ligne du fichier Excel.</p>
+    <p class="block-desc">Le parcours réel de l'application. Le mapping n'est qu'une étape préparatoire, validée une fois : l'objectif de l'outil est le remplissage automatique du formulaire, ligne après ligne, sous les yeux de l'utilisateur.</p>
 
     <div class="steps-tracker">
       <div class="step-item done">
@@ -360,7 +370,7 @@
           <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <span class="step-check">✓</span>
         </span>
-        <span class="step-label">Upload Excel + URL</span>
+        <span class="step-label">Upload fichier + URL</span>
       </div>
       <div class="step-line"></div>
       <div class="step-item done">
@@ -368,7 +378,15 @@
           <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span class="step-check">✓</span>
         </span>
-        <span class="step-label">Connexion manuelle si besoin</span>
+        <span class="step-label">Connexion si besoin</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 9h18M8 4v16" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Détection des champs</span>
       </div>
       <div class="step-line"></div>
       <div class="step-item done">
@@ -376,7 +394,7 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" fill="currentColor"/></svg>
           <span class="step-check">✓</span>
         </span>
-        <span class="step-label">Mapping suggéré (moteur local, IA en dernier recours)</span>
+        <span class="step-label">Mapping (résolu en local)</span>
       </div>
       <div class="step-line"></div>
       <div class="step-item done">
@@ -384,7 +402,7 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
           <span class="step-check">✓</span>
         </span>
-        <span class="step-label">Remplissage ligne par ligne</span>
+        <span class="step-label">Remplissage automatique</span>
       </div>
       <div class="step-line"></div>
       <div class="step-item">
@@ -396,20 +414,48 @@
     </div>
 
     <div class="demo-flow">
-      <div class="demo-bubble">Colonne Excel : « Client » → quel champ du formulaire correspond ?</div>
+      <div class="demo-bubble">Fichier de données (12 lignes) + URL du formulaire cible</div>
+      <div class="v-connector"></div>
+
+      <div class="demo-card">
+        <div class="dc-label">Champs détectés sur le formulaire réel</div>
+        <div class="dc-a">Playwright inspecte la page ouverte dans Chromium et retrouve chaque champ visible, avec son type exact — pas seulement des cases de texte.</div>
+        <div class="chips" style="margin-top:0.65rem;">
+          <span class="chip">Nom (texte, requis)</span>
+          <span class="chip">Pays → Région (select en cascade)</span>
+          <span class="chip">Newsletter (case à cocher)</span>
+          <span class="chip">Formule (bouton radio)</span>
+          <span class="chip">Notes (éditeur de texte enrichi)</span>
+        </div>
+      </div>
+
       <div class="v-connector"></div>
       <div class="demo-card">
-        <div class="dc-label">Champ détecté sur le formulaire</div>
-        <div class="dc-q">Nom du client (input texte, requis)</div>
-        <div class="dc-a">« Client » correspond à un synonyme connu du champ « Nom du client » — reconnu instantanément par le dictionnaire de synonymes, sans aucun appel au LLM. Si aucun des trois niveaux locaux n'avait été assez confiant, le LLM aurait été sollicité en dernier recours, sur la seule base des noms de colonnes et des labels — jamais des données réelles.</div>
+        <div class="dc-label">Mapping colonne ↔ champ — étape préparatoire</div>
+        <div class="dc-a">« Client » → « Nom » : reconnu instantanément par le dictionnaire de synonymes, sans appel au LLM. L'utilisateur valide, corrige ou ignore chaque suggestion avant tout remplissage réel.</div>
         <span class="demo-score">Score de confiance : 0.92</span>
       </div>
+
+      <div class="v-connector"></div>
+      <div class="demo-card highlight">
+        <div class="dc-label">🎯 Ce que fait l'outil, concrètement : le formulaire se remplit tout seul</div>
+        <div class="dc-a">Ligne après ligne, DataToForm rejoue le mapping validé dans la vraie fenêtre de navigateur — l'utilisateur regarde chaque champ se remplir en direct, sans rien saisir lui-même.</div>
+        <div class="fill-progress">
+          <div class="fill-row"><span class="fill-check">✓</span> Nom : Dupont</div>
+          <div class="fill-row"><span class="fill-check">✓</span> Pays : France → Région : Île-de-France</div>
+          <div class="fill-row"><span class="fill-check">✓</span> Newsletter : cochée</div>
+          <div class="fill-row"><span class="fill-spin"></span> Formule : Premium…</div>
+          <div class="fill-row pending"><span class="fill-dot"></span> Notes</div>
+        </div>
+      </div>
+
       <div class="v-connector"></div>
       <div class="demo-card">
-        <div class="dc-label">Validation par l'utilisateur</div>
-        <div class="dc-a">L'utilisateur accepte, corrige ou ignore la suggestion — champ par champ, avant tout remplissage réel. Rien n'est écrit dans le formulaire sans ce mapping validé.</div>
+        <div class="dc-label">Relecture &amp; envoi</div>
+        <div class="dc-a">L'utilisateur relit la ligne remplie dans la fenêtre et clique lui-même sur « Envoyer ». La fenêtre se recharge alors pour la ligne suivante.</div>
       </div>
-      <p class="demo-final">Une fois validé, le mapping est rejoué automatiquement pour chaque ligne du fichier — la soumission finale reste toujours un clic humain.</p>
+
+      <p class="demo-final">Le mapping n'est validé qu'une fois par formulaire ; ce qui se répète ensuite, ligne après ligne, c'est le remplissage automatique — pas le matching.</p>
     </div>
   </section>
 
@@ -426,7 +472,7 @@
     </div>
 
     <div class="callout" style="margin-top:1.4rem;">
-      <strong>Comment le mapping reste rapide et (presque) gratuit :</strong> chaque colonne Excel traverse jusqu'à quatre niveaux, dans l'ordre — dès qu'un niveau répond avec assez de confiance, les suivants sont sautés.
+      <strong>Comment le mapping se résout, en 4 niveaux :</strong> chaque colonne traverse ces niveaux dans l'ordre — dès qu'un niveau répond avec assez de confiance, les suivants sont sautés.
       <ul>
         <li><strong>Niveau 1 — Synonymes :</strong> un dictionnaire d'environ 190 libellés connus (FR/EN/ES) reconnaît instantanément les colonnes courantes (nom, email, adresse, date de naissance…)</li>
         <li><strong>Niveau 2 — Mémoire :</strong> les correspondances déjà validées pour un formulaire (par un utilisateur ou par l'IA) sont mémorisées et réutilisées automatiquement la fois suivante</li>
@@ -498,7 +544,7 @@
           <tr><td>Nécessite une API</td><td class="dim">Non</td><td class="dim">Non, mais scripts fragiles</td><td class="hl">Non — fonctionne sur tout formulaire HTTPS</td><td class="dim">Non</td></tr>
           <tr><td>Formulaire derrière connexion</td><td class="dim">Connexion normale</td><td class="dim">Identifiants stockés dans le script</td><td class="hl">L'utilisateur se connecte lui-même, rien n'est stocké</td><td class="dim">Identifiants automatisés</td></tr>
           <tr><td>Soumission du formulaire</td><td class="dim">Manuelle</td><td class="dim">Souvent automatisée</td><td class="hl">Toujours manuelle, par conception</td><td class="dim">Automatique</td></tr>
-          <tr><td>Coût par ligne traitée</td><td class="dim">Temps humain uniquement</td><td class="dim">Développement + maintenance du script</td><td class="hl">Gratuit — matching local dans l'immense majorité des cas, LLM local par défaut sinon</td><td class="dim">Variable selon plateforme</td></tr>
+          <tr><td>Coût par ligne traitée</td><td class="dim">Temps humain uniquement</td><td class="dim">Développement + maintenance du script</td><td class="hl">Marginal une fois le mapping validé — le remplissage se rejoue automatiquement</td><td class="dim">Variable selon plateforme</td></tr>
         </tbody>
       </table>
     </div>
@@ -565,17 +611,17 @@
 
   <section class="block" id="evolutions">
     <div class="block-head"><span class="block-num">08</span><h2>Évolutions possibles</h2></div>
-    <p class="block-desc">Le socle actuel est pensé pour grandir dans ces directions.</p>
+    <p class="block-desc">Excel et CSV sont le point d'entrée actuel, pas une limite définitive. Le socle est pensé pour se brancher sur d'autres sources de données et s'ouvrir à des systèmes tiers.</p>
     <div class="evolutions-grid">
+      <div class="evo-item"><span class="evo-dot"></span>Connexion directe à d'autres sources de données — base de données, CRM, ERP — en plus d'un fichier Excel/CSV</div>
+      <div class="evo-item"><span class="evo-dot"></span>Une API DataToForm pour déclencher un remplissage depuis un système tiers, sans passer par l'interface web</div>
+      <div class="evo-item"><span class="evo-dot"></span>Le même moteur de mapping et de remplissage, réutilisable quelle que soit la donnée d'entrée</div>
       <div class="evo-item"><span class="evo-dot"></span>Mapping réutilisable d'une session à l'autre pour un même formulaire cible</div>
-      <div class="evo-item"><span class="evo-dot"></span>Connecteurs directs vers les ERP/CRM les plus courants, en complément du remplissage par navigateur</div>
-      <div class="evo-item"><span class="evo-dot"></span>Ingestion de PDF et de documents Word comme source de données, en plus d'Excel et CSV</div>
-      <div class="evo-item"><span class="evo-dot"></span>Mode 1-1 étendu : une URL différente par ligne pour les mises à jour de fiches existantes</div>
     </div>
   </section>
 
   <footer>
-    <span>DataToForm — Excel vers n'importe quel formulaire web</span>
+    <span>DataToForm — Vos données vers n'importe quel formulaire web</span>
     <span>Généré le 2026-09-01 · <a href="architecture.html">Architecture technique complète</a></span>
   </footer>
 
