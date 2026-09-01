@@ -1,11 +1,549 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>licences manager for softwares api</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licenses API — Une API de licences qui protège vos revenus</title>
+<style>
+  :root {
+    --bg: #F1F5F9;
+    --surface: #FFFFFF;
+    --surface-2: #F8FAFC;
+    --text: #0F172A;
+    --text-dim: #64748B;
+    --border: #DDE1E8;
+    --accent: #4F46E5;
+    --accent-ink: #4338CA;
+    --code-bg: #E2E8F0;
+    --chip-bg: #E8EBF0;
+    --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+      --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+      --accent: #818CF8; --accent-ink: #A5B4FC;
+      --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+      --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+    --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+    --accent: #818CF8; --accent-ink: #A5B4FC;
+    --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+    --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+  }
+  :root[data-theme="light"] {
+    --bg: #F1F5F9; --surface: #FFFFFF; --surface-2: #F8FAFC;
+    --text: #0F172A; --text-dim: #64748B; --border: #DDE1E8;
+    --accent: #4F46E5; --accent-ink: #4338CA;
+    --code-bg: #E2E8F0; --chip-bg: #E8EBF0; --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  code, .mono {
+    font-family: ui-monospace, "Cascadia Code", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+  code { background: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .page { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+  header.hero { padding: 3.5rem 0 2.2rem; border-bottom: 1px solid var(--border); }
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4.2vw, 2.9rem); line-height: 1.12; letter-spacing: -0.015em;
+    margin: 0 0 1rem; text-wrap: balance; max-width: 20ch;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle { color: var(--text-dim); font-size: 1.12rem; max-width: 62ch; margin: 0 0 1.5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.76rem;
+    padding: 0.28rem 0.6rem; border-radius: 100px; background: var(--chip-bg); color: var(--chip-color);
+  }
+  .hero-cta { margin-top: 1.5rem; display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.88rem; }
+  .hero-cta a { font-weight: 600; text-decoration: none; }
+  .hero-cta a:hover { text-decoration: underline; }
+  .hero-cta a.secondary { color: var(--text-dim); font-weight: 500; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--border);
+    margin: 0 -1.5rem 2.5rem; padding: 0 1.5rem;
+  }
+  nav.toc .inner {
+    max-width: 1000px; margin: 0 auto; display: flex; gap: 1.2rem;
+    overflow-x: auto; padding: 0.75rem 0; font-size: 0.8rem;
+  }
+  nav.toc a { color: var(--text-dim); text-decoration: none; white-space: nowrap; }
+  nav.toc a:hover { color: var(--accent); }
+
+  section.block { padding: 2.8rem 0; border-bottom: 1px solid var(--border); scroll-margin-top: 4rem; }
+  section.block:last-of-type { border-bottom: none; }
+  .block-head { display: flex; align-items: baseline; gap: 0.7rem; margin-bottom: 0.4rem; }
+  .block-num { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.8rem; color: var(--text-dim); }
+  h2 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
+  h3 { font-size: 1rem; margin: 0 0 0.35rem; }
+  .block-desc { color: var(--text-dim); max-width: 66ch; margin: 0.6rem 0 1.6rem; }
+  .block-desc.center { margin-left: auto; margin-right: auto; text-align: center; }
+
+  /* ---------- Problem framing ---------- */
+  .framing { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .framing-card { border-radius: 10px; padding: 1.1rem 1.2rem; border: 1.5px solid; }
+  .framing-card.bad { background: var(--bad-bg); border-color: var(--bad-border); }
+  .framing-card.good { background: var(--good-bg); border-color: var(--good-border); }
+  .framing-card .label {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.65rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+  }
+  .framing-card.bad .label { color: var(--bad-text); }
+  .framing-card.good .label { color: var(--good-text); }
+  .framing-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; }
+  .framing-card.bad li { color: var(--bad-text); }
+  .framing-card.good li { color: var(--good-text); }
+  .framing-card li + li { margin-top: 0.4rem; }
+
+  /* ---------- Metrics strip ---------- */
+  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; margin-top: 1.5rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; box-shadow: var(--shadow); }
+  .metric .m-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .metric .m-value { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 1.3rem; font-weight: 700; margin: 0.25rem 0; color: var(--text); font-variant-numeric: tabular-nums; }
+  .metric .m-delta { font-size: 0.76rem; color: var(--good-text); font-weight: 600; }
+  .metric p.m-explain { margin: 0.35rem 0 0; font-size: 0.78rem; color: var(--text-dim); font-family: ui-sans-serif, system-ui, sans-serif; }
+
+  /* ---------- Use case cards ---------- */
+  .usecases { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .usecase { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 0.55rem; }
+  .usecase .uc-tag {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.62rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); align-self: flex-start;
+    background: var(--chip-bg); padding: 0.2rem 0.55rem; border-radius: 100px;
+  }
+  .usecase h3 { font-size: 1.02rem; margin-top: 0.2rem; }
+  .uc-detail { display: flex; gap: 0.6rem; font-size: 0.82rem; }
+  .uc-detail .uc-k { flex: none; width: 76px; font-weight: 700; color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 0.15rem; }
+  .uc-detail .uc-v { color: var(--text-dim); line-height: 1.4; }
+  .usecase .uc-value { margin-top: auto; padding-top: 0.6rem; border-top: 1px dashed var(--border); font-size: 0.8rem; color: var(--text); }
+  .usecase .uc-value strong { color: var(--accent-ink); }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; min-width: 560px; }
+  th, td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); background: var(--surface-2); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.dim { color: var(--text-dim); }
+  td.hl { color: var(--accent-ink); font-weight: 600; }
+
+  /* ---------- Callout ---------- */
+  .callout { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 1rem 1.2rem; font-size: 0.88rem; color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+  .callout li + li { margin-top: 0.3rem; }
+
+  /* ---------- Hero blobs ---------- */
+  header.hero { position: relative; overflow: hidden; }
+  header.hero > * { position: relative; z-index: 1; }
+  .hero-blobs { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.28; }
+  .blob-a { width: 340px; height: 340px; background: var(--accent); top: -100px; left: -70px; }
+  .blob-b { width: 300px; height: 300px; background: #22D3EE; top: -60px; right: -60px; }
+  @media (prefers-color-scheme: dark) { .blob { opacity: 0.16; } }
+  :root[data-theme="dark"] .blob { opacity: 0.16; }
+  :root[data-theme="light"] .blob { opacity: 0.28; }
+
+  /* ---------- Trust pills ---------- */
+  .trust-pills { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.2rem 0 1.3rem; }
+  .trust-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem; background: var(--good-bg); color: var(--good-text);
+    border: 1px solid var(--good-border); border-radius: 100px; padding: 0.4rem 0.9rem; font-size: 0.82rem; font-weight: 600;
+  }
+  .trust-pill .tp-check { font-weight: 800; }
+
+  /* ---------- Nav brand ---------- */
+  .nav-brand { display: flex; flex-direction: column; line-height: 1.15; margin-right: 0.4rem; flex: none; }
+  .nav-brand .nb-name { font-weight: 800; color: var(--accent); font-size: 0.88rem; white-space: nowrap; }
+  .nav-brand .nb-tag { font-size: 0.64rem; color: var(--text-dim); white-space: nowrap; }
+  .nav-sep { width: 1px; align-self: stretch; background: var(--border); flex: none; margin: 0.3rem 0; }
+
+  /* ---------- Step tracker ---------- */
+  .steps-tracker { display: flex; align-items: flex-start; justify-content: center; gap: 0; flex-wrap: wrap; margin-bottom: 2rem; }
+  .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; width: 118px; text-align: center; }
+  .step-bubble {
+    position: relative; width: 50px; height: 50px; border-radius: 50%; background: var(--surface);
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); box-shadow: var(--shadow);
+  }
+  .step-bubble svg { width: 22px; height: 22px; }
+  .step-item.done .step-bubble { border-color: var(--accent); color: var(--accent); }
+  .step-check {
+    position: absolute; bottom: -3px; right: -3px; width: 17px; height: 17px; border-radius: 50%;
+    background: var(--good-border); color: #fff; font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface);
+  }
+  .step-label { font-size: 0.76rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin-top: 25px; min-width: 20px; }
+
+  /* ---------- Demo sequence ---------- */
+  .demo-flow { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 500px; margin: 0 auto; }
+  .v-connector { width: 2px; height: 26px; background: var(--border); position: relative; flex: none; }
+  .v-connector::after { content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid var(--border); }
+  .demo-bubble { align-self: flex-end; background: var(--accent); color: #fff; border-radius: 14px 14px 4px 14px; padding: 0.85rem 1.1rem; font-size: 0.95rem; max-width: 88%; box-shadow: var(--shadow); }
+  .demo-tag { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); background: var(--surface-2); border: 1px solid var(--border); border-radius: 100px; padding: 0.32rem 0.85rem; }
+  .demo-card { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; box-shadow: var(--shadow); }
+  .demo-card .dc-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); font-weight: 800; margin-bottom: 0.45rem; }
+  .demo-card .dc-q { font-weight: 600; margin-bottom: 0.3rem; font-size: 0.92rem; font-family: ui-monospace, "Cascadia Code", monospace; }
+  .demo-card .dc-a { color: var(--text-dim); font-size: 0.86rem; line-height: 1.5; }
+  .demo-score { display: inline-block; margin-top: 0.65rem; font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.78rem; background: var(--good-bg); color: var(--good-text); border: 1px solid var(--good-border); padding: 0.22rem 0.65rem; border-radius: 100px; }
+  .demo-final { text-align: center; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.4rem; }
+
+  /* ---------- Features ---------- */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.9rem; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; box-shadow: var(--shadow); }
+  .feature-card .f-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.35rem; }
+  .feature-card p { margin: 0; font-size: 0.82rem; color: var(--text-dim); line-height: 1.45; }
+
+  /* ---------- Comparison progression ---------- */
+  .compare-steps { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.4rem; }
+  .compare-chip { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.82rem; font-weight: 700; padding: 0.55rem 1.1rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-dim); }
+  .compare-chip.mid { border-color: var(--accent); color: var(--accent-ink); background: var(--surface); box-shadow: var(--shadow); }
+  .compare-arrow { color: var(--text-dim); font-size: 1rem; }
+
+  /* ---------- Evolutions ---------- */
+  .evolutions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.7rem; }
+  .evo-item { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.86rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; color: var(--text-dim); }
+  .evo-item .evo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 0.55rem; flex: none; }
+
+  footer { padding-top: 2.5rem; color: var(--text-dim); font-size: 0.85rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+  @media (max-width: 700px) {
+    .framing { grid-template-columns: 1fr; }
+  }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
 </head>
 <body>
-  <h1>licences manager for softwares api</h1>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-blobs"><span class="blob blob-a"></span><span class="blob blob-b"></span></div>
+    <p class="eyebrow">API de licences multi-éditeurs</p>
+    <h1>Une API de licences qui protège vos revenus — <em>sans</em> vous enfermer dans le cloud de quelqu'un d'autre</h1>
+    <p class="subtitle">
+      Un jeu, un plugin, une application SaaS ou un logiciel installé a souvent besoin d'une simple clé de
+      licence pour débloquer ses fonctionnalités premium. Cette API auto-hébergée gère l'activation, la
+      désactivation et l'administration de ces licences pour plusieurs éditeurs à la fois — chacun strictement
+      isolé des autres — avec des jetons signés Ed25519, vérifiables hors-ligne par le logiciel client.
+    </p>
+    <div class="trust-pills">
+      <span class="trust-pill"><span class="tp-check">✓</span> Auto-hébergée, sur votre propre infrastructure</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Multi-éditeurs : isolation stricte des données</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Vérification de signature hors-ligne (Ed25519)</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Rien de sensible stocké en clair (HMAC-SHA256)</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Apache-2.0, aucun verrouillage propriétaire</span>
+    </div>
+    <div class="chips">
+      <span class="chip">FastAPI</span>
+      <span class="chip">PostgreSQL</span>
+      <span class="chip">Ed25519</span>
+      <span class="chip">Multi-tenant</span>
+      <span class="chip">Apache-2.0</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#demo">Voir comment ça marche ↓</a>
+      <a href="architecture.html">Voir l'architecture technique →</a>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="inner">
+      <div class="nav-brand"><span class="nb-name">Licenses API</span><span class="nb-tag">Protégez ce que vous vendez</span></div>
+      <div class="nav-sep"></div>
+      <a href="#usages">Cas d'usage</a>
+      <a href="#demo">Comment ça marche</a>
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#securite">Sécurité</a>
+      <a href="#valeur">Valeur métier</a>
+      <a href="#comparaison">Comparaison</a>
+      <a href="#operationnel">Repères opérationnels</a>
+      <a href="#evolutions">Évolutions</a>
+      <div class="nav-sep"></div>
+      <a href="architecture.html">Architecture technique →</a>
+    </div>
+  </nav>
+
+  <section class="block" id="usages">
+    <div class="block-head"><span class="block-num">01</span><h2>Cas d'usage</h2></div>
+    <p class="block-desc">Cinq profils d'éditeurs directement couverts par le modèle multi-tenant actuel.</p>
+    <div class="usecases">
+      <div class="usecase">
+        <span class="uc-tag">Éditeurs de jeux &amp; DLC</span>
+        <h3>Freiner la redistribution de clés piratées</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un studio indépendant vend un jeu, des mods ou du DLC et veut limiter chaque licence à quelques machines, sans construire son propre backend.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Une clé codée en dur dans le binaire se retrouve partagée sur un forum en quelques jours.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v"><code>/activate</code> avec quota d'appareils par licence et jeton signé Ed25519, vérifié hors-ligne à chaque lancement.</span></div>
+        <div class="uc-value">Valeur : <strong>le partage sauvage de clés devient auto-limitant</strong>, sans SDK anti-piratage lourd.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Éditeurs SaaS &amp; logiciels desktop</span>
+        <h3>Débloquer les fonctionnalités Pro par palier d'abonnement</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Une app SaaS ou desktop veut réserver certaines fonctionnalités aux abonnés Pro ou Enterprise.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Construire un système de licences maison prend des semaines et se trompe souvent : secrets qui fuitent, aucune révocation possible.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">API d'administration scopée par éditeur — créer, activer, désactiver une licence instantanément, branchée sur n'importe quel système de facturation.</span></div>
+        <div class="uc-value">Valeur : <strong>le contrôle d'accès Pro livré en un jour</strong>, pas en un trimestre.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Marketplaces de plugins &amp; add-ons</span>
+        <h3>Un seul backend de licences pour tout un catalogue</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un éditeur vend de nombreux petits plugins ou add-ons sur une marketplace (DAW, CAD, design…).</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Chaque add-on réinvente sa propre vérification maison — ou n'en a aucune.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Une API multi-éditeurs unique, un compte éditeur par gamme de produits, le même contrat <code>/activate</code> partout.</span></div>
+        <div class="uc-value">Valeur : <strong>une protection cohérente sur tout le catalogue</strong>, sans multiplier les backends.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Logiciels d'entreprise &amp; on-premise</span>
+        <h3>Contrôler les licences sans dépendre en permanence du réseau</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Des clients grands comptes font tourner le logiciel sur des réseaux fermés, avec un accès internet occasionnel.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Un DRM rigide qui exige un contact serveur permanent casse dès qu'il tourne en environnement restreint ou isolé.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Jeton signé mis en cache et vérifié hors-ligne via la clé publique Ed25519 ; re-validation uniquement à l'expiration (1h par défaut, configurable).</span></div>
+        <div class="uc-value">Valeur : <strong>les clients grands comptes continuent de travailler</strong>, l'éditeur garde le contrôle.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Plateformes multi-marques</span>
+        <h3>Provisionner une nouvelle marque éditeur sans tout re-architecturer</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un opérateur fait tourner la plateforme pour plusieurs studios ou marques sous un même toit.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Une table de licences partagée fait courir le risque qu'une marque voie les données d'une autre, ou qu'une fuite touche tout le monde.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">L'API plateforme provisionne un nouvel éditeur, avec ses propres jetons client/admin, en un seul appel ; l'isolement est appliqué à chaque requête.</span></div>
+        <div class="uc-value">Valeur : <strong>une nouvelle marque onboardée en quelques minutes</strong>, le rayon d'impact d'une fuite reste limité à un éditeur.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="demo">
+    <div class="block-head"><span class="block-num">02</span><h2>Comment ça marche</h2></div>
+    <p class="block-desc">Le déroulé d'une activation, tel qu'implémenté par l'API aujourd'hui.</p>
+
+    <div class="steps-tracker">
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="8" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8V6a4 4 0 018 0v2" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Clé saisie</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Quota &amp; débit vérifiés</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Jeton signé (Ed25519)</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 118 0v3" stroke="currentColor" stroke-width="1.8"/></svg>
+        </span>
+        <span class="step-label">Fonctionnalité débloquée</span>
+      </div>
+    </div>
+
+    <div class="demo-flow">
+      <div class="demo-bubble">« Je viens d'acheter la version Pro — voici ma clé : XPFD-8F2K-93JQ-11ZR »</div>
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">POST /activate</div>
+        <div class="dc-q">email + license_key + device_hash + device_name</div>
+        <div class="dc-a">L'API vérifie le débit par (éditeur, email), la propriété et le quota d'appareils, puis signe un jeton avec la clé Ed25519 active.</div>
+        <span class="demo-score">200 · jeton signé + kid + expires_at</span>
+      </div>
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">Vérification hors-ligne (à chaque lancement)</div>
+        <div class="dc-a">L'app récupère <code>/public-keys</code> une fois, met en cache par <code>kid</code>, et vérifie la signature Ed25519 localement — aucun appel réseau requis avant expiration.</div>
+      </div>
+      <p class="demo-final">L'aller-retour se fait typiquement en quelques dizaines de millisecondes ; la vérification hors-ligne qui suit est locale et instantanée.</p>
+    </div>
+  </section>
+
+  <section class="block" id="fonctionnalites">
+    <div class="block-head"><span class="block-num">03</span><h2>Fonctionnalités</h2></div>
+    <p class="block-desc">Ce que l'API fait, concrètement.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-title">Isolation multi-éditeurs</div><p>Chaque utilisateur, licence et activation est scopé par éditeur au niveau de la requête — un jeton admin ne voit jamais les données d'un autre éditeur.</p></div>
+      <div class="feature-card"><div class="f-title">Vérification de signature hors-ligne</div><p>Les jetons sont signés Ed25519 ; le logiciel client vérifie localement contre une clé publique mise en cache, sans aller-retour serveur à chaque lancement.</p></div>
+      <div class="feature-card"><div class="f-title">Quotas d'activation par appareil</div><p>Chaque licence applique un <code>max_activations</code> ; désactiver un appareil libère un slot pour un autre.</p></div>
+      <div class="feature-card"><div class="f-title">Débit limité par utilisateur final</div><p><code>/activate</code> est throttlé par (éditeur, email), pas seulement par jeton d'éditeur — un utilisateur abusif ne peut pas noyer le trafic des autres.</p></div>
+      <div class="feature-card"><div class="f-title">Rotation de clé sans casser les anciens jetons</div><p>Les clés vivent en base (table <code>signing_keys</code>) avec un <code>kid</code> ; la rotation retire l'ancienne clé de la signature mais la garde valide pour vérifier les jetons déjà émis.</p></div>
+      <div class="feature-card"><div class="f-title">Auto-hébergeable, Apache-2.0</div><p>Tourne sur votre propre infrastructure (Docker Compose, Caddy, Postgres) — pas de coût à l'activation vers une SaaS de licences tierce.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="securite">
+    <div class="block-head"><span class="block-num">04</span><h2>Sécurité</h2></div>
+    <p class="block-desc">Une API de licences n'a de valeur que si elle est elle-même difficile à contourner.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-title">Rien en clair</div><p>Clés de licence et jetons éditeur sont hashés (HMAC-SHA256 salé) avant d'atteindre la base — jamais stockés en clair.</p></div>
+      <div class="feature-card"><div class="f-title">Jetons vérifiables hors-ligne</div><p>Chaque jeton d'activation est signé Ed25519 ; le logiciel client le vérifie localement, sans dépendre du serveur à chaque lancement.</p></div>
+      <div class="feature-card"><div class="f-title">Fenêtre de validité limitée</div><p>Un jeton expire au bout d'1h par défaut ; passé ce délai, l'app rappelle <code>/activate</code> — la révocation finit donc toujours par se propager.</p></div>
+      <div class="feature-card"><div class="f-title">Journal d'audit</div><p>Chaque mutation admin ou plateforme (création, activation, rotation) est tracée : acteur, action, cible, IP, horodatage.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="valeur">
+    <div class="block-head"><span class="block-num">05</span><h2>Valeur métier</h2></div>
+    <p class="block-desc">
+      Beaucoup de logiciels sortent encore sans aucun système de licences — une clé codée en dur, ou rien du
+      tout. Ça fonctionne jusqu'au premier remboursement à traiter, ou à la première clé qui circule librement
+      sur un forum.
+    </p>
+    <div class="framing">
+      <div class="framing-card bad">
+        <div class="label">Sans système de licence</div>
+        <ul>
+          <li>Une clé fuitée ou copiée-collée débloque le produit pour toujours, sur un nombre illimité de machines</li>
+          <li>Impossible de révoquer l'accès après un remboursement sans reconstruire le logiciel</li>
+          <li>Chaque produit réinvente sa propre vérification maison, jamais auditée</li>
+          <li>Les clients sur réseau fermé sont soit bloqués, soit contournés</li>
+        </ul>
+      </div>
+      <div class="framing-card good">
+        <div class="label">Avec cette API</div>
+        <ul>
+          <li>Quota par appareil + vérification hors-ligne rend le partage sauvage de clé auto-limitant</li>
+          <li><code>POST /admin/licenses/enable</code> désactive une licence immédiatement, sans nouvelle build</li>
+          <li>Un seul backend audité, multi-éditeurs, pour tous les produits vendus</li>
+          <li>Les jetons se vérifient localement — fonctionne avec une connectivité limitée, et expire quand même</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2rem;">Ce que ça change concrètement</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Situation</th><th>Sans système de licence</th><th>Avec cette API</th></tr></thead>
+        <tbody>
+          <tr><td>Remboursement / rétrofacturation</td><td class="dim">La clé continue de fonctionner indéfiniment</td><td class="dim">Licence désactivée instantanément via <code>/admin/licenses/enable</code></td></tr>
+          <tr><td>Changement de machine</td><td class="dim">Ticket support manuel ou nouvelle clé</td><td class="dim">Libre-service via <code>/deactivate</code>, qui libère le slot</td></tr>
+          <tr><td>Clé de signature compromise</td><td class="dim">Chaque identifiant émis doit être remplacé</td><td class="dim">Rotation de la clé (<code>kid</code>) ; les anciens jetons restent valides jusqu'à expiration naturelle</td></tr>
+          <tr><td>Plusieurs produits ou marques</td><td class="dim">Systèmes maison séparés par produit</td><td class="dim">Une seule API multi-éditeurs, isolée par éditeur</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="comparaison">
+    <div class="block-head"><span class="block-num">06</span><h2>Comparaison</h2></div>
+    <p class="block-desc">Ce projet se positionne délibérément entre plusieurs extrêmes.</p>
+    <div class="compare-steps">
+      <span class="compare-chip">Clé codée en dur</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip">DRM / SDK maison</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip mid">Cette API (auto-hébergée)</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip">SaaS de licences propriétaire</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Dimension</th><th>Clé codée en dur</th><th>DRM / SDK maison</th><th>Cette API</th><th>SaaS propriétaire</th></tr></thead>
+        <tbody>
+          <tr><td>Propriété des données</td><td class="dim">Aucune donnée</td><td class="dim">Vous — mais tout est à construire</td><td class="hl">Vous, hébergée chez vous</td><td class="dim">Le fournisseur SaaS</td></tr>
+          <tr><td>Effort d'implémentation</td><td class="dim">Minimal</td><td class="dim">Élevé — des mois</td><td class="hl">Modéré — une API HTTPS à intégrer</td><td class="dim">Faible — SDK fourni</td></tr>
+          <tr><td>Support hors-ligne</td><td class="dim">Total (rien à vérifier)</td><td class="dim">Variable, selon conception</td><td class="hl">Total (Ed25519 local)</td><td class="dim">Dépend du fournisseur</td></tr>
+          <tr><td>Modèle de coût</td><td class="dim">Gratuit</td><td class="dim">Coût de développement interne</td><td class="hl">Coût d'auto-hébergement (infra propre)</td><td class="dim">Abonnement ou prix à l'activation</td></tr>
+          <tr><td>Dépendance fournisseur</td><td class="dim">Aucune</td><td class="dim">Aucune</td><td class="hl">Aucune (Apache-2.0, code source disponible)</td><td class="dim">Forte</td></tr>
+          <tr><td>Révocation</td><td class="dim">Impossible</td><td class="dim">Possible, si prévue dès le départ</td><td class="hl">Immédiate via <code>/admin/licenses/enable</code></td><td class="dim">Possible, dépend du fournisseur</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="block-desc" style="margin-top:1rem; font-size:0.85rem;">
+      Un DRM maison rassure sur le papier, mais chaque équipe produit finit par réinventer sa propre logique
+      d'activation, rarement auditée et rarement testée contre les cas limites (horloge système modifiée, appel
+      réseau qui échoue, clé partiellement corrompue). Une API dédiée, elle, ne fait que ça.
+    </p>
+  </section>
+
+  <section class="block" id="operationnel">
+    <div class="block-head"><span class="block-num">07</span><h2>Repères opérationnels</h2></div>
+    <p class="block-desc">Les valeurs par défaut de l'API telle qu'elle tourne aujourd'hui — chacune configurable via l'environnement.</p>
+    <div class="metrics-row">
+      <div class="metric">
+        <div class="m-label">Quota d'appareils</div>
+        <div class="m-value">3 / licence</div>
+        <p class="m-explain">Valeur par défaut, configurable par licence via <code>max_activations</code>.</p>
+      </div>
+      <div class="metric">
+        <div class="m-label">Durée de vie d'un jeton</div>
+        <div class="m-value">1 heure</div>
+        <p class="m-explain"><code>expires_at</code> par défaut — force une re-validation périodique, donc la révocation finit par se propager.</p>
+      </div>
+      <div class="metric">
+        <div class="m-label">Débit limité</div>
+        <div class="m-value">5 / 5 min</div>
+        <p class="m-explain">Par (éditeur, email) — pas par jeton d'éditeur partagé.</p>
+      </div>
+      <div class="metric">
+        <div class="m-label">Niveaux d'authentification</div>
+        <div class="m-value">3</div>
+        <p class="m-explain">Plateforme, Admin, Client — chacun scopé à ses propres données.</p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:1rem;">
+      <strong>Base Postgres, migrations Alembic.</strong> Le schéma est versionné (<code>alembic upgrade head</code>),
+      la clé de signature Ed25519 vit en base avec rotation possible sans invalider les jetons déjà émis, et
+      chaque mutation admin/plateforme est écrite dans un journal d'audit append-only.
+    </div>
+  </section>
+
+  <section class="block" id="evolutions">
+    <div class="block-head"><span class="block-num">08</span><h2>Évolutions possibles</h2></div>
+    <p class="block-desc">Le socle multi-tenant actuel est pensé pour grandir dans ces directions.</p>
+    <div class="evolutions-grid">
+      <div class="evo-item"><span class="evo-dot"></span>Webhooks Stripe / Paddle pour provisionner une licence automatiquement à l'achat</div>
+      <div class="evo-item"><span class="evo-dot"></span>Portail libre-service pour l'utilisateur final (voir / désactiver ses propres appareils)</div>
+      <div class="evo-item"><span class="evo-dot"></span>Tableau de bord d'utilisation par éditeur</div>
+      <div class="evo-item"><span class="evo-dot"></span>Webhooks sortants sur les évènements de licence (création, désactivation, appareil libéré)</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Licenses API — Protection multi-éditeurs</span>
+    <span>Généré le 2026-09-01 · <a href="architecture.html">Architecture technique complète</a></span>
+  </footer>
+
+</div>
 </body>
 </html>

@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licenses API — Architecture Technique</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #16181d;
+    --ink-soft: #444b52;
+    --grey: #6b7280;
+    --line: #dfe2e6;
+    --line-strong: #c3c8cd;
+
+    --blue: #3350d6;
+    --blue-bg: #eef1fc;
+    --purple: #6a4fd1;
+    --purple-bg: #f1eefb;
+    --green: #1f8a52;
+    --green-bg: #e8f5ee;
+    --grey-muted: #7a828a;
+    --grey-muted-bg: #f1f2f3;
+    --red: #a9352b;
+    --red-bg: #f7e7e5;
+
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", "Consolas", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--blue); }
+  a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 36px 32px 80px; }
+
+  /* ---------- header ---------- */
+
+  header.doc-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;
+    padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .head-left { max-width: 64ch; }
+  .back-link { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--grey); text-decoration: none; margin-bottom: 10px; }
+  .back-link:hover { color: var(--blue); }
+  h1 { font-size: 27px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 8px; text-wrap: balance; }
+  h1 .accent { color: var(--blue); }
+  .dek { font-style: italic; color: var(--grey); font-size: 14.5px; margin: 0; }
+  .head-right { text-align: right; flex: none; }
+  .author { font-weight: 700; font-size: 15px; color: var(--ink); margin: 0 0 6px; }
+  .stack-line { font-size: 12.5px; color: var(--grey); margin: 0 0 10px; font-family: var(--mono); }
+  .version-badge {
+    display: inline-block; background: var(--red); color: #fff; font-family: var(--mono);
+    font-weight: 700; font-size: 11px; letter-spacing: 0.03em; padding: 4px 9px; border-radius: 4px;
+  }
+
+  /* ---------- section scaffolding ---------- */
+
+  section.block { margin-bottom: 52px; }
+  .block-eyebrow {
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--purple); margin: 0 0 6px;
+  }
+  h2.block-title { font-size: 19px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.005em; }
+  .block-dek { color: var(--grey); font-size: 14px; margin: 0 0 22px; max-width: 78ch; }
+
+  /* ---------- client software row ---------- */
+
+  .client-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .client-card {
+    flex: 1 1 260px; border: 1.5px solid var(--line-strong); border-radius: 8px; padding: 16px 18px; background: #fff;
+  }
+  .client-card h3 { margin: 0 0 4px; font-size: 15px; font-weight: 700; }
+  .client-card p { margin: 0 0 10px; font-size: 13px; color: var(--grey); }
+  .client-card .fact { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); background: var(--grey-muted-bg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; display: inline-block; }
+
+  /* ---------- capability cards ---------- */
+
+  .cap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+  .cap-card { border: 1.5px solid var(--line-strong); border-radius: 8px; background: #fff; overflow: hidden; }
+  .cap-band { height: 5px; }
+  .cap-body { padding: 15px 16px; }
+  .cap-tag { font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .cap-card h3 { margin: 0 0 6px; font-size: 14.5px; font-weight: 700; }
+  .cap-card p { margin: 0 0 10px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+  .cap-card .fact { font-family: var(--mono); font-size: 10.5px; color: var(--ink-soft); }
+
+  /* ---------- how to consume ---------- */
+
+  .howto-row { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+  .howto-step { flex: 1 1 220px; border: 1.5px solid var(--blue); background: var(--blue-bg); border-radius: 8px; padding: 14px 16px; }
+  .howto-num {
+    display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--blue); color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 8px;
+  }
+  .howto-step h3 { margin: 0 0 5px; font-size: 13.5px; font-weight: 700; color: var(--blue); }
+  .howto-step p { margin: 0; font-size: 12px; color: var(--ink-soft); line-height: 1.45; }
+  .howto-arrow { display: flex; align-items: center; color: var(--line-strong); font-size: 20px; flex: 0 0 auto; }
+
+  /* ---------- security band ---------- */
+
+  .sec-band { background: var(--green-bg); border: 1.5px solid var(--green); border-radius: 10px; padding: 22px 24px; }
+  .sec-band-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .sec-band-head h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--green); }
+  .sec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
+  .sec-item h4 { margin: 0 0 5px; font-size: 13px; font-weight: 700; color: var(--ink); }
+  .sec-item p { margin: 0; font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+  /* ---------- reference table ---------- */
+
+  table.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.ref-table th {
+    text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--grey); border-bottom: 1.5px solid var(--line-strong); padding: 8px 10px;
+  }
+  table.ref-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.ref-table td.ep { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  table.ref-table td.auth { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); white-space: nowrap; }
+  .auth-none { color: var(--grey); }
+  .auth-client { color: var(--blue); }
+  .auth-admin { color: var(--red); }
+  .auth-platform { color: var(--purple); }
+
+  .ref-facts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .chip {
+    font-family: var(--mono); font-size: 10.5px; padding: 5px 9px; border-radius: 4px;
+    border: 1px solid var(--line); background: #fbfbfc; color: var(--ink-soft);
+  }
+
+  /* ---------- sequence diagram ---------- */
+
+  .diagram-scroll { overflow-x: auto; padding-bottom: 8px; }
+  .seq-frame { position: relative; margin: 0 auto; }
+
+  .lane-head {
+    position: absolute; border: 1.5px solid var(--purple); background: var(--purple-bg); color: var(--purple);
+    border-radius: 6px; font-family: var(--mono); font-weight: 700; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 6px;
+  }
+
+  .rect-group { position: absolute; background: var(--blue-bg); border: 1px dashed var(--blue); border-radius: 8px; opacity: 0.55; }
+  .rect-group-label {
+    position: absolute; font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--blue);
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  .seq-conn { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .seq-conn line { stroke-width: 1.6; }
+  .seq-conn text { font-family: var(--mono); fill: var(--ink-soft); }
+  .seq-conn .label { font-size: 10.5px; text-anchor: middle; }
+  .seq-conn .num { font-size: 9.5px; fill: #fff; text-anchor: middle; dominant-baseline: middle; font-weight: 700; }
+  .seq-conn circle.badge-req { fill: var(--blue); }
+  .seq-conn circle.badge-res { fill: var(--grey-muted); }
+
+  .self-pill {
+    position: absolute; border: 1.5px dashed var(--purple); background: #fff; border-radius: 20px;
+    padding: 6px 12px; font-family: var(--mono); font-size: 10.5px; color: var(--purple); text-align: center;
+  }
+
+  .note-box {
+    position: absolute; border: 1.5px dashed var(--line-strong); background: var(--grey-muted-bg); border-radius: 6px;
+    padding: 8px 12px; font-size: 11.5px; font-style: italic; color: var(--ink-soft); text-align: center;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .legend-item { display: flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); }
+  .legend-line { width: 30px; height: 0; border-top-width: 2px; border-top-style: solid; }
+  .legend-line.dashed { border-top-style: dashed; }
+  .legend-swatch { width: 22px; height: 12px; border-radius: 3px; }
+
+  footer.doc-footer { padding-top: 24px; margin-top: 8px; border-top: 1px solid var(--line); color: var(--grey); font-size: 12.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  footer.doc-footer a { color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc-head">
+    <div class="head-left">
+      <a class="back-link" href="business-value.html">← Présentation &amp; valeur métier</a>
+      <h1><span class="accent">Licenses API</span> — Architecture Technique</h1>
+      <p class="dek">Comment la consommer, ce qui la sécurise, comment elle fonctionne en détail.</p>
+    </div>
+    <div class="head-right">
+      <p class="author">Arnaud BRETON</p>
+      <p class="stack-line">Python · FastAPI · PostgreSQL · Alembic · Ed25519</p>
+      <span class="version-badge">V2.0.0</span>
+    </div>
+  </header>
+
+  <!-- ===== chain of actors ===== -->
+  <section class="block">
+    <p class="block-eyebrow">À ne pas confondre</p>
+    <h2 class="block-title">Chaîne d'acteurs</h2>
+    <p class="block-dek">Trois parties distinctes. Nous ne parlons jamais directement à l'utilisateur final — seul le logiciel de l'éditeur le fait.</p>
+    <div class="howto-row">
+      <div class="howto-step" style="border-color:var(--purple);background:var(--purple-bg);">
+        <span class="howto-num" style="background:var(--purple);">1</span>
+        <h3 style="color:var(--purple);">Plateforme (nous)</h3>
+        <p>Provisionne les comptes éditeur via /platform/*, détient le X-Platform-Token.</p>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step" style="border-color:var(--purple);background:var(--purple-bg);">
+        <span class="howto-num" style="background:var(--purple);">2</span>
+        <h3 style="color:var(--purple);">Éditeur (tenant)</h3>
+        <p>Reçoit ses tokens, gère ses licences via /admin/*, fixe le quota "X licences / utilisateur".</p>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step" style="border-color:var(--purple);background:var(--purple-bg);">
+        <span class="howto-num" style="background:var(--purple);">3</span>
+        <h3 style="color:var(--purple);">Logiciel de l'éditeur</h3>
+        <p>Jeu, app, SaaS — embarque le X-Client-Token de l'éditeur, appelle /activate.</p>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step" style="border-color:var(--purple);background:var(--purple-bg);">
+        <span class="howto-num" style="background:var(--purple);">4</span>
+        <h3 style="color:var(--purple);">Utilisateur final</h3>
+        <p>Client de l'éditeur, pas de nous. Reçoit une licence, la saisit dans le logiciel pour le débloquer.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== client software ===== -->
+  <section class="block">
+    <p class="block-eyebrow">Qui l'utilise</p>
+    <h2 class="block-title">Cibles — les éditeurs</h2>
+    <p class="block-dek">Tout éditeur capable d'appeler une API HTTPS peut consommer ce service de licences de la même façon. C'est <em>leur</em> logiciel qui parle à l'API — leurs utilisateurs finaux, eux, ne voient qu'un champ "entrez votre clé de licence".</p>
+    <div class="client-row">
+      <div class="client-card">
+        <h3>Éditeurs de jeux</h3>
+        <p>Jeux, plugins, DLC, mods, assets</p>
+        <span class="fact">leurs joueurs activent depuis le jeu</span>
+      </div>
+      <div class="client-card">
+        <h3>Éditeurs SaaS</h3>
+        <p>Applications web et services cloud</p>
+        <span class="fact">leurs abonnés activent depuis l'app</span>
+      </div>
+      <div class="client-card">
+        <h3>Éditeurs de logiciels</h3>
+        <p>Desktop &amp; On-Premise</p>
+        <span class="fact">leurs clients activent depuis le logiciel</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== capabilities ===== -->
+  <section class="block">
+    <p class="block-eyebrow">Ce que fait l'API</p>
+    <h2 class="block-title">Capacités principales</h2>
+    <p class="block-dek">Cinq choses que l'on peut faire avec cette API — le reste (quotas, sécurité) découle de ces actions.</p>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <div class="cap-band" style="background:var(--purple);"></div>
+        <div class="cap-body">
+          <span class="cap-tag" style="color:var(--purple);">Platform</span>
+          <h3>Provisionner un éditeur</h3>
+          <p>Nous créons le compte d'un éditeur : il reçoit un token client et un token admin, générés une fois.</p>
+          <span class="fact">POST /platform/publishers</span>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-band" style="background:var(--blue);"></div>
+        <div class="cap-body">
+          <span class="cap-tag" style="color:var(--blue);">Client</span>
+          <h3>Activer une licence</h3>
+          <p>Le logiciel de l'éditeur envoie l'email et la clé saisis par l'utilisateur final ; l'API vérifie le quota d'appareils (X par utilisateur) et renvoie un token signé.</p>
+          <span class="fact">POST /activate</span>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-band" style="background:var(--blue);"></div>
+        <div class="cap-body">
+          <span class="cap-tag" style="color:var(--blue);">Client</span>
+          <h3>Libérer un appareil</h3>
+          <p>Quand l'utilisateur final change de machine, un appel libère le slot d'activation pour le réutiliser ailleurs.</p>
+          <span class="fact">POST /deactivate</span>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-band" style="background:var(--grey-muted);"></div>
+        <div class="cap-body">
+          <span class="cap-tag" style="color:var(--grey);">Public</span>
+          <h3>Vérifier hors-ligne</h3>
+          <p>Le logiciel récupère la clé publique active (par kid) une fois, puis vérifie la signature du token localement, sans rappeler le serveur.</p>
+          <span class="fact">GET /public-keys</span>
+        </div>
+      </div>
+      <div class="cap-card">
+        <div class="cap-band" style="background:var(--red);"></div>
+        <div class="cap-body">
+          <span class="cap-tag" style="color:var(--red);">Admin</span>
+          <h3>Administrer ses licences</h3>
+          <p>L'éditeur crée, liste, active/désactive ses propres licences et peut forcer la désactivation d'un appareil.</p>
+          <span class="fact">/admin/*</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== how to consume ===== -->
+  <section class="block">
+    <p class="block-eyebrow">Prise en main — côté éditeur</p>
+    <h2 class="block-title">Comment un éditeur intègre l'API</h2>
+    <p class="block-dek">Le chemin le plus court entre la création de votre compte éditeur et une fonctionnalité débloquée chez <em>votre</em> utilisateur final.</p>
+    <div class="howto-row">
+      <div class="howto-step">
+        <span class="howto-num">1</span>
+        <h3>Recevoir vos identifiants</h3>
+        <p>Un X-Client-Token et un X-Admin-Token, générés une fois lors de la création de votre compte éditeur.</p>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step">
+        <span class="howto-num">2</span>
+        <h3>Intégrer /activate dans votre logiciel</h3>
+        <p>Avec l'email et la clé de licence saisis par votre utilisateur final, plus un identifiant d'appareil.</p>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step">
+        <span class="howto-num">3</span>
+        <h3>Stocker le token signé</h3>
+        <p>La réponse contient les métadonnées de licence, un <span style="font-family:var(--mono);font-size:11px;">kid</span>, et une signature Ed25519.</p>
+      </div>
+      <div class="howto-arrow">→</div>
+      <div class="howto-step">
+        <span class="howto-num">4</span>
+        <h3>Vérifier hors-ligne</h3>
+        <p>À chaque lancement, comparer la signature à la clé publique correspondant au <span style="font-family:var(--mono);font-size:11px;">kid</span> — aucun appel réseau requis.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== security reassurance ===== -->
+  <section class="block">
+    <div class="sec-band">
+      <div class="sec-band-head">
+        <h2>Sécurité — ce qui vous protège</h2>
+      </div>
+      <div class="sec-grid">
+        <div class="sec-item">
+          <h4>Rien en clair</h4>
+          <p>Les clés de licence ne sont jamais stockées : seul un hash HMAC-SHA256 salé (pepper) est comparé.</p>
+        </div>
+        <div class="sec-item">
+          <h4>Signatures vérifiables hors-ligne</h4>
+          <p>Chaque token est signé Ed25519 ; le logiciel client le vérifie localement, sans dépendre du serveur à chaque lancement.</p>
+        </div>
+        <div class="sec-item">
+          <h4>Jetons d'accès séparés</h4>
+          <p>Un jeton client (X-Client-Token) et un jeton admin (X-Admin-Token) distincts, jamais mélangés.</p>
+        </div>
+        <div class="sec-item">
+          <h4>Débit limité par utilisateur final</h4>
+          <p>/activate est throttlé par (éditeur, email) — pas seulement par jeton d'éditeur partagé. Un utilisateur qui teste des clés au hasard ne peut ni se cacher dans, ni bloquer, le trafic des autres utilisateurs du même éditeur.</p>
+        </div>
+        <div class="sec-item">
+          <h4>Fenêtre de validité limitée</h4>
+          <p>Un token expire par défaut au bout d'1h (<span style="font-family:var(--mono);font-size:11px;">expires_at</span>). Passé ce délai, le logiciel rappelle /activate — ce qui capte une éventuelle révocation côté serveur. Le hors-ligne n'est donc jamais permanent.</p>
+        </div>
+        <div class="sec-item">
+          <h4>Clé de signature avec rotation &amp; sauvegarde</h4>
+          <p>La clé Ed25519 vit en base (pas seulement dans un fichier) : elle est donc sauvegardée avec le reste des données, et peut être remplacée sans invalider les tokens déjà émis — chaque token porte le <span style="font-family:var(--mono);font-size:11px;">kid</span> de la clé qui l'a signé.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== technical reference ===== -->
+  <section class="block">
+    <p class="block-eyebrow">Détail technique</p>
+    <h2 class="block-title">Référence — endpoints & stockage</h2>
+    <table class="ref-table">
+      <thead><tr><th>Endpoint</th><th>Auth</th><th>Rôle</th></tr></thead>
+      <tbody>
+        <tr><td class="ep">GET /health</td><td class="auth auth-none">aucune</td><td>vérification de disponibilité</td></tr>
+        <tr><td class="ep">GET /public-key</td><td class="auth auth-none">aucune</td><td>clé de signature active (+ kid) pour vérification hors-ligne</td></tr>
+        <tr><td class="ep">GET /public-keys</td><td class="auth auth-none">aucune</td><td>toutes les clés (active + retirées) — vérifie un token signé avant une rotation</td></tr>
+        <tr><td class="ep">POST /activate</td><td class="auth auth-client">X-Client-Token</td><td>active une licence pour un appareil · rate-limit par (éditeur, email)</td></tr>
+        <tr><td class="ep">POST /deactivate</td><td class="auth auth-client">X-Client-Token</td><td>libère un appareil</td></tr>
+        <tr><td class="ep">POST / GET /admin/licenses</td><td class="auth auth-admin">X-Admin-Token</td><td>crée / liste (paginé) les licences et leurs appareils de <em>cet éditeur</em></td></tr>
+        <tr><td class="ep">POST /admin/licenses/enable</td><td class="auth auth-admin">X-Admin-Token</td><td>active ou désactive une licence</td></tr>
+        <tr><td class="ep">POST /admin/deactivate-device</td><td class="auth auth-admin">X-Admin-Token</td><td>force la désactivation d'un appareil</td></tr>
+        <tr><td class="ep">POST /platform/publishers</td><td class="auth auth-platform">X-Platform-Token</td><td>crée un éditeur, renvoie ses tokens une fois</td></tr>
+        <tr><td class="ep">GET /platform/publishers</td><td class="auth auth-platform">X-Platform-Token</td><td>liste les éditeurs</td></tr>
+        <tr><td class="ep">POST /platform/publishers/enable</td><td class="auth auth-platform">X-Platform-Token</td><td>coupe l'accès d'un éditeur</td></tr>
+        <tr><td class="ep">POST /platform/publishers/rotate-token</td><td class="auth auth-platform">X-Platform-Token</td><td>fait tourner un token d'éditeur</td></tr>
+        <tr><td class="ep">POST /platform/keys/rotate</td><td class="auth auth-platform">X-Platform-Token</td><td>fait tourner la clé de signature Ed25519</td></tr>
+      </tbody>
+    </table>
+    <div class="ref-facts">
+      <span class="chip">port interne 6062</span>
+      <span class="chip">root_path /licenses-api/v1</span>
+      <span class="chip">HTTPS obligatoire</span>
+      <span class="chip">DATABASE_URL défini directement en .env (Postgres)</span>
+      <span class="chip">quota par défaut : 3 appareils / licence</span>
+      <span class="chip">rate-limit applicatif : 5 tentatives / 5min par (éditeur, email)</span>
+      <span class="chip">Caddy : 60 req/60s par jeton — garde-fou secondaire</span>
+      <span class="chip">license_key_hash = HMAC-SHA256(pepper, key) — irréversible</span>
+      <span class="chip">clé de signature en base, rotation via /platform/keys/rotate</span>
+    </div>
+  </section>
+
+  <!-- ===== sequence diagram ===== -->
+  <section class="block">
+    <p class="block-eyebrow">Vue technique</p>
+    <h2 class="block-title">Séquence — activation &amp; gestion</h2>
+    <p class="block-dek">Le déroulé complet d'une activation, de la vérification hors-ligne, de la gestion admin et d'un changement d'appareil — après qu'un éditeur a déjà été provisionné par la Plateforme. "Utilisateur final" = le client de l'éditeur, "Logiciel éditeur" = son jeu/app/SaaS. Voir aussi le <a href="https://api.xp-flightdeck.com/licenses-api/v1/guides/schemas/" target="_blank" rel="noopener">guide en ligne</a>.</p>
+
+    <div class="diagram-scroll">
+      <div class="seq-frame" style="width:1200px;height:800px;">
+
+        <!-- rect group behind everything -->
+        <div class="rect-group" style="left:360px;top:372px;width:400px;height:118px;"></div>
+        <div class="rect-group-label" style="left:370px;top:378px;">Vérification hors-ligne (Ed25519)</div>
+
+        <svg class="seq-conn" viewBox="0 0 1200 800" preserveAspectRatio="none">
+          <defs>
+            <marker id="sah-req" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--blue)"></path></marker>
+            <marker id="sah-res" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--grey-muted)"></path></marker>
+          </defs>
+
+          <!-- lifelines -->
+          <line x1="195" y1="60" x2="195" y2="770" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="3 4"></line>
+          <line x1="465" y1="60" x2="465" y2="770" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="3 4"></line>
+          <line x1="735" y1="60" x2="735" y2="770" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="3 4"></line>
+          <line x1="1005" y1="60" x2="1005" y2="770" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="3 4"></line>
+
+          <!-- 1: User -> App -->
+          <line x1="195" y1="110" x2="461" y2="110" stroke="var(--blue)" marker-end="url(#sah-req)"></line>
+          <text class="label" x="330" y="100">lance l'app / saisit la clé</text>
+          <circle class="badge-req" cx="195" cy="110" r="9"></circle><text class="num" x="195" y="111">1</text>
+
+          <!-- 2: App -> API -->
+          <line x1="465" y1="165" x2="731" y2="165" stroke="var(--blue)" marker-end="url(#sah-req)"></line>
+          <text class="label" x="600" y="155">POST /activate (email, key, device)</text>
+          <circle class="badge-req" cx="465" cy="165" r="9"></circle><text class="num" x="465" y="166">2</text>
+
+          <!-- 4: API --> App (response) -->
+          <line x1="735" y1="270" x2="469" y2="270" stroke="var(--grey-muted)" stroke-dasharray="5 4" marker-end="url(#sah-res)"></line>
+          <text class="label" x="600" y="260">200 · token signé + kid + métadonnées</text>
+          <circle class="badge-res" cx="735" cy="270" r="9"></circle><text class="num" x="735" y="271">4</text>
+
+          <!-- 6: App -> API (public keys) -->
+          <line x1="465" y1="400" x2="731" y2="400" stroke="var(--blue)" marker-end="url(#sah-req)"></line>
+          <text class="label" x="600" y="390">GET /public-keys (cache par kid)</text>
+          <circle class="badge-req" cx="465" cy="400" r="9"></circle><text class="num" x="465" y="401">6</text>
+
+          <!-- 8: Admin -> API -->
+          <line x1="1005" y1="520" x2="739" y2="520" stroke="var(--blue)" marker-end="url(#sah-req)"></line>
+          <text class="label" x="870" y="510">crée / liste / active / désactive</text>
+          <circle class="badge-req" cx="1005" cy="520" r="9"></circle><text class="num" x="1005" y="521">8</text>
+
+          <!-- 9: API --> Admin -->
+          <line x1="735" y1="575" x2="1001" y2="575" stroke="var(--grey-muted)" stroke-dasharray="5 4" marker-end="url(#sah-res)"></line>
+          <text class="label" x="870" y="565">détails licence + appareils actifs</text>
+          <circle class="badge-res" cx="735" cy="575" r="9"></circle><text class="num" x="735" y="576">9</text>
+
+          <!-- 10: User -> App -->
+          <line x1="195" y1="630" x2="461" y2="630" stroke="var(--blue)" marker-end="url(#sah-req)"></line>
+          <text class="label" x="330" y="620">change de machine</text>
+          <circle class="badge-req" cx="195" cy="630" r="9"></circle><text class="num" x="195" y="631">10</text>
+
+          <!-- 11: App -> API -->
+          <line x1="465" y1="685" x2="731" y2="685" stroke="var(--blue)" marker-end="url(#sah-req)"></line>
+          <text class="label" x="600" y="675">POST /deactivate (key_hash, device_hash)</text>
+          <circle class="badge-req" cx="465" cy="685" r="9"></circle><text class="num" x="465" y="686">11</text>
+
+          <!-- 12: API --> App -->
+          <line x1="735" y1="740" x2="469" y2="740" stroke="var(--grey-muted)" stroke-dasharray="5 4" marker-end="url(#sah-res)"></line>
+          <text class="label" x="600" y="730">slot libéré — activable ailleurs</text>
+          <circle class="badge-res" cx="735" cy="740" r="9"></circle><text class="num" x="735" y="741">12</text>
+        </svg>
+
+        <!-- lane headers -->
+        <div class="lane-head" style="left:120px;top:20px;width:150px;height:38px;">Utilisateur final</div>
+        <div class="lane-head" style="left:390px;top:20px;width:150px;height:38px;">Logiciel éditeur</div>
+        <div class="lane-head" style="left:660px;top:20px;width:150px;height:38px;">Licenses API</div>
+        <div class="lane-head" style="left:930px;top:20px;width:150px;height:38px;">Admin éditeur</div>
+
+        <!-- 3: API self -->
+        <div class="self-pill" style="left:645px;top:200px;width:180px;">3 · rate-limit (éditeur, email)<br/>+ valide statut / propriétaire / quota</div>
+
+        <!-- 5: note over App -->
+        <div class="note-box" style="left:345px;top:305px;width:240px;">5 · stocke le token, débloque le Pro</div>
+
+        <!-- 7: App self -->
+        <div class="self-pill" style="left:375px;top:435px;width:180px;">7 · vérifie la signature (Ed25519)</div>
+
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-line" style="border-color:var(--blue);"></span> requête (solide)</div>
+      <div class="legend-item"><span class="legend-line dashed" style="border-color:var(--grey-muted);"></span> réponse (pointillé)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--blue-bg);border:1px dashed var(--blue);"></span> étapes groupées (hors-ligne)</div>
+    </div>
+  </section>
+
+  <footer class="doc-footer">
+    <span>Licenses API — Architecture Technique</span>
+    <span><a href="business-value.html">← Présentation &amp; valeur métier</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
