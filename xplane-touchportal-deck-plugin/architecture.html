@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XP-FlightDeck — Architecture Technique</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #fff;
+  color: #0F172A;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  padding: 2rem 2rem 3rem;
+}
+.page { max-width: 1200px; margin: 0 auto; }
+
+/* ─── HEADER ─── */
+.hdr {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem;
+  padding-bottom: 1rem; border-bottom: 1px solid #E2E8F0; margin-bottom: 1.8rem;
+}
+.hdr h1 { font-size: 1.05rem; font-weight: 700; line-height: 1.3; }
+.brand { color: #4F46E5; }
+.subtitle { font-style: italic; font-size: .78rem; color: #9CA3AF; margin-top: .25rem; }
+.hdr-right { text-align: right; flex-shrink: 0; }
+.author { font-size: .88rem; font-weight: 700; }
+.stack { font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: .68rem; color: #64748B; margin-top: .15rem; }
+.badge {
+  display: inline-block; background: #DC2626; color: #fff;
+  font-size: .58rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 2px 9px; border-radius: 3px; margin-top: .5rem;
+}
+
+/* ─── DIAGRAM WRAPPER ─── */
+.dw { position: relative; }
+
+/* ─── LICENSE API (external, below diagram) ─── */
+.extwrap { display: flex; justify-content: center; margin-top: 30px; }
+.ext {
+  display: inline-block;
+  padding: 5px 16px; text-align: center;
+  background: #FDF2F8; border: 1.5px dashed #BE185D; border-radius: 6px;
+}
+.ext-title { font-size: 9.5px; font-weight: 600; color: #9D174D; }
+.ext-sub { font-family: monospace; font-size: 7px; color: #BE185D; margin-top: 2px; }
+
+/* ─── ZONES ROW ─── */
+.zones {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+/* ─── INDIVIDUAL ZONES ─── */
+.zone {
+  border-radius: 10px;
+  padding: 12px 12px 14px;
+  position: relative;
+  min-width: 0;
+}
+.za { width: 188px; flex-shrink: 0; background: #EEF2FF; border: 1.5px solid #4F46E5; }
+.zb { flex: 1; background: #F8FAFC; border: 1.5px solid #94A3B8; margin: 0 22px; }
+.zc { width: 356px; flex-shrink: 0; background: #ECFDF5; border: 1.5px solid #059669; }
+
+.zlabel {
+  font-family: monospace; font-size: 7.5px; letter-spacing: 2.5px;
+  text-transform: uppercase; text-align: center; font-weight: 600; margin-bottom: 10px;
+}
+.za .zlabel { color: #4F46E5; }
+.zb .zlabel { color: #64748B; }
+.zc .zlabel { color: #059669; }
+
+/* ─── CARDS ─── */
+.card {
+  background: #fff; border-radius: 7px;
+  padding: 11px 13px; margin-bottom: 10px;
+}
+.card-t { font-size: 11px; font-weight: 600; text-align: center; }
+.card-s { font-size: 8.5px; text-align: center; margin-top: 1px; }
+
+.card-indigo { border: 1.2px solid #4F46E5; }
+.card-indigo .card-t { color: #3730A3; }
+.card-indigo .card-s { color: #4F46E5; }
+
+.card-slate { border: 1.2px solid #CBD5E1; }
+.card-slate .card-t { color: #1E293B; }
+
+.card-green { border: 1.2px solid #059669; }
+.card-green .card-t { color: #065F46; }
+
+/* pill inside cards */
+.pill {
+  background: #F1F5F9; border-radius: 4px;
+  padding: 3.5px 8px; margin-top: 7px;
+  font-family: monospace; font-size: 7px; color: #64748B; text-align: center;
+}
+.pill.indigo { background: #E0E7FF; color: #4338CA; }
+.pill.green  { background: #ECFDF5; color: #6EE7B7; }
+
+/* ─── ZONE A: file chips ─── */
+.fchips { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.fchip {
+  background: #fff; border: 0.8px solid rgba(79,70,229,.35);
+  border-radius: 4px; padding: 4px 8px;
+  font-family: monospace; font-size: 7.5px; color: #4338CA;
+}
+
+/* ─── plugin.py big box ─── */
+.pluginbox {
+  background: #fff; border: 1.4px solid #7C3AED; border-radius: 8px; overflow: hidden;
+}
+.ph {
+  background: #F5F3FF; padding: 7px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(124,58,237,.15);
+}
+.ph-t { font-family: monospace; font-size: 11px; font-weight: 600; color: #5B21B6; }
+.ph-s { font-family: monospace; font-size: 7px; color: #7C3AED; }
+.pb { padding: 10px 12px 12px; }
+
+/* 2-column chip grid */
+.chips2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 9px;
+}
+.chip {
+  border-radius: 5px; padding: 9px 10px;
+}
+.chip-t { font-size: 9.5px; font-weight: 500; text-align: center; }
+.chip-s { font-family: monospace; font-size: 7px; text-align: center; margin-top: 4px; }
+
+.cv { background: #F5F3FF; border: 1px solid rgba(124,58,237,.55); }
+.cv .chip-t { color: #4C1D95; }
+.cv .chip-s { color: #7C3AED; }
+
+.cp { background: #FDF2F8; border: 1px solid rgba(190,24,93,.6); }
+.cp .chip-t { color: #831843; }
+.cp .chip-s { color: #BE185D; }
+
+.ca { background: #FFFBEB; border: 1px solid rgba(217,119,6,.55); }
+.ca .chip-t { color: #78350F; }
+.ca .chip-s { color: #D97706; }
+
+/* file refs row */
+.frefs { display: flex; flex-wrap: wrap; gap: 5px; }
+.fref {
+  background: #F1F5F9; border: 0.7px solid #CBD5E1; border-radius: 3px;
+  padding: 3px 6px; font-family: monospace; font-size: 7px; color: #64748B;
+}
+
+/* ─── PI box (Zone C) ─── */
+.pibox {
+  background: #fff; border: 1.2px solid #047857; border-radius: 8px; overflow: hidden;
+}
+.pih {
+  background: #D1FAE5; padding: 7px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(4,120,87,.15);
+}
+.pih-t { font-family: monospace; font-size: 10px; font-weight: 600; color: #065F46; }
+.pih-s { font-family: monospace; font-size: 7px; color: #047857; }
+.pib { padding: 10px; }
+
+.chips2-green {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 7px; margin-bottom: 8px;
+}
+.cg { background: #F0FDF4; border: 0.8px solid rgba(5,150,105,.4); }
+.cg .chip-t { color: #065F46; }
+.cg .chip-s { color: #059669; }
+
+.drpanel {
+  background: #F0FDF4; border: 1px solid #A7F3D0;
+  border-radius: 4px; padding: 7px 9px;
+}
+.dr-title { font-family: monospace; font-size: 7.5px; color: #047857; margin-bottom: 3px; }
+.dr-item { font-family: monospace; font-size: 6.5px; color: #6EE7B7; line-height: 1.65; }
+
+/* ─── SVG ARROWS OVERLAY ─── */
+#arrowsvg {
+  position: absolute; top: 0; left: 0;
+  width: 100%; pointer-events: none; overflow: visible;
+  z-index: 20;
+}
+
+/* ─── LEGEND ─── */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 1.4rem;
+  margin-top: 1.6rem; padding-top: 1rem; border-top: 1px solid #E2E8F0;
+}
+.leg { display: flex; align-items: center; gap: .5rem; font-family: monospace; font-size: .63rem; color: #64748B; }
+.leg svg { flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div>
+      <h1><span class="brand">XP-FlightDeck</span> — Architecture Technique</h1>
+      <p class="subtitle">Plugin Touch Portal pour X-Plane 12 · piloté par XPPython3 · communication UDP localhost</p>
+    </div>
+    <div class="hdr-right">
+      <div class="author">Arnaud BRETON</div>
+      <div class="stack">Python · XPPython3 · Swift · Inno Setup · LLM</div>
+      <span class="badge">v1.0.2</span>
+    </div>
+  </header>
+
+  <!-- DIAGRAM -->
+  <div class="dw" id="dw">
+
+    <!-- Three zones -->
+    <div class="zones" id="zones">
+
+      <!-- ZONE A — MOBILE -->
+      <div class="zone za" id="zA">
+        <div class="zlabel">Mobile</div>
+
+        <div class="card card-indigo" id="tpApp">
+          <div class="card-t">Touch Portal</div>
+          <div class="card-s">App Mobile</div>
+          <div class="pill indigo">iOS · Android · Tablette</div>
+        </div>
+
+        <div class="fchips">
+          <div class="fchip">pages .tpz2</div>
+          <div class="fchip">icons_pack .tpi</div>
+          <div class="fchip">entry.tp</div>
+        </div>
+      </div>
+
+      <!-- ZONE B — MACHINE HÔTE -->
+      <div class="zone zb" id="zB">
+        <div class="zlabel">Machine Hôte · localhost</div>
+
+        <!-- TP Daemon -->
+        <div class="card card-slate" id="tpDaemon">
+          <div class="card-t">Touch Portal Daemon</div>
+          <div class="card-s" style="color:#64748B">Daemon</div>
+          <div class="pill">protocole Touch Portal · TCP :12136</div>
+        </div>
+
+        <!-- plugin.py -->
+        <div class="pluginbox" id="pluginBox">
+          <div class="ph">
+            <span class="ph-t">plugin.py</span>
+            <span class="ph-s">Touch Portal Plugin · PyInstaller</span>
+          </div>
+          <div class="pb">
+            <div class="chips2">
+              <div class="chip cv" id="cEH">
+                <div class="chip-t">TP Event Handler</div>
+                <div class="chip-s">on_action · on_settings · on_info</div>
+              </div>
+              <div class="chip cp" id="cLV">
+                <div class="chip-t">License Verifier</div>
+                <div class="chip-s">Ed25519 · API REST</div>
+              </div>
+              <div class="chip ca" id="cUS">
+                <div class="chip-t">UDP Sender</div>
+                <div class="chip-s">→ :5050 · commandes JSON</div>
+              </div>
+              <div class="chip ca" id="cSR">
+                <div class="chip-t">State Receiver</div>
+                <div class="chip-s">← :5051 · états DataRef</div>
+              </div>
+            </div>
+            <div class="frefs">
+              <span class="fref">entry.tp</span>
+              <span class="fref">version.json</span>
+              <span class="fref">aircraft_capabilities.json</span>
+              <span class="fref">plugin.log</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ZONE C — X-PLANE 12 -->
+      <div class="zone zc" id="zC">
+        <div class="zlabel">Simulateur de vol · X-Plane 12</div>
+
+        <!-- XPPython3 -->
+        <div class="card card-green" id="xpy">
+          <div class="card-t">XPPython3&nbsp; v4.7.0</div>
+          <div class="pill" style="background:#D1FAE5;color:#047857;">Python 3.12 embarqué · SDK 430 · module xp</div>
+          <div class="pill green">X-Plane 12.4.0+ · macOS · Linux · Windows</div>
+        </div>
+
+        <!-- PI_C172 -->
+        <div class="pibox" id="piBox">
+          <div class="pih">
+            <span class="pih-t">PI_C172TouchPortal.py</span>
+            <span class="pih-s">XPPython3 Plugin</span>
+          </div>
+          <div class="pib">
+            <div class="chips2-green">
+              <div class="chip cg">
+                <div class="chip-t">Plugin Lifecycle</div>
+                <div class="chip-s">XPluginStart · Stop · Enable</div>
+              </div>
+              <div class="chip cg">
+                <div class="chip-t">Flight Loop</div>
+                <div class="chip-s">surveille DataRefs / frame</div>
+              </div>
+              <div class="chip ca">
+                <div class="chip-t">UDP Listener</div>
+                <div class="chip-s">:5050 · commandes</div>
+              </div>
+              <div class="chip cg">
+                <div class="chip-t">DataRef Manager</div>
+                <div class="chip-s">get/set · array · float · int</div>
+              </div>
+              <div class="chip cg">
+                <div class="chip-t">Command Executor</div>
+                <div class="chip-s">xp.commandOnce</div>
+              </div>
+              <div class="chip cg">
+                <div class="chip-t">Splash Window</div>
+                <div class="chip-s">xp.createWindowEx</div>
+              </div>
+            </div>
+            <div class="drpanel">
+              <div class="dr-title">DataRefs · CommandRefs&nbsp; (X-Plane SDK)</div>
+              <div class="dr-item">sim/cockpit/electrical/beacon_lights_on</div>
+              <div class="dr-item">sim/cockpit2/engine/actuators/ignition_key[0]</div>
+              <div class="dr-item">sim/flightmodel/controls/parkbrake · …</div>
+              <div class="dr-item">cmd: sim/operation/pause_on · sim/map/show_current</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /zones -->
+
+    <!-- License API — external service, placed below so its arrow never crosses another block -->
+    <div class="extwrap">
+      <div class="ext" id="extApi">
+        <div class="ext-title">License API &nbsp;·&nbsp; externe</div>
+        <div class="ext-sub">api.xp-flightdeck.com · HTTPS · Ed25519</div>
+      </div>
+    </div>
+
+    <!-- SVG arrows overlay — drawn by JS from real element positions -->
+    <svg id="arrowsvg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="mu" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#D97706"/></marker>
+        <marker id="mw" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#4F46E5"/></marker>
+        <marker id="mt" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#0369A1"/></marker>
+        <marker id="ms" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#047857"/></marker>
+        <marker id="mh" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#BE185D"/></marker>
+      </defs>
+    </svg>
+
+  </div><!-- /dw -->
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="leg">
+      <svg width="36" height="10" viewBox="0 0 36 10"><line x1="0" y1="5" x2="28" y2="5" stroke="#4F46E5" stroke-width="2" stroke-dasharray="5,3"/><polygon points="28,2 36,5 28,8" fill="#4F46E5"/></svg>WebSocket · Wi-Fi (app ↔ daemon)
+    </div>
+    <div class="leg">
+      <svg width="36" height="10" viewBox="0 0 36 10"><line x1="0" y1="5" x2="28" y2="5" stroke="#0369A1" stroke-width="1.6"/><polygon points="28,2 36,5 28,8" fill="#0369A1"/></svg>TCP localhost :12136
+    </div>
+    <div class="leg">
+      <svg width="36" height="10" viewBox="0 0 36 10"><line x1="0" y1="5" x2="28" y2="5" stroke="#D97706" stroke-width="2"/><polygon points="28,2 36,5 28,8" fill="#D97706"/></svg>UDP localhost :5050 / :5051
+    </div>
+    <div class="leg">
+      <svg width="36" height="10" viewBox="0 0 36 10"><line x1="0" y1="5" x2="28" y2="5" stroke="#BE185D" stroke-width="1.4" stroke-dasharray="4,3"/><polygon points="28,2 36,5 28,8" fill="#BE185D"/></svg>HTTPS · API externe
+    </div>
+    <div class="leg">
+      <svg width="36" height="10" viewBox="0 0 36 10"><line x1="0" y1="5" x2="28" y2="5" stroke="#047857" stroke-width="1.6"/><polygon points="28,2 36,5 28,8" fill="#047857"/></svg>API X-Plane SDK
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+(function () {
+  var svg = document.getElementById('arrowsvg');
+  var wrap = document.getElementById('dw');
+
+  function r(id) {
+    var el = document.getElementById(id);
+    if (!el) return null;
+    var wr = wrap.getBoundingClientRect();
+    var er = el.getBoundingClientRect();
+    return {
+      l:  er.left   - wr.left,
+      r:  er.right  - wr.left,
+      t:  er.top    - wr.top,
+      b:  er.bottom - wr.top,
+      cx: (er.left + er.right)  / 2 - wr.left,
+      cy: (er.top  + er.bottom) / 2 - wr.top,
+      w:  er.width,
+      h:  er.height,
+    };
+  }
+
+  function ns(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+
+  function line(x1, y1, x2, y2, color, w, dash, mk) {
+    var l = ns('line');
+    l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+    l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+    l.setAttribute('stroke', color);
+    l.setAttribute('stroke-width', w || 1.6);
+    if (dash) l.setAttribute('stroke-dasharray', dash);
+    if (mk)   l.setAttribute('marker-end', 'url(#' + mk + ')');
+    svg.appendChild(l);
+  }
+
+  function path(d, color, w, dash, mk) {
+    var p = ns('path');
+    p.setAttribute('d', d);
+    p.setAttribute('stroke', color);
+    p.setAttribute('stroke-width', w || 1.6);
+    p.setAttribute('fill', 'none');
+    if (dash) p.setAttribute('stroke-dasharray', dash);
+    if (mk)   p.setAttribute('marker-end', 'url(#' + mk + ')');
+    svg.appendChild(p);
+  }
+
+  function text(x, y, txt, color, size, anchor) {
+    var t = ns('text');
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    t.setAttribute('fill', color);
+    t.setAttribute('font-size', size || 7.5);
+    t.setAttribute('font-family', 'monospace');
+    t.setAttribute('font-weight', '600');
+    t.setAttribute('text-anchor', anchor || 'middle');
+    t.textContent = txt;
+    svg.appendChild(t);
+  }
+
+  /* text on a solid white pill so labels stay legible over crossing lines/cards */
+  function labelBg(x, y, txt, color, size, anchor) {
+    size = size || 7.5;
+    anchor = anchor || 'middle';
+    var w = txt.length * size * 0.62 + 8;
+    var h = size + 6;
+    var rx = anchor === 'middle' ? x - w / 2 : (anchor === 'start' ? x - 4 : x - w + 4);
+    var ry = y - size - 1;
+    var rect = ns('rect');
+    rect.setAttribute('x', rx);
+    rect.setAttribute('y', ry);
+    rect.setAttribute('width', w);
+    rect.setAttribute('height', h);
+    rect.setAttribute('rx', 3);
+    rect.setAttribute('fill', '#ffffff');
+    rect.setAttribute('fill-opacity', '0.94');
+    svg.appendChild(rect);
+    text(x, y, txt, color, size, anchor);
+  }
+
+  function draw() {
+    // Remove all children except <defs>
+    var children = Array.prototype.slice.call(svg.childNodes);
+    children.forEach(function (c) { if (c.nodeName !== 'defs') svg.removeChild(c); });
+
+    svg.setAttribute('height', wrap.offsetHeight);
+
+    var zA      = r('zA');
+    var zB      = r('zB');
+    var zC      = r('zC');
+    var daemon  = r('tpDaemon');
+    var plugin  = r('pluginBox');
+    var api     = r('extApi');
+    var cLV     = r('cLV');
+    var cUS     = r('cUS');
+    var cSR     = r('cSR');
+    var xpy     = r('xpy');
+    var pi      = r('piBox');
+
+    if (!zA || !zB || !zC) return;
+
+    /* 1 ── WebSocket (Wi-Fi)  Zone A ↔ TP Daemon (two parallel dashed lines) */
+    var wY1 = daemon ? daemon.cy - 10 : zA.cy - 15;
+    var wY2 = daemon ? daemon.cy + 10 : zA.cy + 15;
+    var wMx = (zA.r + zB.l) / 2;
+    path('M ' + zA.r + ' ' + wY1 + ' L ' + zB.l + ' ' + wY1, '#4F46E5', 2, '5,3', 'mw');
+    path('M ' + zB.l + ' ' + wY2 + ' L ' + zA.r + ' ' + wY2, '#4F46E5', 2, '5,3', 'mw');
+    labelBg(wMx, wY1 - 6, 'WebSocket', '#4F46E5', 7.5);
+
+    /* 2 ── TCP :12136  TP Daemon ↔ plugin.py (two vertical lines) */
+    if (daemon && plugin) {
+      var tx1 = daemon.cx - 9;
+      var tx2 = daemon.cx + 9;
+      line(tx1, daemon.b, tx1, plugin.t, '#0369A1', 1.4, null, 'mt');
+      line(tx2, plugin.t, tx2, daemon.b, '#0369A1', 1.4, null, 'mt');
+      labelBg(tx2 + 30, (daemon.b + plugin.t) / 2 + 4, 'TCP :12136', '#0369A1', 7, 'start');
+    }
+
+    /* 3 ── HTTPS  License Verifier → License API. Starts at the bottom edge of zone B
+       (below every chip, including State Receiver which sits right under License
+       Verifier) so the line never crosses another block, then curves down to the
+       API box sitting clear beneath the whole diagram. */
+    if (cLV && zB && api) {
+      var hx1 = cLV.cx;
+      var hy1 = zB.b;
+      var hx2 = api.cx;
+      var hy2 = api.t;
+      var hmy = (hy1 + hy2) / 2;
+      path('M ' + hx1 + ' ' + hy1 + ' C ' + hx1 + ' ' + hmy + ' ' + hx2 + ' ' + hmy + ' ' + hx2 + ' ' + hy2, '#BE185D', 1.2, '4,3', 'mh');
+      labelBg(hx1 + 8, hy1 + 14, 'HTTPS', '#BE185D', 7, 'start');
+    }
+
+    /* 4 ── UDP :5050  plugin.py → Zone C (at UDP Sender level) */
+    if (cUS && zC) {
+      var u1y = cUS.cy - 13;
+      path('M ' + zB.r + ' ' + u1y + ' L ' + zC.l + ' ' + u1y, '#D97706', 2.2, null, 'mu');
+      labelBg((zB.r + zC.l) / 2, u1y - 6, 'UDP :5050 → commandes', '#D97706', 7.5);
+    }
+
+    /* 5 ── UDP :5051  Zone C → plugin.py (at State Receiver level) */
+    if (cSR && zC) {
+      var u2y = cSR.cy + 13;
+      path('M ' + zC.l + ' ' + u2y + ' L ' + zB.r + ' ' + u2y, '#D97706', 2.2, null, 'mu');
+      labelBg((zC.l + zB.r) / 2, u2y + 18, 'UDP :5051 ← états', '#D97706', 7.5);
+    }
+
+    /* 6 ── SDK  XPPython3 → PI_C172 */
+    if (xpy && pi) {
+      line(xpy.cx, xpy.b, xpy.cx, pi.t, '#047857', 1.6, null, 'ms');
+      labelBg(xpy.cx + 24, (xpy.b + pi.t) / 2 + 4, 'SDK xp', '#047857', 7, 'start');
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', draw);
+  } else {
+    draw();
+  }
+  window.addEventListener('resize', draw);
+})();
+</script>
+</body>
+</html>

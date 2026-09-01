@@ -1,11 +1,538 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>xplane touchportal deck plugin</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XP-FlightDeck — Pilotez X-Plane 12 depuis votre tablette, sans matériel</title>
+<style>
+  :root {
+    --bg: #F1F5F9;
+    --surface: #FFFFFF;
+    --surface-2: #F8FAFC;
+    --text: #0F172A;
+    --text-dim: #64748B;
+    --border: #DDE1E8;
+    --accent: #4F46E5;
+    --accent-ink: #4338CA;
+    --code-bg: #E2E8F0;
+    --chip-bg: #E8EBF0;
+    --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+      --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+      --accent: #818CF8; --accent-ink: #A5B4FC;
+      --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+      --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+    --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+    --accent: #818CF8; --accent-ink: #A5B4FC;
+    --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+    --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+  }
+  :root[data-theme="light"] {
+    --bg: #F1F5F9; --surface: #FFFFFF; --surface-2: #F8FAFC;
+    --text: #0F172A; --text-dim: #64748B; --border: #DDE1E8;
+    --accent: #4F46E5; --accent-ink: #4338CA;
+    --code-bg: #E2E8F0; --chip-bg: #E8EBF0; --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  code, .mono {
+    font-family: ui-monospace, "Cascadia Code", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+  code { background: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .page { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+  header.hero { padding: 3.5rem 0 2.2rem; border-bottom: 1px solid var(--border); }
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4.2vw, 2.9rem); line-height: 1.12; letter-spacing: -0.015em;
+    margin: 0 0 1rem; text-wrap: balance; max-width: 22ch;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle { color: var(--text-dim); font-size: 1.12rem; max-width: 62ch; margin: 0 0 1.5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.76rem;
+    padding: 0.28rem 0.6rem; border-radius: 100px; background: var(--chip-bg); color: var(--chip-color);
+  }
+  .hero-cta { margin-top: 1.5rem; display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.88rem; }
+  .hero-cta a { font-weight: 600; text-decoration: none; }
+  .hero-cta a:hover { text-decoration: underline; }
+  .hero-cta a.secondary { color: var(--text-dim); font-weight: 500; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--border);
+    margin: 0 -1.5rem 2.5rem; padding: 0 1.5rem;
+  }
+  nav.toc .inner {
+    max-width: 1000px; margin: 0 auto; display: flex; gap: 1.2rem;
+    overflow-x: auto; padding: 0.75rem 0; font-size: 0.8rem;
+  }
+  nav.toc a { color: var(--text-dim); text-decoration: none; white-space: nowrap; }
+  nav.toc a:hover { color: var(--accent); }
+
+  section.block { padding: 2.8rem 0; border-bottom: 1px solid var(--border); scroll-margin-top: 4rem; }
+  section.block:last-of-type { border-bottom: none; }
+  .block-head { display: flex; align-items: baseline; gap: 0.7rem; margin-bottom: 0.4rem; }
+  .block-num { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.8rem; color: var(--text-dim); }
+  h2 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
+  h3 { font-size: 1rem; margin: 0 0 0.35rem; }
+  .block-desc { color: var(--text-dim); max-width: 66ch; margin: 0.6rem 0 1.6rem; }
+  .block-desc.center { margin-left: auto; margin-right: auto; text-align: center; }
+
+  /* ---------- Problem framing ---------- */
+  .framing { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .framing-card { border-radius: 10px; padding: 1.1rem 1.2rem; border: 1.5px solid; }
+  .framing-card.bad { background: var(--bad-bg); border-color: var(--bad-border); }
+  .framing-card.good { background: var(--good-bg); border-color: var(--good-border); }
+  .framing-card .label {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.65rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+  }
+  .framing-card.bad .label { color: var(--bad-text); }
+  .framing-card.good .label { color: var(--good-text); }
+  .framing-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; }
+  .framing-card.bad li { color: var(--bad-text); }
+  .framing-card.good li { color: var(--good-text); }
+  .framing-card li + li { margin-top: 0.4rem; }
+
+  /* ---------- Metrics strip ---------- */
+  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; margin-top: 1.5rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; box-shadow: var(--shadow); }
+  .metric .m-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .metric .m-value { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 1.3rem; font-weight: 700; margin: 0.25rem 0; color: var(--text); font-variant-numeric: tabular-nums; }
+  .metric .m-delta { font-size: 0.76rem; color: var(--good-text); font-weight: 600; }
+  .metric p.m-explain { margin: 0.35rem 0 0; font-size: 0.78rem; color: var(--text-dim); font-family: ui-sans-serif, system-ui, sans-serif; }
+
+  /* ---------- Use case cards ---------- */
+  .usecases { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .usecase { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 0.55rem; }
+  .usecase .uc-tag {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.62rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); align-self: flex-start;
+    background: var(--chip-bg); padding: 0.2rem 0.55rem; border-radius: 100px;
+  }
+  .usecase h3 { font-size: 1.02rem; margin-top: 0.2rem; }
+  .uc-detail { display: flex; gap: 0.6rem; font-size: 0.82rem; }
+  .uc-detail .uc-k { flex: none; width: 76px; font-weight: 700; color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 0.15rem; }
+  .uc-detail .uc-v { color: var(--text-dim); line-height: 1.4; }
+  .usecase .uc-value { margin-top: auto; padding-top: 0.6rem; border-top: 1px dashed var(--border); font-size: 0.8rem; color: var(--text); }
+  .usecase .uc-value strong { color: var(--accent-ink); }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; min-width: 560px; }
+  th, td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); background: var(--surface-2); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.dim { color: var(--text-dim); }
+  td.hl { color: var(--accent-ink); font-weight: 600; }
+
+  /* ---------- Callout ---------- */
+  .callout { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 1rem 1.2rem; font-size: 0.88rem; color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+  .callout li + li { margin-top: 0.3rem; }
+
+  /* ---------- Hero blobs ---------- */
+  header.hero { position: relative; overflow: hidden; }
+  header.hero > * { position: relative; z-index: 1; }
+  .hero-blobs { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.28; }
+  .blob-a { width: 340px; height: 340px; background: var(--accent); top: -100px; left: -70px; }
+  .blob-b { width: 300px; height: 300px; background: #22D3EE; top: -60px; right: -60px; }
+  @media (prefers-color-scheme: dark) { .blob { opacity: 0.16; } }
+  :root[data-theme="dark"] .blob { opacity: 0.16; }
+  :root[data-theme="light"] .blob { opacity: 0.28; }
+
+  /* ---------- Trust pills ---------- */
+  .trust-pills { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.2rem 0 1.3rem; }
+  .trust-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem; background: var(--good-bg); color: var(--good-text);
+    border: 1px solid var(--good-border); border-radius: 100px; padding: 0.4rem 0.9rem; font-size: 0.82rem; font-weight: 600;
+  }
+  .trust-pill .tp-check { font-weight: 800; }
+
+  /* ---------- Nav brand ---------- */
+  .nav-brand { display: flex; flex-direction: column; line-height: 1.15; margin-right: 0.4rem; flex: none; }
+  .nav-brand .nb-name { font-weight: 800; color: var(--accent); font-size: 0.88rem; white-space: nowrap; }
+  .nav-brand .nb-tag { font-size: 0.64rem; color: var(--text-dim); white-space: nowrap; }
+  .nav-sep { width: 1px; align-self: stretch; background: var(--border); flex: none; margin: 0.3rem 0; }
+
+  /* ---------- Step tracker ---------- */
+  .steps-tracker { display: flex; align-items: flex-start; justify-content: center; gap: 0; flex-wrap: wrap; margin-bottom: 2rem; }
+  .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; width: 118px; text-align: center; }
+  .step-bubble {
+    position: relative; width: 50px; height: 50px; border-radius: 50%; background: var(--surface);
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); box-shadow: var(--shadow);
+  }
+  .step-bubble svg { width: 22px; height: 22px; }
+  .step-item.done .step-bubble { border-color: var(--accent); color: var(--accent); }
+  .step-check {
+    position: absolute; bottom: -3px; right: -3px; width: 17px; height: 17px; border-radius: 50%;
+    background: var(--good-border); color: #fff; font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface);
+  }
+  .step-label { font-size: 0.76rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin-top: 25px; min-width: 20px; }
+
+  /* ---------- Demo sequence ---------- */
+  .demo-flow { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 500px; margin: 0 auto; }
+  .v-connector { width: 2px; height: 26px; background: var(--border); position: relative; flex: none; }
+  .v-connector::after { content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid var(--border); }
+  .demo-bubble { align-self: flex-end; background: var(--accent); color: #fff; border-radius: 14px 14px 4px 14px; padding: 0.85rem 1.1rem; font-size: 0.95rem; max-width: 88%; box-shadow: var(--shadow); }
+  .demo-tag { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); background: var(--surface-2); border: 1px solid var(--border); border-radius: 100px; padding: 0.32rem 0.85rem; }
+  .demo-card { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; box-shadow: var(--shadow); }
+  .demo-card .dc-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); font-weight: 800; margin-bottom: 0.45rem; }
+  .demo-card .dc-q { font-weight: 600; margin-bottom: 0.3rem; font-size: 0.92rem; font-family: ui-monospace, "Cascadia Code", monospace; }
+  .demo-card .dc-a { color: var(--text-dim); font-size: 0.86rem; line-height: 1.5; }
+  .demo-score { display: inline-block; margin-top: 0.65rem; font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.78rem; background: var(--good-bg); color: var(--good-text); border: 1px solid var(--good-border); padding: 0.22rem 0.65rem; border-radius: 100px; }
+  .demo-final { text-align: center; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.4rem; }
+
+  /* ---------- Features ---------- */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.9rem; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; box-shadow: var(--shadow); }
+  .feature-card .f-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.35rem; }
+  .feature-card p { margin: 0; font-size: 0.82rem; color: var(--text-dim); line-height: 1.45; }
+
+  /* ---------- Comparison progression ---------- */
+  .compare-steps { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.4rem; }
+  .compare-chip { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.82rem; font-weight: 700; padding: 0.55rem 1.1rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-dim); }
+  .compare-chip.mid { border-color: var(--accent); color: var(--accent-ink); background: var(--surface); box-shadow: var(--shadow); }
+  .compare-arrow { color: var(--text-dim); font-size: 1rem; }
+
+  /* ---------- Evolutions ---------- */
+  .evolutions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.7rem; }
+  .evo-item { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.86rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; color: var(--text-dim); }
+  .evo-item .evo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 0.55rem; flex: none; }
+
+  footer { padding-top: 2.5rem; color: var(--text-dim); font-size: 0.85rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+  @media (max-width: 700px) {
+    .framing { grid-template-columns: 1fr; }
+  }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
 </head>
 <body>
-  <h1>xplane touchportal deck plugin</h1>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-blobs"><span class="blob blob-a"></span><span class="blob blob-b"></span></div>
+    <p class="eyebrow">Plugin Touch Portal pour X-Plane 12</p>
+    <h1>Transformez une tablette en panneau de commandes pour votre <em>cockpit virtuel</em></h1>
+    <p class="subtitle">
+      XP-FlightDeck relie Touch Portal à X-Plane 12 : chaque bouton pressé sur une tablette ou un smartphone
+      actionne un vrai interrupteur du cockpit, et son état revient s'afficher en temps réel — sans HOTAS,
+      sans panneau physique, sans câblage. Distribué et sous licence sur
+      <strong><a href="https://www.xp-flightdeck.com" target="_blank" rel="noopener">www.xp-flightdeck.com</a></strong>.
+    </p>
+    <div class="trust-pills">
+      <span class="trust-pill"><span class="tp-check">✓</span> État du cockpit synchronisé en temps réel</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Profils par avion (Cessna 172SP, Cirrus SR22…)</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> macOS, Linux, Windows</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Licence vérifiable hors-ligne (Ed25519)</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Aucun matériel supplémentaire à acheter</span>
+    </div>
+    <div class="chips">
+      <span class="chip">Touch Portal</span>
+      <span class="chip">X-Plane 12</span>
+      <span class="chip">XPPython3</span>
+      <span class="chip">UDP temps réel</span>
+      <span class="chip">DataRefs &amp; CommandRefs</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#demo">Voir comment ça marche ↓</a>
+      <a href="architecture.html">Voir l'architecture technique →</a>
+      <a class="secondary" href="https://www.xp-flightdeck.com" target="_blank" rel="noopener">www.xp-flightdeck.com ↗</a>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="inner">
+      <div class="nav-brand"><span class="nb-name">XP-FlightDeck</span><span class="nb-tag">Votre tablette devient le panneau</span></div>
+      <div class="nav-sep"></div>
+      <a href="#usages">Cas d'usage</a>
+      <a href="#demo">Comment ça marche</a>
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#licence">Licence &amp; distribution</a>
+      <a href="#valeur">Valeur utilisateur</a>
+      <a href="#comparaison">Comparaison</a>
+      <a href="#operationnel">Repères opérationnels</a>
+      <a href="#evolutions">Évolutions</a>
+      <div class="nav-sep"></div>
+      <a href="architecture.html">Architecture technique →</a>
+    </div>
+  </nav>
+
+  <section class="block" id="usages">
+    <div class="block-head"><span class="block-num">01</span><h2>Cas d'usage</h2></div>
+    <p class="block-desc">Quatre profils de pilotes virtuels directement couverts par le plugin aujourd'hui.</p>
+    <div class="usecases">
+      <div class="usecase">
+        <span class="uc-tag">Simmer sans cockpit physique</span>
+        <h3>Un vrai panneau de switches, sans rien acheter</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un utilisateur pilote au clavier/souris ou au HOTAS, mais doit fouiller les menus X-Plane pour actionner magnétos, feux ou pompe à carburant.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Un panneau de switches physique (Honeycomb, DIY Arduino…) coûte cher et prend de la place sur le bureau.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Une page Touch Portal importable (<code>.tpz2</code>) reproduit le panneau du Cessna 172 ou du Cirrus SR22 sur la tablette posée à côté du clavier.</span></div>
+        <div class="uc-value">Valeur : <strong>l'immersion d'un panneau physique, pour le prix d'une tablette déjà possédée</strong>.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Pilote VR</span>
+        <h3>Actionner le cockpit sans quitter le casque</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">En VR, atteindre le clavier pour mettre en pause ou changer de vue casse complètement l'immersion.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Les raccourcis clavier sont invisibles et malcommodes une fois le casque posé.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Un smartphone à portée de main sert de télécommande tactile pour la pause, la carte ou l'ATC, sans retirer le casque.</span></div>
+        <div class="uc-value">Valeur : <strong>moins d'interruptions d'immersion</strong> pendant un vol VR.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Instructeur &amp; créateur de contenu</span>
+        <h3>Démontrer les procédures avec des boutons visibles à l'écran</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un instructeur virtuel ou un créateur de tutoriels veut montrer clairement quelle action déclenche quel effet.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Un raccourci clavier pressé hors caméra est invisible pour l'audience.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Chaque bouton de la page Touch Portal s'allume selon l'état réel du DataRef — visible en stream ou en capture d'écran.</span></div>
+        <div class="uc-value">Valeur : <strong>des démonstrations lisibles</strong>, sans explication verbale nécessaire.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Constructeur de home-cockpit léger</span>
+        <h3>Étendre un cockpit DIY sans électronique supplémentaire</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un passionné a déjà un yoke ou des pédales, et veut ajouter les circuits secondaires (éclairage, dégivrage, freins de parking) sans câblage.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Ajouter des interrupteurs physiques pour chaque circuit demande de l'électronique, du câblage et du temps.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Une tablette fixée près du poste de pilotage couvre les circuits secondaires via Touch Portal, en complément du matériel physique existant.</span></div>
+        <div class="uc-value">Valeur : <strong>un cockpit plus complet</strong>, sans nouvelle carte électronique à souder.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="demo">
+    <div class="block-head"><span class="block-num">02</span><h2>Comment ça marche</h2></div>
+    <p class="block-desc">Le trajet d'une pression de bouton, tel qu'implémenté par le plugin aujourd'hui.</p>
+
+    <div class="steps-tracker">
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="7" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="13" r="2" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Bouton pressé sur la tablette</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12h6M14 12h6M12 4v6M12 14v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">plugin.py → UDP :5050</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">DataRef modifié dans X-Plane</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="step-label">État renvoyé sur la tablette</span>
+      </div>
+    </div>
+
+    <div class="demo-flow">
+      <div class="demo-bubble">Le pilote appuie sur « Beacon Lights » dans Touch Portal</div>
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">plugin.py — UDP 127.0.0.1:5050</div>
+        <div class="dc-q">{"command": "beacon_lights_on"}</div>
+        <div class="dc-a">Le plugin Touch Portal traduit l'appui en commande JSON et l'envoie à <code>PI_C172TouchPortal.py</code>, chargé dans X-Plane 12 via XPPython3.</div>
+        <span class="demo-score">DataRef écrit : sim/cockpit/electrical/beacon_lights_on</span>
+      </div>
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">Retour d'état — UDP 127.0.0.1:5051</div>
+        <div class="dc-a">Le FlightLoop du plugin XPPython3 détecte le changement et le renvoie à <code>plugin.py</code>, qui met à jour l'état du bouton sur la tablette — allumé, comme le vrai interrupteur du cockpit.</div>
+      </div>
+      <p class="demo-final">L'aller-retour complet se joue en quelques dizaines de millisecondes, à chaque frame du FlightLoop.</p>
+    </div>
+  </section>
+
+  <section class="block" id="fonctionnalites">
+    <div class="block-head"><span class="block-num">03</span><h2>Fonctionnalités</h2></div>
+    <p class="block-desc">Ce que le plugin fait, concrètement, pour le pilote.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-title">Panneau prêt à l'emploi</div><p>Une page <code>.tpz2</code> et un pack d'icônes s'importent directement dans Touch Portal — pas de configuration bouton par bouton.</p></div>
+      <div class="feature-card"><div class="f-title">Profils par avion</div><p><code>aircraft_capabilities.json</code> active ou masque chaque commande selon l'avion chargé (Cessna 172SP, Cirrus SR22…), détecté automatiquement au démarrage.</p></div>
+      <div class="feature-card"><div class="f-title">États synchronisés en continu</div><p>Chaque interrupteur affiché sur la tablette reflète l'état réel du DataRef X-Plane, pas seulement le dernier clic envoyé.</p></div>
+      <div class="feature-card"><div class="f-title">Commandes de simulation</div><p>Pause, affichage carte, ATC, auto-start et auto-stop moteur sont accessibles depuis la tablette comme les circuits du cockpit.</p></div>
+      <div class="feature-card"><div class="f-title">Multi-plateforme</div><p>Installateurs dédiés pour macOS (app Swift + DMG), Linux (archive prête à déployer) et Windows (Inno Setup).</p></div>
+      <div class="feature-card"><div class="f-title">Aucun matériel requis</div><p>Fonctionne avec n'importe quelle tablette ou smartphone iOS/Android déjà équipé de l'app Touch Portal, sur le même réseau Wi-Fi.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="licence">
+    <div class="block-head"><span class="block-num">04</span><h2>Licence &amp; distribution</h2></div>
+    <p class="block-desc">XP-FlightDeck est un produit sous licence, pas un script partagé sur un forum.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-title">Distribué sur xp-flightdeck.com</div><p>Le plugin, ses installateurs et les mises à jour sont proposés sur <a href="https://www.xp-flightdeck.com" target="_blank" rel="noopener">www.xp-flightdeck.com</a> — un seul endroit pour obtenir une version à jour et supportée.</p></div>
+      <div class="feature-card"><div class="f-title">Activation simple</div><p>L'email et la clé de licence se saisissent directement dans les réglages du plugin Touch Portal, sans compte séparé à créer.</p></div>
+      <div class="feature-card"><div class="f-title">Vérification hors-ligne</div><p>Le jeton de licence est signé Ed25519 et vérifié localement par <code>PyNaCl</code> — le plugin continue de fonctionner même en cas de coupure réseau ponctuelle.</p></div>
+      <div class="feature-card"><div class="f-title">Rien codé en dur</div><p>La clé n'est pas figée dans l'exécutable : elle est vérifiée auprès de l'API de licences à chaque activation, ce qui permet la révocation et le support.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="valeur">
+    <div class="block-head"><span class="block-num">05</span><h2>Valeur utilisateur</h2></div>
+    <p class="block-desc">
+      Beaucoup de simmers pilotent avec ce qu'ils ont sous la main — clavier, souris, HOTAS — et laissent
+      les circuits secondaires du cockpit inaccessibles, faute de panneau dédié.
+    </p>
+    <div class="framing">
+      <div class="framing-card bad">
+        <div class="label">Sans XP-FlightDeck</div>
+        <ul>
+          <li>Les interrupteurs secondaires (feux, pompe, magnétos…) passent par des menus ou raccourcis peu intuitifs</li>
+          <li>Un panneau physique dédié coûte plusieurs centaines d'euros et prend de la place sur le bureau</li>
+          <li>En VR, impossible d'atteindre le clavier sans casser l'immersion</li>
+          <li>Chaque avion demanderait un nouveau câblage ou une nouvelle configuration matérielle</li>
+        </ul>
+      </div>
+      <div class="framing-card good">
+        <div class="label">Avec XP-FlightDeck</div>
+        <ul>
+          <li>Chaque circuit du cockpit devient un bouton tactile, avec retour d'état en temps réel</li>
+          <li>La tablette ou le smartphone déjà possédé fait office de panneau — aucun achat matériel</li>
+          <li>Une télécommande à portée de main en VR, sans quitter le casque</li>
+          <li>Changer d'avion charge automatiquement le bon profil de commandes</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2rem;">Ce que ça change concrètement</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Situation</th><th>Sans XP-FlightDeck</th><th>Avec XP-FlightDeck</th></tr></thead>
+        <tbody>
+          <tr><td>Actionner un circuit secondaire</td><td class="dim">Menu X-Plane ou raccourci clavier à mémoriser</td><td class="dim">Bouton dédié sur la tablette, identique au vrai cockpit</td></tr>
+          <tr><td>Changer d'avion</td><td class="dim">Se souvenir de quels circuits existent sur ce modèle</td><td class="dim">Profil chargé automatiquement depuis <code>aircraft_capabilities.json</code></td></tr>
+          <tr><td>Vérifier un état (feux, frein de parking…)</td><td class="dim">Regarder le cockpit 3D ou l'overlay</td><td class="dim">L'état s'affiche directement sur le bouton, en temps réel</td></tr>
+          <tr><td>Session VR</td><td class="dim">Retirer le casque pour utiliser le clavier</td><td class="dim">Tablette ou téléphone à portée de main, sans interruption</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="comparaison">
+    <div class="block-head"><span class="block-num">06</span><h2>Comparaison</h2></div>
+    <p class="block-desc">XP-FlightDeck se positionne entre le clavier nu et le panneau physique dédié.</p>
+    <div class="compare-steps">
+      <span class="compare-chip">Clavier / souris</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip mid">XP-FlightDeck (tablette)</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip">Panneau physique dédié</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Dimension</th><th>Clavier / souris</th><th>XP-FlightDeck</th><th>Panneau physique dédié</th></tr></thead>
+        <tbody>
+          <tr><td>Coût matériel</td><td class="dim">Aucun</td><td class="hl">Aucun (tablette déjà possédée)</td><td class="dim">Plusieurs centaines d'euros</td></tr>
+          <tr><td>Installation</td><td class="dim">Immédiate</td><td class="hl">Un installateur + import d'une page Touch Portal</td><td class="dim">Câblage, calibration, drivers</td></tr>
+          <tr><td>Retour d'état visuel</td><td class="dim">Aucun sans regarder le cockpit 3D</td><td class="hl">État du bouton mis à jour en temps réel</td><td class="dim">Total (interrupteur physique)</td></tr>
+          <tr><td>Multi-avion</td><td class="dim">Raccourcis identiques pour tous les avions</td><td class="hl">Profil de commandes par avion</td><td class="dim">Souvent conçu pour un seul modèle</td></tr>
+          <tr><td>Encombrement</td><td class="dim">Aucun</td><td class="hl">Une tablette posée sur le bureau</td><td class="dim">Poste dédié, souvent volumineux</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="block-desc" style="margin-top:1rem; font-size:0.85rem;">
+      Un panneau physique reste irremplaçable pour le réalisme tactile, mais demande un investissement et un
+      espace dédiés. XP-FlightDeck vise l'entre-deux : la couverture fonctionnelle et le retour d'état d'un
+      panneau dédié, avec le coût et l'installation d'une simple application.
+    </p>
+  </section>
+
+  <section class="block" id="operationnel">
+    <div class="block-head"><span class="block-num">07</span><h2>Repères opérationnels</h2></div>
+    <p class="block-desc">Ce qui tourne aujourd'hui, tel que suivi dans <code>version.json</code>.</p>
+    <div class="metrics-row">
+      <div class="metric">
+        <div class="m-label">Profils d'avion</div>
+        <div class="m-value">2 + défaut</div>
+        <p class="m-explain">Cessna 172SP et Cirrus SR22 aujourd'hui, extensible via <code>aircraft_capabilities.json</code>.</p>
+      </div>
+      <div class="metric">
+        <div class="m-label">X-Plane requis</div>
+        <div class="m-value">12.4.0+</div>
+        <p class="m-explain">Piloté par XPPython3 v4.7.0, Python 3.12 embarqué.</p>
+      </div>
+      <div class="metric">
+        <div class="m-label">Latence commande</div>
+        <div class="m-value">&lt; 1 frame</div>
+        <p class="m-explain">Allers-retours UDP localhost sur les ports 5050/5051, à chaque FlightLoop.</p>
+      </div>
+      <div class="metric">
+        <div class="m-label">Plateformes</div>
+        <div class="m-value">3</div>
+        <p class="m-explain">macOS, Linux, Windows — un installateur dédié par OS.</p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:1rem;">
+      <strong>Version actuelle 1.0.2.</strong> Le plugin Touch Portal (<code>plugin.py</code>) et le plugin XPPython3
+      (<code>PI_C172TouchPortal.py</code>) sont versionnés indépendamment de XPPython3 lui-même, chacun suivi dans
+      <code>version.json</code> — les mises à jour sont publiées sur
+      <a href="https://www.xp-flightdeck.com" target="_blank" rel="noopener">www.xp-flightdeck.com</a>.
+    </div>
+  </section>
+
+  <section class="block" id="evolutions">
+    <div class="block-head"><span class="block-num">08</span><h2>Évolutions possibles</h2></div>
+    <p class="block-desc">Le socle multi-avion actuel est pensé pour grandir dans ces directions.</p>
+    <div class="evolutions-grid">
+      <div class="evo-item"><span class="evo-dot"></span>Nouveaux profils d'avion au-delà du Cessna 172SP et du Cirrus SR22</div>
+      <div class="evo-item"><span class="evo-dot"></span>Pages Touch Portal supplémentaires pour d'autres postes de pilotage (IFR, hélicoptère…)</div>
+      <div class="evo-item"><span class="evo-dot"></span>Bibliothèque communautaire de profils d'avion partageables</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>XP-FlightDeck — Plugin Touch Portal pour X-Plane 12</span>
+    <span>Distribué sur <a href="https://www.xp-flightdeck.com" target="_blank" rel="noopener">www.xp-flightdeck.com</a> · <a href="architecture.html">Architecture technique complète</a></span>
+  </footer>
+
+</div>
 </body>
 </html>
