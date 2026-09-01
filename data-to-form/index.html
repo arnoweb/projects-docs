@@ -1,11 +1,572 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>data to form</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataToForm — Ce que l'application apporte concrètement</title>
+<style>
+  :root {
+    --bg: #F1F5F9;
+    --surface: #FFFFFF;
+    --surface-2: #F8FAFC;
+    --text: #0F172A;
+    --text-dim: #64748B;
+    --border: #DDE1E8;
+    --accent: #4F46E5;
+    --accent-ink: #4338CA;
+    --code-bg: #E2E8F0;
+    --chip-bg: #E8EBF0;
+    --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+      --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+      --accent: #818CF8; --accent-ink: #A5B4FC;
+      --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+      --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+    --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+    --accent: #818CF8; --accent-ink: #A5B4FC;
+    --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+    --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+  }
+  :root[data-theme="light"] {
+    --bg: #F1F5F9; --surface: #FFFFFF; --surface-2: #F8FAFC;
+    --text: #0F172A; --text-dim: #64748B; --border: #DDE1E8;
+    --accent: #4F46E5; --accent-ink: #4338CA;
+    --code-bg: #E2E8F0; --chip-bg: #E8EBF0; --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  code, .mono {
+    font-family: ui-monospace, "Cascadia Code", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+  code { background: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .page { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+  header.hero { padding: 3.5rem 0 2.2rem; border-bottom: 1px solid var(--border); }
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4.2vw, 2.9rem); line-height: 1.12; letter-spacing: -0.015em;
+    margin: 0 0 1rem; text-wrap: balance; max-width: 20ch;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle { color: var(--text-dim); font-size: 1.12rem; max-width: 62ch; margin: 0 0 1.5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.76rem;
+    padding: 0.28rem 0.6rem; border-radius: 100px; background: var(--chip-bg); color: var(--chip-color);
+  }
+  .hero-cta { margin-top: 1.5rem; display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.88rem; }
+  .hero-cta a { font-weight: 600; text-decoration: none; }
+  .hero-cta a:hover { text-decoration: underline; }
+  .hero-cta a.secondary { color: var(--text-dim); font-weight: 500; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--border);
+    margin: 0 -1.5rem 2.5rem; padding: 0 1.5rem;
+  }
+  nav.toc .inner {
+    max-width: 1000px; margin: 0 auto; display: flex; gap: 1.2rem;
+    overflow-x: auto; padding: 0.75rem 0; font-size: 0.8rem;
+  }
+  nav.toc a { color: var(--text-dim); text-decoration: none; white-space: nowrap; }
+  nav.toc a:hover { color: var(--accent); }
+
+  section.block { padding: 2.8rem 0; border-bottom: 1px solid var(--border); scroll-margin-top: 4rem; }
+  section.block:last-of-type { border-bottom: none; }
+  .block-head { display: flex; align-items: baseline; gap: 0.7rem; margin-bottom: 0.4rem; }
+  .block-num { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.8rem; color: var(--text-dim); }
+  h2 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
+  h3 { font-size: 1rem; margin: 0 0 0.35rem; }
+  .block-desc { color: var(--text-dim); max-width: 66ch; margin: 0.6rem 0 1.6rem; }
+  .block-desc.center { margin-left: auto; margin-right: auto; text-align: center; }
+
+  /* ---------- Problem framing ---------- */
+  .framing { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .framing-card { border-radius: 10px; padding: 1.1rem 1.2rem; border: 1.5px solid; }
+  .framing-card.bad { background: var(--bad-bg); border-color: var(--bad-border); }
+  .framing-card.good { background: var(--good-bg); border-color: var(--good-border); }
+  .framing-card .label {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.65rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+  }
+  .framing-card.bad .label { color: var(--bad-text); }
+  .framing-card.good .label { color: var(--good-text); }
+  .framing-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; }
+  .framing-card.bad li { color: var(--bad-text); }
+  .framing-card.good li { color: var(--good-text); }
+  .framing-card li + li { margin-top: 0.4rem; }
+
+  /* ---------- Metrics strip ---------- */
+  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; margin-top: 1.5rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; box-shadow: var(--shadow); }
+  .metric .m-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .metric .m-value { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 1.3rem; font-weight: 700; margin: 0.25rem 0; color: var(--text); font-variant-numeric: tabular-nums; }
+  .metric .m-delta { font-size: 0.76rem; color: var(--good-text); font-weight: 600; }
+  .metric p.m-explain { margin: 0.35rem 0 0; font-size: 0.78rem; color: var(--text-dim); font-family: ui-sans-serif, system-ui, sans-serif; }
+
+  /* ---------- Use case cards ---------- */
+  .usecases { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .usecase { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 0.55rem; }
+  .usecase .uc-tag {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.62rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); align-self: flex-start;
+    background: var(--chip-bg); padding: 0.2rem 0.55rem; border-radius: 100px;
+  }
+  .usecase h3 { font-size: 1.02rem; margin-top: 0.2rem; }
+  .uc-detail { display: flex; gap: 0.6rem; font-size: 0.82rem; }
+  .uc-detail .uc-k { flex: none; width: 76px; font-weight: 700; color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 0.15rem; }
+  .uc-detail .uc-v { color: var(--text-dim); line-height: 1.4; }
+  .usecase .uc-value { margin-top: auto; padding-top: 0.6rem; border-top: 1px dashed var(--border); font-size: 0.8rem; color: var(--text); }
+  .usecase .uc-value strong { color: var(--accent-ink); }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; min-width: 560px; }
+  th, td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); background: var(--surface-2); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.dim { color: var(--text-dim); }
+  td.hl { color: var(--accent-ink); font-weight: 600; }
+
+  /* ---------- Callout ---------- */
+  .callout { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 1rem 1.2rem; font-size: 0.88rem; color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+  .callout li + li { margin-top: 0.3rem; }
+
+  /* ---------- Hero blobs ---------- */
+  header.hero { position: relative; overflow: hidden; }
+  header.hero > * { position: relative; z-index: 1; }
+  .hero-blobs { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.28; }
+  .blob-a { width: 340px; height: 340px; background: var(--accent); top: -100px; left: -70px; }
+  .blob-b { width: 300px; height: 300px; background: #22D3EE; top: -60px; right: -60px; }
+  @media (prefers-color-scheme: dark) { .blob { opacity: 0.16; } }
+  :root[data-theme="dark"] .blob { opacity: 0.16; }
+  :root[data-theme="light"] .blob { opacity: 0.28; }
+
+  /* ---------- Trust pills ---------- */
+  .trust-pills { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.2rem 0 1.3rem; }
+  .trust-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem; background: var(--good-bg); color: var(--good-text);
+    border: 1px solid var(--good-border); border-radius: 100px; padding: 0.4rem 0.9rem; font-size: 0.82rem; font-weight: 600;
+  }
+  .trust-pill .tp-check { font-weight: 800; }
+
+  /* ---------- Nav brand ---------- */
+  .nav-brand { display: flex; flex-direction: column; line-height: 1.15; margin-right: 0.4rem; flex: none; }
+  .nav-brand .nb-name { font-weight: 800; color: var(--accent); font-size: 0.88rem; white-space: nowrap; }
+  .nav-brand .nb-tag { font-size: 0.64rem; color: var(--text-dim); white-space: nowrap; }
+  .nav-sep { width: 1px; align-self: stretch; background: var(--border); flex: none; margin: 0.3rem 0; }
+
+  /* ---------- Step tracker ---------- */
+  .steps-tracker { display: flex; align-items: flex-start; justify-content: center; gap: 0; flex-wrap: wrap; margin-bottom: 2rem; }
+  .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; width: 108px; text-align: center; }
+  .step-bubble {
+    position: relative; width: 50px; height: 50px; border-radius: 50%; background: var(--surface);
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); box-shadow: var(--shadow);
+  }
+  .step-bubble svg { width: 22px; height: 22px; }
+  .step-item.done .step-bubble { border-color: var(--accent); color: var(--accent); }
+  .step-check {
+    position: absolute; bottom: -3px; right: -3px; width: 17px; height: 17px; border-radius: 50%;
+    background: var(--good-border); color: #fff; font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface);
+  }
+  .step-label { font-size: 0.76rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin-top: 25px; min-width: 12px; }
+
+  /* ---------- Demo sequence ---------- */
+  .demo-flow { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 480px; margin: 0 auto; }
+  .v-connector { width: 2px; height: 26px; background: var(--border); position: relative; flex: none; }
+  .v-connector::after { content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid var(--border); }
+  .demo-bubble { align-self: flex-end; background: var(--accent); color: #fff; border-radius: 14px 14px 4px 14px; padding: 0.85rem 1.1rem; font-size: 0.95rem; max-width: 88%; box-shadow: var(--shadow); }
+  .demo-card { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; box-shadow: var(--shadow); }
+  .demo-card .dc-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); font-weight: 800; margin-bottom: 0.45rem; }
+  .demo-card .dc-q { font-weight: 600; margin-bottom: 0.3rem; font-size: 0.92rem; }
+  .demo-card .dc-a { color: var(--text-dim); font-size: 0.86rem; line-height: 1.5; }
+  .demo-score { display: inline-block; margin-top: 0.65rem; font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.78rem; background: var(--good-bg); color: var(--good-text); border: 1px solid var(--good-border); padding: 0.22rem 0.65rem; border-radius: 100px; }
+  .demo-final { text-align: center; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.4rem; }
+
+  /* ---------- Features ---------- */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.9rem; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; box-shadow: var(--shadow); }
+  .feature-card .f-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.35rem; }
+  .feature-card p { margin: 0; font-size: 0.82rem; color: var(--text-dim); line-height: 1.45; }
+
+  /* ---------- Comparison progression ---------- */
+  .compare-steps { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.4rem; }
+  .compare-chip { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.82rem; font-weight: 700; padding: 0.55rem 1.1rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-dim); }
+  .compare-chip.mid { border-color: var(--accent); color: var(--accent-ink); background: var(--surface); box-shadow: var(--shadow); }
+  .compare-arrow { color: var(--text-dim); font-size: 1rem; }
+
+  /* ---------- Evolutions ---------- */
+  .evolutions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.7rem; }
+  .evo-item { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.86rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; color: var(--text-dim); }
+  .evo-item .evo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 0.55rem; flex: none; }
+
+  footer { padding-top: 2.5rem; color: var(--text-dim); font-size: 0.85rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+  @media (max-width: 700px) {
+    .framing { grid-template-columns: 1fr; }
+  }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
 </head>
 <body>
-  <h1>data to form</h1>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-blobs"><span class="blob blob-a"></span><span class="blob blob-b"></span></div>
+    <p class="eyebrow">Remplissage de formulaires piloté par IA</p>
+    <h1>Le pont entre votre <em>Excel</em> et n'importe quel formulaire web, sans API</h1>
+    <p class="subtitle">
+      Des milliers d'outils métier — logiciels de billetterie, extranets fédéraux, back-offices e-commerce,
+      portails immobiliers, CRM médico-sociaux — n'exposent aucune API d'import. La seule porte d'entrée
+      reste leur formulaire web. DataToForm ouvre une vraie fenêtre de navigateur sur ce formulaire,
+      comprend ses champs, et les remplit ligne par ligne à partir d'un fichier Excel — sans jamais cliquer
+      sur « Envoyer » à la place de l'utilisateur.
+    </p>
+    <div class="trust-pills">
+      <span class="trust-pill"><span class="tp-check">✓</span> Ne soumet jamais le formulaire</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Fonctionne sur n'importe quel formulaire HTTPS, sans API</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Fichier Excel jamais stocké sur disque</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> LLM gratuit et local par défaut (Ollama)</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Connexion au formulaire faite à la main par l'utilisateur</span>
+    </div>
+    <div class="chips">
+      <span class="chip">Playwright / Chromium réel</span>
+      <span class="chip">Mapping colonnes → champs par IA</span>
+      <span class="chip">Validation champ par champ</span>
+      <span class="chip">Selects en cascade gérés</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#usages">Voir les cas d'usage ↓</a>
+      <a href="architecture.html">Voir l'architecture technique →</a>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="inner">
+      <div class="nav-brand"><span class="nb-name">DataToForm</span><span class="nb-tag">Excel → n'importe quel formulaire</span></div>
+      <div class="nav-sep"></div>
+      <a href="#usages">Cas d'usage</a>
+      <a href="#demo">Comment ça marche</a>
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#valeur">Valeur métier</a>
+      <a href="#comparaison">Comparaison</a>
+      <a href="#validation">Pourquoi un humain valide</a>
+      <a href="#limites">Garanties &amp; limites</a>
+      <a href="#evolutions">Évolutions</a>
+      <div class="nav-sep"></div>
+      <a href="architecture.html">Architecture technique →</a>
+    </div>
+  </nav>
+
+  <section class="block" id="usages">
+    <div class="block-head"><span class="block-num">01</span><h2>Cas d'usage</h2></div>
+    <p class="block-desc">Six secteurs où la saisie manuelle dans un formulaire web reste, aujourd'hui, la seule option.</p>
+    <div class="usecases">
+      <div class="usecase">
+        <span class="uc-tag">Institutions culturelles</span>
+        <h3>Programmation &amp; réservations groupes</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un musée ou un théâtre gère sa billetterie et ses réservations de groupes dans un back-office propriétaire, sans API d'import.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Chaque nouvelle séance, visite scolaire ou tarif doit être ressaisi à la main, champ par champ.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Le tableur de programmation devient la source unique ; DataToForm remplit le back-office ligne par ligne.</span></div>
+        <div class="uc-value">Valeur : <strong>moins d'erreurs de ressaisie</strong>, agents mobilisés sur l'accueil du public.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Fédérations sportives</span>
+        <h3>Licenciés &amp; résultats de compétition</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Une fédération ou un club saisit inscriptions et résultats dans un extranet fédéral vieillissant.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">L'extranet n'a pas d'import de masse ; les bénévoles ressaisissent à la main chaque licence ou score.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Export Excel du club → mapping une fois validé → remplissage automatique du formulaire fédéral.</span></div>
+        <div class="uc-value">Valeur : <strong>temps bénévole libéré</strong>, saisie fiable en période d'inscriptions.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Commerce &amp; e-commerce</span>
+        <h3>Création de fiches produit en masse</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un back-office e-commerce ou une marketplace n'accepte pas d'import CSV pour certains champs (catégories, attributs).</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Chaque référence est créée à la main dans un formulaire produit, colonne par colonne du catalogue Excel.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Le catalogue Excel existant est mappé une fois sur les champs du formulaire, puis rejoué ligne par ligne.</span></div>
+        <div class="uc-value">Valeur : <strong>mise en ligne accélérée</strong> des nouvelles collections.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">BTP &amp; immobilier</span>
+        <h3>Publication d'annonces &amp; de biens</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Une agence ou un promoteur publie ses biens sur un portail ou un logiciel de gestion locative sans API ouverte.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Surface, pièces, DPE, prix : autant de champs recopiés à la main depuis le tableur de suivi des biens.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Le tableur de biens alimente directement le formulaire de publication, ligne par ligne.</span></div>
+        <div class="uc-value">Valeur : <strong>délai de mise en ligne réduit</strong>, moins d'erreurs de caractéristiques.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Santé &amp; médico-social</span>
+        <h3>Dossiers bénéficiaires &amp; admissions</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un établissement médico-social saisit les dossiers d'admission dans un logiciel métier sans passerelle d'import.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Les informations existent déjà dans un tableur de suivi mais doivent être ressaisies champ par champ.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Remplissage assisté, validé ligne par ligne par un agent qui reste responsable de la soumission.</span></div>
+        <div class="uc-value">Valeur : <strong>temps administratif réduit</strong>, sans automatiser la décision elle-même.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Finance &amp; assurance</span>
+        <h3>Dossiers clients sur extranet assureur</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un courtier saisit les dossiers clients sur l'extranet propriétaire de chaque compagnie d'assurance.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Chaque compagnie a son propre formulaire, sans API ; les données client existent déjà dans un tableur interne.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Le mapping s'apprend une fois par extranet, puis se rejoue à chaque nouveau dossier.</span></div>
+        <div class="uc-value">Valeur : <strong>plus de dossiers traités par jour</strong>, sans changer d'outil compagnie.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="demo">
+    <div class="block-head"><span class="block-num">02</span><h2>Comment ça marche</h2></div>
+    <p class="block-desc">Le parcours réel de l'application, tel qu'il se déroule pour une ligne du fichier Excel.</p>
+
+    <div class="steps-tracker">
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Upload Excel + URL</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Connexion manuelle si besoin</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" fill="currentColor"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Mapping suggéré par l'IA</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Remplissage ligne par ligne</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="step-label">L'utilisateur relit &amp; envoie</span>
+      </div>
+    </div>
+
+    <div class="demo-flow">
+      <div class="demo-bubble">Colonne Excel : « Client » → quel champ du formulaire correspond ?</div>
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">Champ détecté sur le formulaire</div>
+        <div class="dc-q">Nom du client (input texte, requis)</div>
+        <div class="dc-a">Le LLM propose « Client » comme colonne source pour ce champ, sur la seule base des noms de colonnes et des labels — jamais des données réelles.</div>
+        <span class="demo-score">Score de confiance : 0.92</span>
+      </div>
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">Validation par l'utilisateur</div>
+        <div class="dc-a">L'utilisateur accepte, corrige ou ignore la suggestion — champ par champ, avant tout remplissage réel. Rien n'est écrit dans le formulaire sans ce mapping validé.</div>
+      </div>
+      <p class="demo-final">Une fois validé, le mapping est rejoué automatiquement pour chaque ligne du fichier — la soumission finale reste toujours un clic humain.</p>
+    </div>
+  </section>
+
+  <section class="block" id="fonctionnalites">
+    <div class="block-head"><span class="block-num">03</span><h2>Fonctionnalités</h2></div>
+    <p class="block-desc">Ce que l'application fait, concrètement.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-title">Fenêtre de navigateur réelle</div><p>Playwright ouvre Chromium sur l'URL du formulaire cible — pas de simulation, le formulaire réel est inspecté et rempli.</p></div>
+      <div class="feature-card"><div class="f-title">Connexion gérée par l'utilisateur</div><p>Si le formulaire est derrière une authentification, l'utilisateur se connecte lui-même dans la fenêtre ; aucun mot de passe ne transite par le serveur.</p></div>
+      <div class="feature-card"><div class="f-title">Détection automatique des champs</div><p>Texte, select, multi-select, checkbox, radio, y compris les selects en cascade — sans configuration préalable.</p></div>
+      <div class="feature-card"><div class="f-title">Mapping IA avec score de confiance</div><p>Chaque champ reçoit une colonne Excel suggérée et un score ; l'utilisateur valide, corrige ou ignore avant tout remplissage.</p></div>
+      <div class="feature-card"><div class="f-title">Extraction Excel intelligente</div><p>Pour les documents non tabulaires (plans de charge, rapports), un premier appel LLM détecte et structure les données avant le mapping.</p></div>
+      <div class="feature-card"><div class="f-title">Provider LLM interchangeable</div><p>Ollama local et gratuit par défaut ; Anthropic, OpenAI ou HuggingFace disponibles avec votre propre clé, sans changement de flux.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="valeur">
+    <div class="block-head"><span class="block-num">04</span><h2>Valeur métier</h2></div>
+    <p class="block-desc">
+      La saisie manuelle dans un formulaire web sans API n'est pas seulement lente : elle mobilise du temps
+      humain qualifié sur une tâche mécanique, et chaque copier-coller est une occasion d'erreur.
+    </p>
+    <div class="framing">
+      <div class="framing-card bad">
+        <div class="label">Saisie manuelle, champ par champ</div>
+        <ul>
+          <li>Chaque ligne du tableur est recopiée à la main dans le formulaire cible</li>
+          <li>Le temps passé croît linéairement avec le nombre de lignes</li>
+          <li>Aucune trace du mapping utilisé — il repose sur la mémoire de la personne qui saisit</li>
+          <li>Risque d'erreur de frappe ou de champ oublié à chaque ligne</li>
+        </ul>
+      </div>
+      <div class="framing-card good">
+        <div class="label">DataToForm</div>
+        <ul>
+          <li>Le mapping colonnes → champs est établi une fois, validé, puis rejoué automatiquement</li>
+          <li>Le temps de traitement d'une ligne supplémentaire devient marginal</li>
+          <li>Le mapping validé est explicite et réutilisable pour le même formulaire</li>
+          <li>La relecture reste humaine, ligne par ligne, avant tout envoi</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2rem;">Ce que ça change concrètement</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Situation</th><th>Saisie manuelle</th><th>DataToForm</th></tr></thead>
+        <tbody>
+          <tr><td>Formulaire sans API d'import</td><td class="dim">Seule option : copier-coller champ par champ</td><td class="dim">Reste la seule voie d'accès — mais automatisée après validation du mapping</td></tr>
+          <tr><td>Nombreuses lignes à saisir</td><td class="dim">Temps proportionnel au volume</td><td class="dim">Mapping validé une fois, rejoué pour chaque ligne</td></tr>
+          <tr><td>Selects en cascade (ville → arrondissement, etc.)</td><td class="dim">Manipulation manuelle à chaque étape</td><td class="dim">Détectés et enchaînés automatiquement</td></tr>
+          <tr><td>Contrôle avant envoi</td><td class="dim">Relecture visuelle, à la charge de l'opérateur</td><td class="dim">Même exigence — l'application n'envoie jamais à sa place</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="comparaison">
+    <div class="block-head"><span class="block-num">05</span><h2>Comparaison</h2></div>
+    <p class="block-desc">DataToForm occupe une place précise entre la saisie manuelle et l'automatisation intégrale.</p>
+    <div class="compare-steps">
+      <span class="compare-chip">Copier-coller manuel</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip">Macro Excel / script RPA classique</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip mid">DataToForm</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip">Bot 100% autonome</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Dimension</th><th>Copier-coller manuel</th><th>Macro / RPA classique</th><th>DataToForm</th><th>Bot 100% autonome</th></tr></thead>
+        <tbody>
+          <tr><td>Mapping colonnes → champs</td><td class="dim">Fait de tête, à chaque ligne</td><td class="dim">Codé en dur, cassé au moindre changement de formulaire</td><td class="hl">Suggéré par IA, validé une fois par un humain</td><td class="dim">Automatique, sans validation</td></tr>
+          <tr><td>Nécessite une API</td><td class="dim">Non</td><td class="dim">Non, mais scripts fragiles</td><td class="hl">Non — fonctionne sur tout formulaire HTTPS</td><td class="dim">Non</td></tr>
+          <tr><td>Formulaire derrière connexion</td><td class="dim">Connexion normale</td><td class="dim">Identifiants stockés dans le script</td><td class="hl">L'utilisateur se connecte lui-même, rien n'est stocké</td><td class="dim">Identifiants automatisés</td></tr>
+          <tr><td>Soumission du formulaire</td><td class="dim">Manuelle</td><td class="dim">Souvent automatisée</td><td class="hl">Toujours manuelle, par conception</td><td class="dim">Automatique</td></tr>
+          <tr><td>Coût par ligne traitée</td><td class="dim">Temps humain uniquement</td><td class="dim">Développement + maintenance du script</td><td class="hl">Gratuit avec le LLM local par défaut</td><td class="dim">Variable selon plateforme</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="block-desc" style="margin-top:1rem; font-size:0.85rem;">
+      Un script RPA « classique » code en dur les sélecteurs CSS du formulaire cible : il casse dès que la
+      page change. DataToForm redétecte les champs à chaque session, et le mapping reste sous le contrôle
+      de l'utilisateur — pas un script fragile qu'il faut réécrire à chaque mise à jour du site cible.
+    </p>
+  </section>
+
+  <section class="block" id="validation">
+    <div class="block-head"><span class="block-num">06</span><h2>Pourquoi une validation humaine plutôt qu'un bot autonome ?</h2></div>
+    <p class="block-desc">
+      Beaucoup d'outils d'automatisation de formulaires promettent un remplissage — et un envoi — totalement
+      autonomes. DataToForm fait un choix différent, volontairement : l'IA propose, l'utilisateur valide et
+      envoie.
+    </p>
+    <div class="framing">
+      <div class="framing-card bad">
+        <div class="label">Bot qui remplit et soumet seul</div>
+        <ul>
+          <li>Une erreur de mapping se propage à toutes les lignes avant d'être repérée</li>
+          <li>Un formulaire soumis à tort peut être irréversible (paiement, inscription, dossier officiel)</li>
+          <li>Aucun point de contrôle humain avant l'envoi</li>
+          <li>La confiance du client dans l'outil dépend d'une exécution parfaite, sans marge d'erreur</li>
+        </ul>
+      </div>
+      <div class="framing-card good">
+        <div class="label">DataToForm</div>
+        <ul>
+          <li>Le mapping est validé champ par champ avant le premier remplissage réel</li>
+          <li>Chaque ligne remplie est relue par l'utilisateur avant l'envoi</li>
+          <li>La soumission reste un geste volontaire, à chaque ligne</li>
+          <li><code>/api/fill-current-row</code> n'accepte aucun sélecteur de soumission, par conception — l'automatisation totale du clic « Envoyer » n'est pas une option de configuration, elle est absente du code</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="limites">
+    <div class="block-head"><span class="block-num">07</span><h2>Garanties &amp; limites actuelles</h2></div>
+    <p class="block-desc">Ce que l'application garantit, et ce qu'elle ne fait pas — pour évaluer le fit sans surprise.</p>
+    <div class="callout">
+      <strong>Garanties par conception :</strong>
+      <ul>
+        <li>Le fichier Excel est parsé en mémoire, jamais écrit sur disque ni envoyé à un tiers</li>
+        <li>Seuls les noms de colonnes et les labels de champs sont envoyés au LLM — jamais le contenu réel des lignes</li>
+        <li>Le formulaire n'est jamais soumis automatiquement, à aucune étape</li>
+        <li>Le LLM local (Ollama) est utilisé par défaut, sans coût variable ni sortie de données</li>
+      </ul>
+    </div>
+    <div class="table-wrap" style="margin-top:1rem;">
+      <table>
+        <thead><tr><th>Limite actuelle</th><th>Détail</th></tr></thead>
+        <tbody>
+          <tr><td>Une ligne en version gratuite</td><td class="dim">Seule la première ligne du fichier est remplie sans compte payant</td></tr>
+          <tr><td>Rate limit LLM partagé</td><td class="dim">20 appels/minute par défaut, tous appels confondus, pour éviter une dérive de coût sur une clé payante</td></tr>
+          <tr><td>Formulaires visibles uniquement</td><td class="dim">L'inspection porte sur les champs affichés à l'écran, pas sur des champs cachés dynamiquement</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="evolutions">
+    <div class="block-head"><span class="block-num">08</span><h2>Évolutions possibles</h2></div>
+    <p class="block-desc">Le socle actuel est pensé pour grandir dans ces directions.</p>
+    <div class="evolutions-grid">
+      <div class="evo-item"><span class="evo-dot"></span>Mapping réutilisable d'une session à l'autre pour un même formulaire cible</div>
+      <div class="evo-item"><span class="evo-dot"></span>Connecteurs directs vers les ERP/CRM les plus courants, en complément du remplissage par navigateur</div>
+      <div class="evo-item"><span class="evo-dot"></span>Ingestion de PDF et de documents Word comme source de données, en plus d'Excel et CSV</div>
+      <div class="evo-item"><span class="evo-dot"></span>Mode 1-1 étendu : une URL différente par ligne pour les mises à jour de fiches existantes</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>DataToForm — Excel vers n'importe quel formulaire web</span>
+    <span>Généré le 2026-09-01 · <a href="architecture.html">Architecture technique complète</a></span>
+  </footer>
+
+</div>
 </body>
 </html>

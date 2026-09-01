@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataToForm — Architecture Technique v2.0</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: #f1f5f9;
+  padding: 36px 24px 48px;
+  color: #0f172a;
+  min-height: 100vh;
+}
+
+.card {
+  width: 100%;
+  max-width: 1020px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #dde1e8;
+  border-radius: 14px;
+  box-shadow: 0 2px 20px rgba(15,23,42,0.07);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.card-header {
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid #e8ebf0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+}
+.card-title em { font-style: normal; color: #4f46e5; }
+.card-tagline {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 4px;
+  font-style: italic;
+}
+.card-meta {
+  font-family: ui-monospace, monospace;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.7;
+  text-align: right;
+  flex-shrink: 0;
+}
+.card-author {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+.version-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #475569;
+  background: #e2e8f0;
+  border-radius: 3px;
+  padding: 1px 6px;
+  margin-right: 4px;
+}
+
+/* ── AI callout banner ── */
+.ai-banner {
+  background: linear-gradient(90deg, #f0fdf4 0%, #dcfce7 100%);
+  border-bottom: 1px solid #bbf7d0;
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ai-banner-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.ai-banner-text {
+  font-size: 0.75rem;
+  color: #14532d;
+  font-weight: 600;
+}
+.ai-banner-text strong { color: #166534; }
+.ai-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #16a34a;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ── Main diagram ── */
+.diagram {
+  display: grid;
+  grid-template-columns: 140px 32px 1fr 32px 150px;
+  align-items: stretch;
+  padding: 20px 18px 16px;
+  gap: 0;
+  min-height: 380px;
+}
+
+/* ── Generic zone ── */
+.zone {
+  border-radius: 9px;
+  padding: 13px 13px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.zone-eyebrow {
+  font-size: 0.56rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+}
+.zone-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.zone-desc {
+  font-size: 0.69rem;
+  line-height: 1.45;
+  flex: 1;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+.chip {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.59rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ── Zone colours ── */
+.z-input  { background: #fff7ed; border: 1.5px solid #fb923c; }
+.z-input .zone-eyebrow { color: #9a3412; }
+.z-input .zone-title   { color: #7c2d12; }
+.z-input .zone-desc    { color: #92400e; }
+.z-input .chip         { background: #ffedd5; color: #7c2d12; }
+.z-input .divider      { border: none; border-top: 1px solid #fed7aa; margin: 4px 0; }
+
+.z-client { background: #eff6ff; border: 1.5px solid #60a5fa; }
+.z-client .zone-eyebrow { color: #1e40af; }
+.z-client .zone-title   { color: #1e3a8a; }
+.z-client .zone-desc    { color: #1d4ed8; }
+.z-client .chip         { background: #dbeafe; color: #1e3a8a; }
+
+.z-server { background: #f5f3ff; border: 1.5px solid #a78bfa; }
+.z-server .zone-eyebrow { color: #5b21b6; }
+.z-server .zone-title   { color: #4c1d95; }
+.z-server .zone-desc    { color: #6d28d9; }
+.z-server .chip         { background: #ede9fe; color: #4c1d95; }
+
+.z-playwright { background: #fdf4ff; border: 1.5px solid #d946ef; }
+.z-playwright .zone-eyebrow { color: #86198f; }
+.z-playwright .zone-title   { color: #701a75; }
+.z-playwright .zone-desc    { color: #a21caf; }
+.z-playwright .chip         { background: #fae8ff; color: #701a75; }
+
+.z-ai  { background: #f0fdf4; border: 2px solid #4ade80; }
+.z-ai .zone-eyebrow { color: #15803d; }
+.z-ai .zone-title   { color: #14532d; }
+.z-ai .zone-desc    { color: #166534; }
+.z-ai .chip         { background: #dcfce7; color: #14532d; }
+
+.z-output { background: #f8fafc; border: 1.5px solid #94a3b8; }
+.z-output .zone-eyebrow { color: #475569; }
+.z-output .zone-title   { color: #1e293b; }
+.z-output .zone-desc    { color: #475569; }
+.z-output .chip         { background: #e2e8f0; color: #334155; }
+
+/* ── Arrows ── */
+.arrow-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 2px;
+}
+.arrow-label {
+  font-family: ui-monospace, monospace;
+  font-size: 0.5rem;
+  color: #94a3b8;
+  text-align: center;
+  writing-mode: vertical-lr;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+.arrow-shaft {
+  flex: 1;
+  width: 1.5px;
+  background: #94a3b8;
+  min-height: 60px;
+}
+.arrow-tip {
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #94a3b8;
+}
+
+/* ── System column ── */
+.system-col {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 0 10px;
+}
+.sys-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+.connector {
+  font-size: 0.54rem;
+  font-family: ui-monospace, monospace;
+  color: #94a3b8;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  border-top: 1px dashed #dde1e8;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+/* ── AI section (2 steps) ── */
+.ai-section {
+  border: 2px solid #4ade80;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f0fdf4;
+}
+.ai-section-header {
+  background: #16a34a;
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-section-header-text {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.ai-section-header-sub {
+  font-size: 0.58rem;
+  color: #bbf7d0;
+  margin-left: auto;
+}
+.ai-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #bbf7d0;
+}
+.ai-step {
+  background: #f0fdf4;
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ai-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: #16a34a;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.ai-step-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ai-step-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #14532d;
+  line-height: 1.2;
+}
+.ai-step-badge {
+  font-size: 0.54rem;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 3px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+.ai-step-desc {
+  font-size: 0.67rem;
+  color: #166534;
+  line-height: 1.4;
+}
+.ai-io {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+.ai-io-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 0.6rem;
+  line-height: 1.3;
+}
+.ai-io-label {
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  color: #15803d;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ai-io-val {
+  color: #166534;
+}
+
+/* ── LLM providers ── */
+.llm-providers {
+  background: #dcfce7;
+  border-top: 1px solid #bbf7d0;
+  padding: 7px 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.llm-label {
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #15803d;
+  white-space: nowrap;
+}
+.llm-chip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.llm-chip.local { background: #16a34a; color: #fff; }
+.llm-chip.api   { background: #dbeafe; color: #1e3a8a; }
+.llm-sep { color: #86efac; font-size: 0.7rem; }
+
+/* ── Footer ── */
+.card-footer {
+  border-top: 1px solid #e8ebf0;
+  padding: 11px 28px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.footer-label {
+  font-size: 0.57rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+.footer-chip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.61rem;
+  padding: 2px 7px;
+  background: #e8ebf0;
+  color: #334155;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.footer-dot { color: #cbd5e1; font-size: 0.8rem; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div>
+      <div class="card-title"><em>DataToForm</em> — Architecture Technique</div>
+      <div class="card-tagline">Remplissage automatique de formulaires web à partir de fichiers Excel, piloté par IA</div>
+    </div>
+    <div class="card-meta">
+      <div class="card-author">Arnaud BRETON</div>
+      Full-stack · Node.js · Playwright · LLM<br>
+      <span class="version-badge">v2.0</span>2026
+    </div>
+  </div>
+
+  <!-- AI callout banner -->
+  <div class="ai-banner">
+    <div class="ai-banner-icon">🤖</div>
+    <div class="ai-banner-text">
+      L'IA intervient à <strong>2 étapes précises</strong> du flux —
+    </div>
+    <span class="ai-step-pill">① Extraction Excel intelligente</span>
+    <span class="ai-step-pill">② Mapping colonnes ↔ champs</span>
+    <div class="ai-banner-text" style="margin-left:4px;">
+      — uniquement sur les <strong>noms de colonnes et labels</strong>, jamais sur les données réelles.
+    </div>
+  </div>
+
+  <!-- Diagram -->
+  <div class="diagram">
+
+    <!-- Input -->
+    <div class="zone z-input">
+      <div class="zone-eyebrow">Données d'entrée</div>
+      <div class="zone-title">Excel / CSV</div>
+      <div class="zone-desc">Parsé en mémoire, jamais stocké ni envoyé sur disque</div>
+      <div class="chips">
+        <span class="chip">SheetJS</span>
+        <span class="chip">.xlsx</span>
+        <span class="chip">.csv</span>
+      </div>
+      <hr class="divider">
+      <div class="zone-title" style="font-size:0.78rem;">URL Formulaire</div>
+      <div class="zone-desc" style="font-size:0.66rem;">HTTPS uniquement · validation client</div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="arrow-col">
+      <div class="arrow-label">upload + URL</div>
+      <div class="arrow-shaft"></div>
+      <div class="arrow-tip"></div>
+    </div>
+
+    <!-- System -->
+    <div class="system-col">
+
+      <div class="sys-top">
+        <!-- Client -->
+        <div class="zone z-client">
+          <div class="zone-eyebrow">Client · Navigateur</div>
+          <div class="zone-title">Interface Web</div>
+          <div class="zone-desc">Wizard multi-étapes, mapping interactif, stream formulaire temps réel</div>
+          <div class="chips">
+            <span class="chip">Vanilla JS</span>
+            <span class="chip">Canvas</span>
+            <span class="chip">WebSocket</span>
+            <span class="chip">Web Audio</span>
+            <span class="chip">i18n fr/en/es</span>
+            <span class="chip">PostHog</span>
+          </div>
+          <div class="connector">↕ REST API · WebSocket</div>
+        </div>
+
+        <!-- Server -->
+        <div class="zone z-server">
+          <div class="zone-eyebrow">Serveur · Node.js ESM</div>
+          <div class="zone-title">Orchestration</div>
+          <div class="zone-desc">Sessions isolées en mémoire, gestion du cycle de vie Playwright, rate-limiting LLM</div>
+          <div class="chips">
+            <span class="chip">Express.js</span>
+            <span class="chip">WebSocket server</span>
+            <span class="chip">multer</span>
+            <span class="chip">rate-limit</span>
+          </div>
+          <div class="connector">↓ Playwright API</div>
+        </div>
+      </div>
+
+      <!-- AI section -->
+      <div class="ai-section">
+        <div class="ai-section-header">
+          <div class="ai-section-header-text">🤖 Moteur IA — 2 appels LLM</div>
+          <div class="ai-section-header-sub">source interchangeable · lib/llm.js</div>
+        </div>
+        <div class="ai-steps">
+
+          <!-- Step 1 -->
+          <div class="ai-step">
+            <div class="ai-step-header">
+              <div class="ai-step-num">1</div>
+              <div>
+                <div class="ai-step-title">Extraction Excel intelligente</div>
+                <span class="ai-step-badge">Si document complexe</span>
+              </div>
+            </div>
+            <div class="ai-step-desc">Détecte les tableaux dans les documents non tabulaires (plans de charge, rapports…) et extrait les données structurées.</div>
+            <div class="ai-io">
+              <div class="ai-io-row">
+                <span class="ai-io-label">IN</span>
+                <span class="ai-io-val">Texte brut du fichier Excel (rawText)</span>
+              </div>
+              <div class="ai-io-row">
+                <span class="ai-io-label">OUT</span>
+                <span class="ai-io-val">Headers + lignes structurés en JSON</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="ai-step">
+            <div class="ai-step-header">
+              <div class="ai-step-num">2</div>
+              <div>
+                <div class="ai-step-title">Mapping colonnes ↔ champs</div>
+                <span class="ai-step-badge">Toujours · validé humain</span>
+              </div>
+            </div>
+            <div class="ai-step-desc">Fait correspondre sémantiquement chaque colonne Excel à un champ du formulaire, avec score de confiance. L'utilisateur valide avant tout remplissage.</div>
+            <div class="ai-io">
+              <div class="ai-io-row">
+                <span class="ai-io-label">IN</span>
+                <span class="ai-io-val">Noms de colonnes + labels des champs</span>
+              </div>
+              <div class="ai-io-row">
+                <span class="ai-io-label">OUT</span>
+                <span class="ai-io-val">Mapping JSON + score de confiance</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="llm-providers">
+          <span class="llm-label">Providers</span>
+          <span class="llm-chip local">Ollama local</span>
+          <span class="llm-sep">·</span>
+          <span class="llm-chip api">HuggingFace</span>
+          <span class="llm-chip api">Anthropic</span>
+          <span class="llm-chip api">OpenAI</span>
+          <span class="llm-sep">·</span>
+          <span style="font-size:0.6rem;color:#15803d;">Rate-limit partagé · 20 req/min</span>
+        </div>
+      </div>
+
+      <!-- Playwright -->
+      <div class="zone z-playwright">
+        <div class="zone-eyebrow">Navigateur piloté · Playwright</div>
+        <div class="zone-title">Inspection + Remplissage</div>
+        <div class="zone-desc">Ouvre l'URL réelle dans Chromium, inspecte les champs visibles (text, select, checkbox, radio, cascade), remplit ligne par ligne. Screencast CDP → Canvas client.</div>
+        <div class="chips">
+          <span class="chip">Chromium</span>
+          <span class="chip">DOM injection</span>
+          <span class="chip">CDP screencast</span>
+          <span class="chip">select cascade</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="arrow-col">
+      <div class="arrow-label">DOM fill · jamais submit</div>
+      <div class="arrow-shaft"></div>
+      <div class="arrow-tip"></div>
+    </div>
+
+    <!-- Output -->
+    <div class="zone z-output">
+      <div class="zone-eyebrow">Cible</div>
+      <div class="zone-title">Formulaire web</div>
+      <div class="zone-desc">N'importe quel formulaire HTTPS, sans API requise. Rendu live via CDP screencast.</div>
+      <div class="chips">
+        <span class="chip">Tout formulaire HTTPS</span>
+        <span class="chip">Sans API</span>
+      </div>
+      <div style="margin-top:auto;padding-top:10px;border-top:1px solid #e2e8f0;">
+        <div style="font-size:0.64rem;color:#64748b;line-height:1.5;">Soumission toujours<br><strong style="color:#0f172a;font-size:0.75rem;">manuelle</strong><br>jamais automatique</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer">
+    <span class="footer-label">Stack</span>
+    <span class="footer-chip">Node.js ESM</span>
+    <span class="footer-chip">Express.js</span>
+    <span class="footer-chip">Playwright</span>
+    <span class="footer-chip">Chrome DevTools Protocol</span>
+    <span class="footer-chip">WebSocket</span>
+    <span class="footer-dot">·</span>
+    <span class="footer-chip">SheetJS</span>
+    <span class="footer-chip">Vanilla JS</span>
+    <span class="footer-chip">HTML5 Canvas</span>
+    <span class="footer-dot">·</span>
+    <span class="footer-chip">LLM local / API</span>
+    <span class="footer-chip">Prompt engineering</span>
+    <span class="footer-dot">·</span>
+    <span class="footer-chip">PostHog</span>
+    <span class="footer-chip">GTM</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<title>DataToForm — Plan de Tracking</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --accent: #3b82f6;
+
+    --cat-upload: #3b82f6;
+    --cat-inspect: #8b5cf6;
+    --cat-mapping: #f59e0b;
+    --cat-fill: #10b981;
+    --cat-paywall: #ef4444;
+
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #0f172a;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f172a; --surface: #1e293b; --surface2: #0f172a;
+    --text: #f1f5f9; --text-muted: #94a3b8; --border: #334155;
+  }
+  :root[data-theme="light"] {
+    --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9;
+    --text: #0f172a; --text-muted: #64748b; --border: #e2e8f0;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 48px 20px 96px;
+  }
+
+  .page { max-width: 820px; margin: 0 auto; }
+
+  /* Header */
+  .doc-header { margin-bottom: 52px; }
+  .doc-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .doc-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .doc-intro {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* Journey strip */
+  .journey {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 36px 0 52px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .journey-step {
+    flex: 1;
+    min-width: 100px;
+    padding: 14px 16px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .journey-step:last-child { border-right: none; }
+  .journey-step .dot {
+    display: block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin: 0 auto 6px;
+  }
+  .journey-step.upload .dot { background: var(--cat-upload); }
+  .journey-step.inspect .dot { background: var(--cat-inspect); }
+  .journey-step.mapping .dot { background: var(--cat-mapping); }
+  .journey-step.fill .dot { background: var(--cat-fill); }
+  .journey-step.paywall .dot { background: var(--cat-paywall); }
+  .journey-step .label { color: var(--text); }
+  .journey-step .count {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 3px;
+  }
+
+  /* Section */
+  .section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    margin-top: 52px;
+  }
+
+  /* Global props */
+  .global-props {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .global-prop {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 0;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .global-prop:last-child { border-bottom: none; }
+  .prop-key {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    padding-top: 2px;
+  }
+  .prop-desc { font-size: 0.88rem; color: var(--text-muted); }
+
+  /* Event cards */
+  .events { display: flex; flex-direction: column; gap: 18px; }
+
+  .event-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--cat-upload);
+    border-radius: 0 10px 10px 0;
+    overflow: hidden;
+  }
+  .event-card.upload  { border-left-color: var(--cat-upload); }
+  .event-card.inspect { border-left-color: var(--cat-inspect); }
+  .event-card.mapping { border-left-color: var(--cat-mapping); }
+  .event-card.fill    { border-left-color: var(--cat-fill); }
+  .event-card.paywall { border-left-color: var(--cat-paywall); }
+
+  .event-head {
+    padding: 18px 20px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .event-name {
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+
+  .stage-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .upload  .stage-badge { background: #dbeafe; color: #1d4ed8; }
+  .inspect .stage-badge { background: #ede9fe; color: #6d28d9; }
+  .mapping .stage-badge { background: #fef3c7; color: #92400e; }
+  .fill    .stage-badge { background: #d1fae5; color: #065f46; }
+  .paywall .stage-badge { background: #fee2e2; color: #991b1b; }
+
+  @media (prefers-color-scheme: dark) {
+    .upload  .stage-badge { background: #1e3a5f; color: #93c5fd; }
+    .inspect .stage-badge { background: #2e1065; color: #c4b5fd; }
+    .mapping .stage-badge { background: #451a03; color: #fcd34d; }
+    .fill    .stage-badge { background: #064e3b; color: #6ee7b7; }
+    .paywall .stage-badge { background: #450a0a; color: #fca5a5; }
+  }
+  :root[data-theme="dark"] .upload  .stage-badge { background: #1e3a5f; color: #93c5fd; }
+  :root[data-theme="dark"] .inspect .stage-badge { background: #2e1065; color: #c4b5fd; }
+  :root[data-theme="dark"] .mapping .stage-badge { background: #451a03; color: #fcd34d; }
+  :root[data-theme="dark"] .fill    .stage-badge { background: #064e3b; color: #6ee7b7; }
+  :root[data-theme="dark"] .paywall .stage-badge { background: #450a0a; color: #fca5a5; }
+  :root[data-theme="light"] .upload  .stage-badge { background: #dbeafe; color: #1d4ed8; }
+  :root[data-theme="light"] .inspect .stage-badge { background: #ede9fe; color: #6d28d9; }
+  :root[data-theme="light"] .mapping .stage-badge { background: #fef3c7; color: #92400e; }
+  :root[data-theme="light"] .fill    .stage-badge { background: #d1fae5; color: #065f46; }
+  :root[data-theme="light"] .paywall .stage-badge { background: #fee2e2; color: #991b1b; }
+
+  .event-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    padding: 0 20px 16px;
+    line-height: 1.6;
+  }
+
+  .when-fires {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    padding: 0 20px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+  }
+  .when-fires strong { color: var(--text); font-weight: 600; flex-shrink: 0; }
+
+  .props-table {
+    width: 100%;
+    border-top: 1px solid var(--border);
+    border-collapse: collapse;
+    font-size: 0.84rem;
+    overflow-x: auto;
+    display: block;
+  }
+  .props-table th {
+    text-align: left;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 20px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .props-table td {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .props-table tr:last-child td { border-bottom: none; }
+  .props-table td:first-child {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    white-space: nowrap;
+    width: 200px;
+  }
+  .props-table td:last-child { color: var(--text-muted); }
+
+  /* Priority callout */
+  .priority-note {
+    margin: 0 20px 16px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #92400e;
+    line-height: 1.5;
+  }
+  @media (prefers-color-scheme: dark) {
+    .priority-note { background: #431407; border-color: #7c2d12; color: #fdba74; }
+  }
+  :root[data-theme="dark"] .priority-note { background: #431407; border-color: #7c2d12; color: #fdba74; }
+  :root[data-theme="light"] .priority-note { background: #fff7ed; border-color: #fed7aa; color: #92400e; }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .doc-footer a { color: var(--accent); text-decoration: none; }
+  .doc-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 560px) {
+    .doc-title { font-size: 1.5rem; }
+    .journey { gap: 0; }
+    .journey-step { min-width: 80px; padding: 12px 10px; font-size: 0.72rem; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="doc-header">
+    <p class="doc-eyebrow">DataToForm · Analytics</p>
+    <h1 class="doc-title">Plan de Tracking</h1>
+    <p class="doc-intro">
+      7 events PostHog (via GTM) capturent les métriques clés du parcours utilisateur —
+      sans jamais collecter le contenu des fichiers, les valeurs des champs, ni de données personnelles.
+      La configuration est dans <code style="font-family:var(--mono);font-size:0.9em">public/tracking.json</code>.
+    </p>
+  </header>
+
+  <!-- Journey -->
+  <nav class="journey" aria-label="Étapes instrumentées">
+    <div class="journey-step upload">
+      <span class="dot"></span>
+      <span class="label">Upload</span>
+      <span class="count">2 events</span>
+    </div>
+    <div class="journey-step inspect">
+      <span class="dot"></span>
+      <span class="label">Inspection</span>
+      <span class="count">1 event</span>
+    </div>
+    <div class="journey-step mapping">
+      <span class="dot"></span>
+      <span class="label">Mapping</span>
+      <span class="count">1 event</span>
+    </div>
+    <div class="journey-step fill">
+      <span class="dot"></span>
+      <span class="label">Remplissage</span>
+      <span class="count">2 events</span>
+    </div>
+    <div class="journey-step paywall">
+      <span class="dot"></span>
+      <span class="label">Limite</span>
+      <span class="count">1 event</span>
+    </div>
+  </nav>
+
+  <!-- Global props -->
+  <h2 class="section-title">Propriétés globales — présentes sur tous les events</h2>
+  <div class="global-props">
+    <div class="global-prop">
+      <span class="prop-key">session_id</span>
+      <span class="prop-desc">Identifiant anonyme généré par <code style="font-size:0.85em;font-family:var(--mono)">crypto.randomUUID()</code>, stocké en <code style="font-size:0.85em;font-family:var(--mono)">sessionStorage</code>. Dure le temps de l'onglet. Pas de compte requis — permet de relier les events d'une même session.</span>
+    </div>
+    <div class="global-prop">
+      <span class="prop-key">locale</span>
+      <span class="prop-desc">Langue sélectionnée dans l'interface : <code style="font-family:var(--mono);font-size:0.85em">fr</code> | <code style="font-family:var(--mono);font-size:0.85em">en</code> | <code style="font-family:var(--mono);font-size:0.85em">es</code>. Détectée depuis l'URL ou le navigateur.</span>
+    </div>
+  </div>
+
+  <!-- Events -->
+  <h2 class="section-title">Events</h2>
+  <div class="events">
+
+    <!-- file_uploaded -->
+    <article class="event-card upload">
+      <div class="event-head">
+        <span class="event-name">file_uploaded</span>
+        <span class="stage-badge">Upload</span>
+      </div>
+      <p class="event-desc">Fichier Excel ou CSV parsé avec succès par le serveur. Déclenché dès que SheetJS renvoie une structure exploitable — avant que l'utilisateur clique sur Analyser.</p>
+      <div class="when-fires"><strong>Quand :</strong> après la réponse <code style="font-family:var(--mono);font-size:0.9em">/api/parse-excel</code> — succès uniquement.</div>
+      <div class="overflow-x: auto">
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>column_count</td><td>Nombre de colonnes réelles détectées (hors colonnes vides __EMPTY). Indique la complexité du fichier.</td></tr>
+            <tr><td>is_complex</td><td><code style="font-family:var(--mono);font-size:0.9em">true</code> si plus de 50 % des colonnes SheetJS sont <code style="font-family:var(--mono);font-size:0.9em">__EMPTY_N</code> — document non tabulaire (formulaire, plan de charge…).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <!-- form_url_submitted -->
+    <article class="event-card upload">
+      <div class="event-head">
+        <span class="event-name">form_url_submitted</span>
+        <span class="stage-badge">Upload</span>
+      </div>
+      <p class="event-desc">URL du formulaire cible soumise et validée. Mesure la diversité des sites cibles et les domaines les plus fréquents.</p>
+      <div class="when-fires"><strong>Quand :</strong> au clic sur "Analyser le formulaire avec l'IA", après validation côté client que l'URL est en <code style="font-family:var(--mono);font-size:0.9em">https://</code>.</div>
+      <table class="props-table">
+        <thead><tr><th>Prop</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>form_domain</td><td>Hostname uniquement (ex. <code style="font-family:var(--mono);font-size:0.9em">example.com</code>). Ni path, ni query string, ni données personnelles.</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <!-- fields_detected -->
+    <article class="event-card inspect">
+      <div class="event-head">
+        <span class="event-name">fields_detected</span>
+        <span class="stage-badge">Inspection</span>
+      </div>
+      <p class="event-desc">Playwright a terminé de scanner le formulaire cible. Donne une mesure de la complexité des formulaires analysés.</p>
+      <div class="when-fires"><strong>Quand :</strong> après la réponse <code style="font-family:var(--mono);font-size:0.9em">/api/inspect-current-form</code> — succès uniquement.</div>
+      <table class="props-table">
+        <thead><tr><th>Prop</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>field_count</td><td>Nombre total de champs remplissables détectés sur la page (texte, select, checkbox, radio…).</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <!-- mapping_validated -->
+    <article class="event-card mapping">
+      <div class="event-head">
+        <span class="event-name">mapping_validated</span>
+        <span class="stage-badge">Mapping IA</span>
+      </div>
+      <p class="event-desc">L'utilisateur a confirmé le mapping colonnes → champs et lancé le pré-remplissage. <strong>Mesure directe de la qualité de l'IA de mapping</strong> : <code style="font-family:var(--mono);font-size:0.9em">ai_accepted_pct</code> proche de 100 % = l'IA est bonne, proche de 0 % = elle se trompe souvent.</p>
+      <div class="when-fires"><strong>Quand :</strong> clic sur "Lancer la prévisualisation" — que l'utilisateur soit passé par la révision champ par champ ou non.</div>
+      <table class="props-table">
+        <thead><tr><th>Prop</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>total_fields</td><td>Nombre total de champs détectés sur le formulaire.</td></tr>
+          <tr><td>mapped_fields</td><td>Champs auxquels une colonne Excel a été associée.</td></tr>
+          <tr><td>ai_accepted</td><td>Parmi les champs mappés, combien ont été gardés tels quels sans modification.</td></tr>
+          <tr><td>manually_adjusted</td><td>Champs que l'utilisateur a modifiés par rapport à la suggestion IA.</td></tr>
+          <tr><td>ai_accepted_pct</td><td>Pourcentage de champs mappés acceptés sans retouche (0–100). Indicateur clé de pertinence IA.</td></tr>
+          <tr><td>via</td><td><code style="font-family:var(--mono);font-size:0.9em">direct</code> = accepté tel quel depuis l'écran de résultat · <code style="font-family:var(--mono);font-size:0.9em">field_review</code> = passé par la révision champ par champ.</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <!-- row_prefilled_success -->
+    <article class="event-card fill">
+      <div class="event-head">
+        <span class="event-name">row_prefilled_success</span>
+        <span class="stage-badge">Remplissage</span>
+      </div>
+      <p class="event-desc">Une ligne du fichier Excel a été injectée dans le formulaire sans erreur. C'est la métrique de valeur délivrée.</p>
+      <div class="when-fires"><strong>Quand :</strong> après la réponse <code style="font-family:var(--mono);font-size:0.9em">/api/start-preview</code> ou <code style="font-family:var(--mono);font-size:0.9em">/api/set-row</code> — succès uniquement.</div>
+      <table class="props-table">
+        <thead><tr><th>Prop</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>row_index</td><td>Index 0-based de la ligne remplie.</td></tr>
+          <tr><td>field_count</td><td>Nombre de champs effectivement remplis pour cette ligne.</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <!-- row_prefilled_error -->
+    <article class="event-card fill">
+      <div class="event-head">
+        <span class="event-name">row_prefilled_error</span>
+        <span class="stage-badge">Remplissage</span>
+      </div>
+      <p class="event-desc">Le pré-remplissage a échoué (sélecteur CSS introuvable, erreur Playwright, timeout…). Signal de débogage.</p>
+      <div class="when-fires"><strong>Quand :</strong> réponse <code style="font-family:var(--mono);font-size:0.9em">/api/start-preview</code> en erreur, ou exception réseau.</div>
+      <table class="props-table">
+        <thead><tr><th>Prop</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>row_index</td><td>Index 0-based de la ligne qui a échoué.</td></tr>
+          <tr><td>field_count</td><td>Nombre de champs tentés avant l'erreur.</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <!-- multi_row_limit_hit -->
+    <article class="event-card paywall">
+      <div class="event-head">
+        <span class="event-name">multi_row_limit_hit</span>
+        <span class="stage-badge">Limite free</span>
+      </div>
+      <p class="event-desc">Un utilisateur gratuit a atteint la limite de la version free. <strong>Signal d'intention d'achat le plus fort du produit</strong> — l'utilisateur a déjà réussi à remplir une ligne et veut continuer.</p>
+      <div class="priority-note">
+        ⚡ Métrique investisseur prioritaire — chaque occurrence est un utilisateur qui a vu la valeur du produit et se heurte au plafond. Corréler avec le taux de conversion vers le formulaire de contact.
+      </div>
+      <div class="when-fires"><strong>Quand :</strong> déclenchement du paywall — depuis le polling de ligne, la navigation prev/next, ou la détection d'un document complexe.</div>
+      <table class="props-table">
+        <thead><tr><th>Prop</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>trigger</td><td><code style="font-family:var(--mono);font-size:0.9em">row_limit</code> = tentative de passer à une ligne > 0 · <code style="font-family:var(--mono);font-size:0.9em">complex_doc</code> = document non tabulaire détecté à l'étape finale.</td></tr>
+          <tr><td>row_index</td><td>Index de la ligne au moment du blocage (absent si <code style="font-family:var(--mono);font-size:0.9em">trigger = complex_doc</code>).</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+  </div>
+
+  <footer class="doc-footer">
+    <span>Config source : <code style="font-family:var(--mono);font-size:0.9em">public/tracking.json</code> · Implémentation : <code style="font-family:var(--mono);font-size:0.9em">public/app.js</code></span>
+    <a href="/">← DataToForm</a>
+  </footer>
+
+</div>
