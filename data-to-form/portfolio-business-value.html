@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data To Form — Business Value | ARNAUD.BRETON</title>
+  <meta name="description" content="Data To Form — turn unstructured spreadsheets into completed web forms, business value and use cases.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 002 — SAAS FORM AUTOMATION</div>
+    <h1 class="doc-title">DATA TO FORM <span class="mono" style="color: var(--text-dim);">// BUSINESS VALUE</span></h1>
+    <p class="doc-lede">Turn your unstructured data into ready-to-submit web forms — no manual re-typing, row after row.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Local Encoder (ONNX)</span>
+      <span class="tag-chip">LLM (fallback)</span>
+      <span class="tag-chip">Playwright</span>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Problem</h2>
+      <p>
+        A recurring back-office task: take an Excel or CSV export and re-type it, row after
+        row, into a third-party web form that has no public API. It's repetitive, slow, and
+        every manual entry is a chance for a typo.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Solution</h2>
+      <p>
+        Data To Form drives a real browser window (via Playwright) connected to the live
+        form. It reads the spreadsheet once, matches each column to the right field with a
+        confidence score, and then fills the form automatically for every remaining row —
+        matching happens once, the filling is what repeats.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Why It's Safe to Trust</h2>
+      <ul class="doc-check-list">
+        <li>Works on any HTTPS form — no API integration required.</li>
+        <li>The source spreadsheet is never stored on disk.</li>
+        <li>Matching runs locally first — an LLM is only called as a last resort, on the
+        columns nothing else could resolve.</li>
+        <li>Handles text, select, multi-select, checkbox and radio fields, including
+        cascading selects, without prior configuration.</li>
+      </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Who It's For</h2>
+      <p>
+        Teams doing repetitive data entry into portals, back-office tools or CRMs that don't
+        expose an official API — anywhere a spreadsheet needs to become form submissions,
+        reliably and without a rebuild every time a form's layout changes.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="portfolio-architecture.html" class="btn btn-secondary">[ TECHNICAL ARCHITECTURE ]</a>
+      <a href="https://github.com/arnoweb/data-to-form" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>

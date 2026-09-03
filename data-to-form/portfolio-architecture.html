@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data To Form — Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="Data To Form — the 4-level column-matching cascade and technical stack.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 002 — SAAS FORM AUTOMATION</div>
+    <h1 class="doc-title">DATA TO FORM <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
+    <p class="doc-lede">The LLM is only the 4th and last level of matching — cheaper, faster methods are tried first.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Node.js</span>
+      <span class="tag-chip">Playwright / CDP</span>
+      <span class="tag-chip">SheetJS</span>
+      <span class="tag-chip">SQLite</span>
+      <span class="tag-chip">ONNX Runtime</span>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">4-Level Matching Cascade</h2>
+      <p>Each spreadsheet column walks through these levels in order — as soon as one answers with enough confidence, the rest are skipped.</p>
+      <div class="doc-steps">
+        <div class="doc-step">
+          <div class="doc-step-num">01</div>
+          <div>
+            <div class="doc-step-title">Synonyms</div>
+            <div class="doc-step-desc">A dictionary of roughly 190 known labels (FR/EN/ES) instantly
+            recognizes common columns — name, email, address, date of birth, and similar.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">02</div>
+          <div>
+            <div class="doc-step-title">Memory</div>
+            <div class="doc-step-desc">Matches already validated for a given form — by a user, or by
+            a previous LLM call — are cached and reused automatically the next time (threshold ≥ 0.92,
+            source: cache / user).</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">03</div>
+          <div>
+            <div class="doc-step-title">Local encoder (ONNX)</div>
+            <div class="doc-step-desc">A quantized <span class="mono">Xenova/all-MiniLM-L6-v2</span>
+            model (~23MB) runs in-process — no network call — and ranks candidates by cosine
+            similarity between the column's embedding and each form field's embedding.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">04</div>
+          <div>
+            <div class="doc-step-title">LLM — last resort</div>
+            <div class="doc-step-desc">Rare: only the columns still unresolved after the first three
+            levels are sent to an LLM (local model, or Anthropic / OpenAI / Hugging Face with your
+            own key).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Runtime</h2>
+      <p>
+        A real Chrome window, driven via the Chrome DevTools Protocol through Playwright,
+        connects to the live form — the connection is made by hand once; what repeats after
+        that is the automatic filling, not the matching. The source file (parsed with
+        SheetJS) is never written to disk; validated mappings persist in SQLite
+        (better-sqlite3) for reuse across runs.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="portfolio-business-value.html" class="btn btn-secondary">[ BUSINESS VALUE ]</a>
+      <a href="https://github.com/arnoweb/data-to-form" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>

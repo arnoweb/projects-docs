@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Likyly — Business Value | ARNAUD.BRETON</title>
+  <meta name="description" content="Likyly — SaaS recommendation system: business value, use cases and why it avoids a per-request LLM.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 001 — SAAS RECOMMENDATION SYSTEM</div>
+    <h1 class="doc-title">LIKYLY <span class="mono" style="color: var(--text-dim);">// BUSINESS VALUE</span></h1>
+    <p class="doc-lede">Help your users discover what they'll love next — recommendations that adapt to real behavior, not a static rule sheet.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Embeddings</span>
+      <span class="tag-chip">Machine Learning (ALS)</span>
+      <span class="tag-chip">Recommendation Systems</span>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Problem</h2>
+      <p>
+        Most catalogs still show the same "related items" to every visitor — a rule set that
+        is configured once and never updated with what people actually click, view or buy.
+        A new visitor, a new product, or a returning user with a full basket all see the
+        exact same shelf.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Solution</h2>
+      <p>
+        Likyly combines three recommendation strategies into one hybrid engine:
+      </p>
+      <ul class="doc-check-list">
+        <li><strong>Content-based</strong> — TF-IDF plus sentence-transformer embeddings capture thematic
+        similarity from product text, computed the moment a product is ingested, so it's
+        recommendable immediately (no waiting for a retraining cycle).</li>
+        <li><strong>Collaborative</strong> — implicit ALS trained on real interactions, weighting a
+        purchase more than a view, with no fabricated ratings.</li>
+        <li><strong>Weighted hybrid</strong> — content and collaborative scores blend through a tunable
+        parameter, adjustable per request, and it works from the first pageview — with or
+        without an account.</li>
+      </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Why Not Just Call an LLM per Request?</h2>
+      <p>
+        It's tempting to ask a general-purpose LLM "what should this user see next?" on every
+        request. Likyly deliberately doesn't: specialized models (TF-IDF, embeddings, ALS),
+        tracked and versioned with MLflow, are precomputed or resolve in a few tens of
+        milliseconds — free to run, fully private (self-hosted), and deterministic. A generic
+        LLM call is billed per request, adds seconds of latency at e-commerce traffic scale,
+        and depends on a third-party provider for a decision that needs to be instant and
+        explainable.
+      </p>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th></th><th>Static rules</th><th>Likyly (hybrid ML)</th><th>Generic LLM per request</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Latency</td><td>Instant</td><td>Instant / tens of ms</td><td>Several seconds</td></tr>
+            <tr><td>Cost per recommendation</td><td>Free</td><td>Free (local compute)</td><td>Billed per call</td></tr>
+            <tr><td>Data privacy</td><td>Total</td><td>Total (self-hosted)</td><td>Depends on the provider</td></tr>
+            <tr><td>Adapts to behavior</td><td>No</td><td>Yes</td><td>Variable, not guaranteed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Who It's For</h2>
+      <p>
+        SaaS products, e-commerce catalogs and content platforms (products, films, articles,
+        cultural content) that want real personalization without shipping user or catalog
+        data to a third-party LLM on every request. Ships as Python, JS/TS and PHP SDKs.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="portfolio-architecture.html" class="btn btn-secondary">[ TECHNICAL ARCHITECTURE ]</a>
+      <a href="https://github.com/arnoweb/likyly-recsys" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>

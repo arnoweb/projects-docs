@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gen AI FAQ — Business Value | ARNAUD.BRETON</title>
+  <meta name="description" content="Gen AI FAQ — a bilingual FAQ that understands meaning, not just keywords. Business value and use cases.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 003 — GENERATIVE AI KNOWLEDGE ASSISTANT</div>
+    <h1 class="doc-title">GEN AI FAQ <span class="mono" style="color: var(--text-dim);">// BUSINESS VALUE</span></h1>
+    <p class="doc-lede">Give your customers instant, accurate answers around the clock — an FAQ that understands meaning, not just keywords.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Fine-tuned Encoder</span>
+      <span class="tag-chip">RAG</span>
+      <span class="tag-chip">LLM</span>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Problem</h2>
+      <p>
+        Static FAQ pages rely on the visitor typing the right keyword. A customer service
+        team fields the same repetitive questions all day, in more than one language, and a
+        badly-phrased search finds nothing even when the answer already exists.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Solution</h2>
+      <p>
+        A semantic search engine, fine-tuned specifically on the FAQ's own bilingual (FR/EN)
+        content: every answer is encoded once, each incoming question is encoded on the fly,
+        and the two are ranked by similarity — finding the right answer even when it's poorly
+        phrased, with a visible confidence score, and an optional LLM step to generate a
+        natural-language reply from the retrieved answer. When nothing matches with enough
+        confidence, it says so rather than inventing one.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Measured Value</h2>
+      <ul class="doc-check-list">
+        <li>No customer data sent to a third party for search.</li>
+        <li>Reduces repetitive support tickets — 24/7 availability.</li>
+        <li>No per-query variable cost — retrieval runs on a self-hosted encoder.</li>
+        <li>One engine covers both French and English.</li>
+        <li>Fine-tuning is measured, not assumed: MRR and Recall@1/3/5 are compared before vs.
+        after, globally and per language.</li>
+      </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Who It's For</h2>
+      <p>
+        E-commerce support (shipping, returns), ticketing platforms (exchanges, refunds,
+        access), practical-information FAQs (hours, pricing, seasonal conditions), B2B SaaS
+        self-service support, and multilingual travel/hospitality guest FAQs — anywhere
+        repetitive, well-documented questions currently reach a human first.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="portfolio-architecture.html" class="btn btn-secondary">[ TECHNICAL ARCHITECTURE ]</a>
+      <a href="https://github.com/arnoweb/gen-ai-faq" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>

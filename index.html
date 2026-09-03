@@ -68,10 +68,20 @@
       </div>
     </section>
 
+    <!-- CURRENTLY TRAINING -->
+    <section class="section" id="training">
+      <div class="section-head">
+        <span class="index">01 /</span>
+        <h2 class="section-title">CURRENTLY <span class="accent">TRAINING</span></h2>
+      </div>
+      <p class="section-sub">// SKILL TREE — ACTIVE UPGRADE IN PROGRESS</p>
+      <div id="training-panel" class="training-panel reveal" style="margin-top: 32px;"></div>
+    </section>
+
     <!-- PRIORITY PROJECTS -->
     <section class="section" id="projects">
       <div class="section-head">
-        <span class="index">01 /</span>
+        <span class="index">02 /</span>
         <h2 class="section-title">PRIORITY <span class="accent">PROJECTS</span></h2>
       </div>
       <p class="section-sub">// SELECTED MISSIONS — CLICK A CARD TO INSPECT</p>
@@ -81,7 +91,7 @@
     <!-- LAB / SIDE QUESTS -->
     <section class="section" id="lab">
       <div class="section-head">
-        <span class="index">02 /</span>
+        <span class="index">03 /</span>
         <h2 class="section-title">THE LAB <span class="accent">// SIDE QUESTS</span></h2>
       </div>
       <p class="section-sub">// PROTOTYPES, EXPERIMENTS AND OPEN SOURCE</p>
@@ -91,7 +101,7 @@
     <!-- TECH STACK -->
     <section class="section" id="stack">
       <div class="section-head">
-        <span class="index">03 /</span>
+        <span class="index">04 /</span>
         <h2 class="section-title">TECH <span class="accent">INVENTORY</span></h2>
       </div>
       <div class="terminal-panel reveal">
@@ -106,7 +116,7 @@
     <!-- CURRENT MISSION -->
     <section class="section" id="mission">
       <div class="section-head">
-        <span class="index">04 /</span>
+        <span class="index">05 /</span>
         <h2 class="section-title">CURRENT <span class="accent">MISSION</span></h2>
       </div>
       <div class="mission-panel reveal">
@@ -115,16 +125,6 @@
         <div class="progress-track"><div id="mission-progress-fill" class="progress-fill"></div></div>
         <div id="mission-progress-label" class="progress-label"></div>
       </div>
-    </section>
-
-    <!-- CURRENTLY TRAINING -->
-    <section class="section" id="training">
-      <div class="section-head">
-        <span class="index">05 /</span>
-        <h2 class="section-title">CURRENTLY <span class="accent">TRAINING</span></h2>
-      </div>
-      <p class="section-sub">// SKILL TREE — ACTIVE UPGRADE IN PROGRESS</p>
-      <div id="training-panel" class="training-panel reveal" style="margin-top: 32px;"></div>
     </section>
 
     <!-- CONNECT: GITHUB / LINKEDIN / CV -->
@@ -152,6 +152,17 @@
     <div>&copy; <span id="current-year"></span></div>
     <span class="status-pill"><span class="status-dot"></span>SYSTEM STATUS: ONLINE</span>
   </footer>
+
+  <!-- VIDEO DEMO POPUP -->
+  <div id="video-modal" class="video-modal" hidden>
+    <div class="video-modal-content">
+      <div class="video-modal-bar">
+        <span id="video-modal-title" class="video-modal-title mono"></span>
+        <button id="video-modal-close" class="video-modal-close" aria-label="Close video">[ X ]</button>
+      </div>
+      <video id="video-modal-player" class="video-modal-player" controls playsinline></video>
+    </div>
+  </div>
 
   <script src="assets/js/main.js" defer></script>
 </body>

@@ -19,10 +19,10 @@ const priorityProjects = [
     value: "Help your users discover what they'll love next.",
     description: "AI-powered recommendation engine combining content-based, collaborative and hybrid filtering.",
     status: "ACTIVE",
-    stack: ["Python", "Recommendation Systems", "API"],
-    github: "https://github.com/arnoweb/likyly-recsys",
-    docsUrl: "https://arnoweb.github.io/projects-docs/likyly-recsys/",
-    architectureUrl: "https://arnoweb.github.io/projects-docs/likyly-recsys/architecture.html"
+    stack: ["Embeddings", "Machine Learning (ALS)", "Recommendation Systems"],
+    github: "https://github.com/Likyly/likyly-recsys",
+    docsUrl: "likyly-recsys/portfolio-business-value.html",
+    architectureUrl: "likyly-recsys/portfolio-architecture.html"
   },
   {
     id: "002",
@@ -31,10 +31,11 @@ const priorityProjects = [
     value: "Turn your unstructured data into ready-to-submit web forms — no manual re-typing.",
     description: "A 4-level matching cascade (synonyms, learned memory, local semantic model, then LLM fallback) maps spreadsheet columns to form fields with confidence scoring.",
     status: "ACTIVE",
-    stack: ["Node.js", "Playwright", "LLM", "ONNX"],
-    github: "https://github.com/arnoweb/data-to-form",
-    docsUrl: "https://arnoweb.github.io/projects-docs/data-to-form/",
-    architectureUrl: "https://arnoweb.github.io/projects-docs/data-to-form/architecture.html"
+    stack: ["Local Encoder (ONNX)", "LLM (fallback)", "Node.js", "Playwright"],
+    // TODO: github.com/arnoweb/data-to-form currently 404s — confirm the real repo URL
+    github: "https://github.com/arnoweb",
+    docsUrl: "data-to-form/portfolio-business-value.html",
+    architectureUrl: "data-to-form/portfolio-architecture.html"
   },
   {
     id: "003",
@@ -43,10 +44,10 @@ const priorityProjects = [
     value: "Give your customers instant, accurate answers around the clock.",
     description: "Fine-tuned Hugging Face language models power a retrieval-driven FAQ interface.",
     status: "ACTIVE",
-    stack: ["Python", "Hugging Face", "Generative AI"],
+    stack: ["Fine-tuned Encoder", "RAG", "LLM"],
     github: "https://github.com/arnoweb/gen-ai-faq",
-    docsUrl: "https://arnoweb.github.io/projects-docs/gen-ai-faq/",
-    architectureUrl: "https://arnoweb.github.io/projects-docs/gen-ai-faq/architecture.html"
+    docsUrl: "gen-ai-faq/portfolio-business-value.html",
+    architectureUrl: "gen-ai-faq/portfolio-architecture.html"
   }
 ];
 
@@ -54,32 +55,27 @@ const priorityProjects = [
 // Source: https://github.com/arnoweb (pinned repositories)
 const labProjects = [
   {
-    id: "SSR-041",
-    name: "Kitstarter",
-    description: "Universal web app combining Laravel, React and SSR without a REST API.",
+    id: "ML-014",
+    name: "Golf & Performance",
+    description: "Linear regression case study predicting golf performance from player and course statistics.",
     status: "OPEN SOURCE",
-    github: "https://github.com/arnoweb/kitstarter-laravel-ssr-noapi"
+    github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb"
   },
   {
-    id: "ML-014",
-    name: "Linear Reg / k-NN / k-Fold",
-    description: "Machine learning implementation with k-Nearest Neighbours on the Airbnb dataset.",
-    status: "OPEN SOURCE",
-    github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold"
+    // TODO: confirm the real repository URL and description for X-Plane MCP
+    id: "MCP-027",
+    name: "X-Plane MCP",
+    description: "Model Context Protocol server to pilot X-Plane directly from an AI agent.",
+    status: "EXPERIMENTAL",
+    github: "https://github.com/arnoweb"
   },
   {
     id: "EDGE-021",
     name: "Google Coral Edge AI",
     description: "Edge AI inference scripts for the Google Coral Dev Board.",
     status: "OPEN SOURCE",
-    github: "https://github.com/arnoweb/googlecoral"
-  },
-  {
-    id: "AUTOML-032",
-    name: "AutoKeras Sandbox",
-    description: "AutoML experimentation environment.",
-    status: "OPEN SOURCE",
-    github: "https://github.com/arnoweb/autokeras-sandbox"
+    github: "https://github.com/arnoweb/googlecoral",
+    video: "assets/videos/coral-vid-test.mp4"
   }
 ];
 
@@ -124,7 +120,7 @@ function renderPriorityProjects() {
   const grid = document.getElementById("priority-projects-grid");
   if (!grid) return;
   grid.innerHTML = priorityProjects.map((p) => `
-    <article class="project-card reveal">
+    <article class="project-card reveal" data-href="${p.github}" tabindex="0" role="link" aria-label="Open ${p.name} on GitHub">
       <div class="card-top">
         <span>PROJECT ID: ${p.id}</span>
         <span class="status-badge ${statusClass(p.status)}">${p.status}</span>
@@ -137,12 +133,31 @@ function renderPriorityProjects() {
         ${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}
       </div>
       <div class="card-links">
-        <a href="${p.github}" target="_blank" rel="noopener">[ GITHUB ]</a>
-        <a href="${p.docsUrl}" target="_blank" rel="noopener">[ BUSINESS VALUE ]</a>
-        <a href="${p.architectureUrl}" target="_blank" rel="noopener">[ ARCHITECTURE ]</a>
+        <a href="${p.github}" target="_blank" rel="noopener">GITHUB</a>
+        <a href="${p.docsUrl}" target="_blank" rel="noopener">BUSINESS VALUE</a>
+        <a href="${p.architectureUrl}" target="_blank" rel="noopener">ARCHITECTURE</a>
       </div>
     </article>
   `).join("");
+}
+
+// Priority cards are clickable (open the GitHub repo) without hijacking
+// clicks on the links inside them.
+function setupClickableCards() {
+  const grid = document.getElementById("priority-projects-grid");
+  if (!grid) return;
+  grid.addEventListener("click", (e) => {
+    if (e.target.closest("a")) return;
+    const card = e.target.closest("[data-href]");
+    if (card) window.open(card.dataset.href, "_blank", "noopener");
+  });
+  grid.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const card = e.target.closest("[data-href]");
+    if (!card) return;
+    e.preventDefault();
+    window.open(card.dataset.href, "_blank", "noopener");
+  });
 }
 
 function renderLabProjects() {
@@ -155,10 +170,46 @@ function renderLabProjects() {
       <p class="lab-desc">${p.description}</p>
       <div class="lab-status">STATUS: ${p.status}</div>
       <div class="card-links" style="border-top: none; padding-top: 8px; margin-top: 8px;">
-        <a href="${p.github}" target="_blank" rel="noopener">[ GITHUB ]</a>
+        <a href="${p.github}" target="_blank" rel="noopener">GITHUB</a>
+        ${p.video ? `<a href="#" data-video="${p.video}" data-video-title="${p.name}">WATCH DEMO</a>` : ""}
       </div>
     </article>
   `).join("");
+}
+
+// Video demos open in a lightbox instead of navigating away.
+function setupVideoModal() {
+  const modal = document.getElementById("video-modal");
+  const player = document.getElementById("video-modal-player");
+  const titleEl = document.getElementById("video-modal-title");
+  const closeBtn = document.getElementById("video-modal-close");
+  if (!modal || !player) return;
+
+  const openModal = (src, title) => {
+    player.src = src;
+    if (titleEl) titleEl.textContent = title || "";
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+    player.play().catch(() => {});
+  };
+  const closeModal = () => {
+    modal.hidden = true;
+    document.body.style.overflow = "";
+    player.pause();
+    player.currentTime = 0;
+    player.src = "";
+  };
+
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-video]");
+    if (trigger) {
+      e.preventDefault();
+      openModal(trigger.dataset.video, trigger.dataset.videoTitle);
+    }
+  });
+  closeBtn && closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
 }
 
 function renderTechStack() {
@@ -312,6 +363,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMission();
   renderTraining();
   setupNavToggle();
+  setupClickableCards();
+  setupVideoModal();
   setupScrollReveal(); // cards are injected above, so reveal runs after render
   runBootSequence();
 

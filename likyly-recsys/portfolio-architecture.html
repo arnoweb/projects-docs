@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Likyly — Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="Likyly — technical architecture: content-based, collaborative and hybrid recommendation pipeline.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 001 — SAAS RECOMMENDATION SYSTEM</div>
+    <h1 class="doc-title">LIKYLY <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
+    <p class="doc-lede">A hybrid recommendation pipeline: two specialized model families, tracked and served independently, blended at request time.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Python</span>
+      <span class="tag-chip">pgvector</span>
+      <span class="tag-chip">MLflow</span>
+      <span class="tag-chip">API</span>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Pipeline</h2>
+      <div class="doc-steps">
+        <div class="doc-step">
+          <div class="doc-step-num">01</div>
+          <div>
+            <div class="doc-step-title">Content-based layer</div>
+            <div class="doc-step-desc">TF-IDF combined with sentence-transformer embeddings, stored in
+            pgvector, capture thematic similarity directly from product text — computed at
+            ingestion time, so a brand-new product is recommendable immediately.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">02</div>
+          <div>
+            <div class="doc-step-title">Collaborative layer</div>
+            <div class="doc-step-desc">Implicit ALS (Alternating Least Squares) trained on real
+            interaction signals — a purchase carries more weight than a view — with no
+            fabricated 1-5 star ratings.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">03</div>
+          <div>
+            <div class="doc-step-title">Weighted hybrid</div>
+            <div class="doc-step-desc">Content and collaborative scores combine through an alpha
+            parameter, tunable per request, so the balance can shift toward content for cold-start
+            cases or toward behavior once enough interaction data exists.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">04</div>
+          <div>
+            <div class="doc-step-title">Model governance</div>
+            <div class="doc-step-desc">MLflow tracks and versions each specialized model, so quality
+            can be monitored and rolled back over time — the same discipline applied to a
+            production ML system, not a one-off script.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">05</div>
+          <div>
+            <div class="doc-step-title">Delivery</div>
+            <div class="doc-step-desc">Precomputed or low-latency (tens of ms) recommendations are
+            exposed through Python, JS/TS and PHP SDKs, self-hosted end to end — no visitor or
+            catalog data leaves the client's infrastructure.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Cold-Start Handling</h2>
+      <p>
+        A new product becomes recommendable the moment it's ingested — through its content
+        profile and embedding, plus popularity — without waiting for a retraining cycle. The
+        collaborative layer only retrains once enough new interactions accumulate.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="portfolio-business-value.html" class="btn btn-secondary">[ BUSINESS VALUE ]</a>
+      <a href="https://github.com/arnoweb/likyly-recsys" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>
