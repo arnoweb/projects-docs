@@ -3,18 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projects Docs</title>
+  <title>ARNAUD.BRETON — Forward Deployed AI Engineer</title>
+  <meta name="description" content="Portfolio technologique d'Arnaud Breton — Forward Deployed AI Engineer spécialisé en systèmes agentic, Generative AI, LLM et Machine Learning, présenté comme une interface rétro-futuriste.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <h1>Projects Docs</h1>
-  <ul>
-    <li><a href="claude-routine-usage/">claude routine usage</a></li>
-    <li><a href="data-to-form/">data to form</a></li>
-    <li><a href="gen-ai-faq/">gen ai faq</a></li>
-    <li><a href="kitstarter-laravel-ssr-noapi/">kitstarter laravel ssr noapi</a></li>
-    <li><a href="licences-manager-for-softwares-api/">licences manager for softwares api</a></li>
-    <li><a href="web-audit-ai/">web audit ai</a></li>
-    <li><a href="xplane-touchportal-deck-plugin/">xplane touchportal deck plugin</a></li>
-  </ul>
+
+  <!-- BOOT SCREEN — skipped automatically after ~1.8s, or on click/keypress -->
+  <div id="boot-screen" class="boot-screen">
+    <div id="boot-lines"></div>
+    <div class="boot-bar-track"><div id="boot-bar-fill" class="boot-bar-fill"></div></div>
+    <div class="boot-skip">PRESS ANY KEY TO SKIP</div>
+  </div>
+
+  <div class="scanline-overlay" aria-hidden="true"></div>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-brand">
+      <span class="name">ARNAUD.BRETON</span>
+      <span class="role">TECH PORTFOLIO</span>
+      <span class="status-pill"><span class="status-dot"></span>SYSTEM ONLINE</span>
+    </div>
+    <button id="nav-toggle" class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <nav id="main-nav" class="main-nav">
+      <a href="#projects">PROJECTS</a>
+      <a href="#about">ABOUT</a>
+      <a href="https://github.com/arnoweb" target="_blank" rel="noopener">GITHUB</a>
+      <a href="#contact">CONTACT</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero" id="about">
+      <div class="hero-kicker">// ON-SITE DEPLOYMENT</div>
+      <h1 class="hero-title">
+        ARNAUD BRETON<br>
+        <span class="line2">AGENTIC AI ENGINEER</span>
+      </h1>
+      <p class="hero-sub">FORWARD DEPLOYED / GEN AI / LLM / ML<span class="blink-cursor"></span></p>
+      <p class="hero-desc">
+        I design and deploy agentic AI systems on-site — from architecture to
+        production, bridging generative AI, LLM workflows and real-world
+        business processes.
+      </p>
+      <div class="tag-row">
+        <span class="tag-chip">Agentic Systems</span>
+        <span class="tag-chip">Generative AI</span>
+        <span class="tag-chip">LLM</span>
+        <span class="tag-chip">Machine Learning</span>
+        <span class="tag-chip">Forward Deployed Engineering</span>
+        <span class="tag-chip">SaaS</span>
+      </div>
+      <div class="cta-row">
+        <a href="#projects" class="btn btn-primary">[ EXPLORE PROJECTS ]</a>
+        <a href="https://github.com/arnoweb" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB PROFILE ]</a>
+      </div>
+    </section>
+
+    <!-- PRIORITY PROJECTS -->
+    <section class="section" id="projects">
+      <div class="section-head">
+        <span class="index">01 /</span>
+        <h2 class="section-title">PRIORITY <span class="accent">PROJECTS</span></h2>
+      </div>
+      <p class="section-sub">// SELECTED MISSIONS — CLICK A CARD TO INSPECT</p>
+      <div id="priority-projects-grid" class="projects-grid" style="margin-top: 32px;"></div>
+    </section>
+
+    <!-- LAB / SIDE QUESTS -->
+    <section class="section" id="lab">
+      <div class="section-head">
+        <span class="index">02 /</span>
+        <h2 class="section-title">THE LAB <span class="accent">// SIDE QUESTS</span></h2>
+      </div>
+      <p class="section-sub">// PROTOTYPES, EXPERIMENTS AND OPEN SOURCE</p>
+      <div id="lab-projects-grid" class="lab-grid" style="margin-top: 32px;"></div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section class="section" id="stack">
+      <div class="section-head">
+        <span class="index">03 /</span>
+        <h2 class="section-title">TECH <span class="accent">INVENTORY</span></h2>
+      </div>
+      <div class="terminal-panel reveal">
+        <div class="terminal-titlebar">
+          <span class="dot red"></span><span class="dot amber"></span><span class="dot green"></span>
+          <span class="terminal-title-text">~/arnaud/stack — inventory.sh</span>
+        </div>
+        <div id="tech-stack-body" class="terminal-body"></div>
+      </div>
+    </section>
+
+    <!-- CURRENT MISSION -->
+    <section class="section" id="mission">
+      <div class="section-head">
+        <span class="index">04 /</span>
+        <h2 class="section-title">CURRENT <span class="accent">MISSION</span></h2>
+      </div>
+      <div class="mission-panel reveal">
+        <div id="mission-status" class="mission-status">STATUS: —</div>
+        <p id="mission-desc" class="mission-desc"></p>
+        <div class="progress-track"><div id="mission-progress-fill" class="progress-fill"></div></div>
+        <div id="mission-progress-label" class="progress-label"></div>
+      </div>
+    </section>
+
+    <!-- CURRENTLY TRAINING -->
+    <section class="section" id="training">
+      <div class="section-head">
+        <span class="index">05 /</span>
+        <h2 class="section-title">CURRENTLY <span class="accent">TRAINING</span></h2>
+      </div>
+      <p class="section-sub">// SKILL TREE — ACTIVE UPGRADE IN PROGRESS</p>
+      <div id="training-panel" class="training-panel reveal" style="margin-top: 32px;"></div>
+    </section>
+
+    <!-- CONNECT: GITHUB / LINKEDIN / CV -->
+    <section class="section" id="contact">
+      <div class="section-head">
+        <span class="index">06 /</span>
+        <h2 class="section-title">CONNECT <span class="accent">// LINKS</span></h2>
+      </div>
+      <div class="github-panel reveal">
+        <p class="mono section-sub" style="font-size: 0.85rem;">// arnoweb</p>
+        <p>Explore repositories, connect professionally, or download my resume.</p>
+        <div class="cta-row" style="justify-content: center;">
+          <a href="https://github.com/arnoweb" target="_blank" rel="noopener" class="btn btn-primary">[ OPEN GITHUB ]</a>
+          <a href="https://www.linkedin.com/in/bretonarnaud" target="_blank" rel="noopener" class="btn btn-secondary">[ LINKEDIN ]</a>
+          <a href="assets/pdf/Arnaud_BRETON_CV_ATS_2026_FR.pdf" target="_blank" rel="noopener" class="btn btn-secondary">[ DOWNLOAD CV ]</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+    <div>&copy; <span id="current-year"></span></div>
+    <span class="status-pill"><span class="status-dot"></span>SYSTEM STATUS: ONLINE</span>
+  </footer>
+
+  <script src="assets/js/main.js" defer></script>
 </body>
 </html>
