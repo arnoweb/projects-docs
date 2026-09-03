@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Video Producer — Architecture Technique v1.0</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: #f1f5f9;
+  padding: 36px 24px 48px;
+  color: #0f172a;
+  min-height: 100vh;
+}
+
+.card {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #dde1e8;
+  border-radius: 14px;
+  box-shadow: 0 2px 20px rgba(15,23,42,0.07);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.card-header {
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid #e8ebf0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+}
+.card-title em { font-style: normal; color: #7C6FF0; }
+.card-tagline {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 4px;
+  font-style: italic;
+}
+.card-meta {
+  font-family: ui-monospace, monospace;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.7;
+  text-align: right;
+  flex-shrink: 0;
+}
+.card-author {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+.version-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #475569;
+  background: #e2e8f0;
+  border-radius: 3px;
+  padding: 1px 6px;
+  margin-right: 4px;
+}
+
+/* ── AI callout banner ── */
+.ai-banner {
+  background: linear-gradient(90deg, #f5f3ff 0%, #ede9fe 100%);
+  border-bottom: 1px solid #ddd6fe;
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ai-banner-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.ai-banner-text {
+  font-size: 0.75rem;
+  color: #4c1d95;
+  font-weight: 600;
+}
+.ai-banner-text strong { color: #5b21b6; }
+.ai-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ── Main diagram ── */
+.diagram {
+  display: grid;
+  grid-template-columns: 150px 32px 1fr 32px 160px;
+  align-items: stretch;
+  padding: 20px 18px 16px;
+  gap: 0;
+  min-height: 380px;
+}
+
+/* ── Generic zone ── */
+.zone {
+  border-radius: 9px;
+  padding: 13px 13px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.zone-eyebrow {
+  font-size: 0.56rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+}
+.zone-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.zone-desc {
+  font-size: 0.69rem;
+  line-height: 1.45;
+  flex: 1;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+.chip {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.59rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: normal;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+/* ── Zone colours ── */
+.z-input  { background: #fff7ed; border: 1.5px solid #fb923c; }
+.z-input .zone-eyebrow { color: #9a3412; }
+.z-input .zone-title   { color: #7c2d12; }
+.z-input .zone-desc    { color: #92400e; }
+.z-input .chip         { background: #ffedd5; color: #7c2d12; }
+.z-input .divider      { border: none; border-top: 1px solid #fed7aa; margin: 4px 0; }
+
+.z-ai-scene { background: #eff6ff; border: 1.5px solid #60a5fa; }
+.z-ai-scene .zone-eyebrow { color: #1e40af; }
+.z-ai-scene .zone-title   { color: #1e3a8a; }
+.z-ai-scene .zone-desc    { color: #1d4ed8; }
+.z-ai-scene .chip         { background: #dbeafe; color: #1e3a8a; }
+
+.z-noai-scene { background: #fdf4ff; border: 1.5px solid #d946ef; }
+.z-noai-scene .zone-eyebrow { color: #86198f; }
+.z-noai-scene .zone-title   { color: #701a75; }
+.z-noai-scene .zone-desc    { color: #a21caf; }
+.z-noai-scene .chip         { background: #fae8ff; color: #701a75; }
+
+.z-output { background: #f8fafc; border: 1.5px solid #94a3b8; }
+.z-output .zone-eyebrow { color: #475569; }
+.z-output .zone-title   { color: #1e293b; }
+.z-output .zone-desc    { color: #475569; }
+.z-output .chip         { background: #e2e8f0; color: #334155; }
+
+/* ── Arrows ── */
+.arrow-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 2px;
+}
+.arrow-label {
+  font-family: ui-monospace, monospace;
+  font-size: 0.5rem;
+  color: #94a3b8;
+  text-align: center;
+  writing-mode: vertical-lr;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+.arrow-shaft {
+  flex: 1;
+  width: 1.5px;
+  background: #94a3b8;
+  min-height: 60px;
+}
+.arrow-tip {
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid #94a3b8;
+}
+
+/* ── System column ── */
+.system-col {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 0 10px;
+}
+.sys-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+.connector {
+  font-size: 0.54rem;
+  font-family: ui-monospace, monospace;
+  color: #94a3b8;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  border-top: 1px dashed #dde1e8;
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+/* ── Overlay section (crisp text/logo, no AI) ── */
+.ai-section {
+  border: 2px solid #d946ef;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fdf4ff;
+}
+.ai-section-header {
+  background: #a21caf;
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-section-header-text {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.ai-section-header-sub {
+  font-size: 0.58rem;
+  color: #fae8ff;
+  margin-left: auto;
+}
+.ai-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: #f5d0fe;
+}
+.ai-step {
+  background: #fdf4ff;
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ai-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: #a21caf;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.ai-step-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ai-step-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #701a75;
+  line-height: 1.2;
+}
+.ai-step-badge {
+  font-size: 0.54rem;
+  font-weight: 700;
+  color: #a21caf;
+  background: #fae8ff;
+  border: 1px solid #f0abfc;
+  border-radius: 3px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+.ai-step-desc {
+  font-size: 0.67rem;
+  color: #86198f;
+  line-height: 1.4;
+}
+.ai-io {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+.ai-io-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 0.6rem;
+  line-height: 1.3;
+}
+.ai-io-label {
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  color: #a21caf;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ai-io-val {
+  color: #86198f;
+}
+.ai-step-badge.rare {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+code.inline-code {
+  font-family: ui-monospace, monospace;
+  background: #fae8ff;
+  color: #701a75;
+  padding: 0 4px;
+  border-radius: 3px;
+  word-break: break-all;
+}
+
+/* ── Node pipeline (per-scene chain) ── */
+.layer-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: #f5d0fe;
+  margin-top: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.layer-row {
+  background: #fdf4ff;
+  padding: 8px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.layer-num {
+  flex-shrink: 0;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #a21caf;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.layer-num.diffusion { background: #2563eb; }
+.layer-body { flex: 1; min-width: 0; }
+.layer-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 2px; }
+.layer-title { font-size: 0.72rem; font-weight: 700; color: #701a75; }
+.layer-desc { font-size: 0.64rem; color: #86198f; line-height: 1.42; }
+.layer-tech { font-family: ui-monospace, monospace; font-size: 0.57rem; color: #a21caf; margin-top: 3px; }
+
+/* ── Custom nodes strip ── */
+.llm-providers {
+  background: #fae8ff;
+  border-top: 1px solid #f5d0fe;
+  padding: 7px 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.llm-label {
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #a21caf;
+  white-space: nowrap;
+}
+.llm-chip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.llm-chip.local { background: #a21caf; color: #fff; }
+.llm-chip.api   { background: #dbeafe; color: #1e3a8a; }
+.llm-sep { color: #f0abfc; font-size: 0.7rem; }
+
+/* ── Assembly zone ── */
+.z-assembly { background: #eff6ff; border: 1.5px solid #60a5fa; margin-top: 0; }
+.z-assembly .zone-eyebrow { color: #1e40af; }
+.z-assembly .zone-title   { color: #1e3a8a; }
+.z-assembly .zone-desc    { color: #1d4ed8; }
+.z-assembly .chip         { background: #dbeafe; color: #1e3a8a; }
+
+/* ── Footer ── */
+.card-footer {
+  border-top: 1px solid #e8ebf0;
+  padding: 11px 28px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.footer-label {
+  font-size: 0.57rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+.footer-chip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.61rem;
+  padding: 2px 7px;
+  background: #e8ebf0;
+  color: #334155;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.footer-dot { color: #cbd5e1; font-size: 0.8rem; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div>
+      <div class="card-title"><em>AI Video Producer</em> — Architecture Technique</div>
+      <div class="card-tagline">Storyboard → spot vidéo assemblé — diffusion IA pour le mouvement, compositing déterministe pour tout texte/logo</div>
+    </div>
+    <div class="card-meta">
+      <div class="card-author">Arnaud BRETON</div>
+      ComfyUI · Wan 2.2 TI2V 5B · UMT5-XXL<br>
+      <span class="version-badge">v1.0</span>2026
+    </div>
+  </div>
+
+  <!-- AI callout banner -->
+  <div class="ai-banner">
+    <div class="ai-banner-text">
+      Le modèle de diffusion ne pilote que le <strong>mouvement des scènes narratives</strong> —
+    </div>
+    <span class="ai-step-pill">① Scène narrative — Wan 2.2 I2V (IA)</span>
+    <span class="ai-step-pill">② Texte / logo / formulaire — compositing pixels (no AI)</span>
+    <div class="ai-banner-text" style="margin-left:4px;">
+      — tout texte affiché à l'écran reste donc net à 100 %, jamais halluciné.
+    </div>
+  </div>
+
+  <!-- Diagram -->
+  <div class="diagram">
+
+    <!-- Input -->
+    <div class="zone z-input">
+      <div class="zone-eyebrow">Données d'entrée</div>
+      <div class="zone-title">Storyboard</div>
+      <div class="zone-desc">Une image source + un prompt texte par scène, versionnés dans le repo (<code class="inline-code" style="background:#ffedd5;color:#7c2d12;">storyboard/datatoform-spot/</code>), copiés dans <code class="inline-code" style="background:#ffedd5;color:#7c2d12;">input/</code> de ComfyUI avant rendu</div>
+      <div class="chips">
+        <span class="chip">PNG</span>
+        <span class="chip">Prompt +/-</span>
+      </div>
+      <hr class="divider">
+      <div class="zone-title" style="font-size:0.78rem;">Graphe de workflow</div>
+      <div class="zone-desc" style="font-size:0.66rem;">JSON versionné dans Git · 3 variantes (API / local / fast-preview)</div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="arrow-col">
+      <div class="arrow-label">1 image + 1 prompt / scène</div>
+      <div class="arrow-shaft"></div>
+      <div class="arrow-tip"></div>
+    </div>
+
+    <!-- System -->
+    <div class="system-col">
+
+      <div class="sys-top">
+        <!-- AI scene chain -->
+        <div class="zone z-ai-scene">
+          <div class="zone-eyebrow">Scènes narratives (9) · IA</div>
+          <div class="zone-title">Diffusion image → vidéo</div>
+          <div class="zone-desc">Chaîne standard par scène, mouvement généré par le modèle à partir de l'image source et du prompt.</div>
+          <div class="chips">
+            <span class="chip">CLIPTextEncode</span>
+            <span class="chip">Wan22ImageToVideoLatent</span>
+            <span class="chip">KSamplerAdvanced</span>
+            <span class="chip">VAEDecode</span>
+          </div>
+          <div class="connector">↓ frames RGB</div>
+        </div>
+
+        <!-- No-AI scene chain -->
+        <div class="zone z-noai-scene">
+          <div class="zone-eyebrow">Scènes logo / formulaire (2) · no AI</div>
+          <div class="zone-title">Compositing pur</div>
+          <div class="zone-desc">Intro/Outro logo et scène formulaire : aucun modèle de diffusion, uniquement des transformations de pixels sur l'image source.</div>
+          <div class="chips">
+            <span class="chip">CreativeLogoVideo</span>
+            <span class="chip">FormFillRevealVideo</span>
+          </div>
+          <div class="connector">↓ frames RGB</div>
+        </div>
+      </div>
+
+      <!-- Overlay section -->
+      <div class="ai-section">
+        <div class="ai-section-header">
+          <div class="ai-section-header-text">🅰️ Habillage texte — compositing PIL, jamais l'IA</div>
+          <div class="ai-section-header-sub">custom_nodes/comfyui_ad_assembler</div>
+        </div>
+        <div class="ai-steps">
+
+          <!-- Step 1 -->
+          <div class="ai-step">
+            <div class="ai-step-header">
+              <div class="ai-step-num">1</div>
+              <div>
+                <div class="ai-step-title">Sous-titre par scène</div>
+                <span class="ai-step-badge">Toutes les scènes narratives · PIL</span>
+              </div>
+            </div>
+            <div class="ai-step-desc">Incruste un badge sombre à coins carrés + texte blanc (police système SF Pro Semibold, rendu PIL) décrivant le problème/la solution de la scène.</div>
+            <div class="ai-io">
+              <div class="ai-io-row">
+                <span class="ai-io-label">IN</span>
+                <span class="ai-io-val">Frames de la scène + texte de la légende</span>
+              </div>
+              <div class="ai-io-row">
+                <span class="ai-io-label">OUT</span>
+                <span class="ai-io-val">Frames avec sous-titre incrusté, texte 100 % net</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="ai-step">
+            <div class="ai-step-header">
+              <div class="ai-step-num">2</div>
+              <div>
+                <div class="ai-step-title">Nœuds spécialisés — sans modèle de diffusion</div>
+                <span class="ai-step-badge">Logo / formulaire · pixels sources</span>
+              </div>
+            </div>
+            <div class="ai-step-desc">Deux nœuds dédiés produisent le mouvement par calcul plutôt que par génération, pour que le texte reste toujours identique aux pixels d'origine.</div>
+
+            <div class="layer-pipeline">
+              <div class="layer-row">
+                <span class="layer-num">1</span>
+                <div class="layer-body">
+                  <div class="layer-top"><span class="layer-title">CreativeLogoVideo</span><span class="ai-step-badge">Intro + Outro</span></div>
+                  <div class="layer-desc">Ken Burns (zoom + panoramique diagonal) + reflet lumineux qui balaie le cadre une fois + glow de couleur pulsant (violet → bleu, teintes de marque) — le tout en compositing pur.</div>
+                  <div class="layer-tech">Entrée : image logo statique · Sortie : clip animé, texte du logo inchangé</div>
+                </div>
+              </div>
+              <div class="layer-row">
+                <span class="layer-num">2</span>
+                <div class="layer-body">
+                  <div class="layer-top"><span class="layer-title">FormFillRevealVideo</span><span class="ai-step-badge">Scène formulaire</span></div>
+                  <div class="layer-desc">Balayage de révélation haut→bas avec ligne de scan lumineuse, entre une image "vide" et une image "remplie" — jamais de texte de formulaire halluciné par un modèle.</div>
+                  <div class="layer-tech">Entrée : 2 images (vide/remplie) · Sortie : clip de transition, champs toujours lisibles</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        <div class="llm-providers">
+          <span class="llm-label">Package de nœuds custom (5)</span>
+          <span class="llm-chip local">TextOverlayVideo</span>
+          <span class="llm-chip local">CreativeLogoVideo</span>
+          <span class="llm-chip local">FormFillRevealVideo</span>
+          <span class="llm-sep">·</span>
+          <span class="llm-chip api">ProceduralZoomVideo</span>
+          <span class="llm-chip api">AssembleAdVideoWithTransitions</span>
+        </div>
+      </div>
+
+      <!-- Assembly -->
+      <div class="zone z-assembly">
+        <div class="zone-eyebrow">Assemblage final</div>
+        <div class="zone-title">AssembleAdVideoWithTransitions</div>
+        <div class="zone-desc">Concatène les 11 clips (Intro → scènes 1-9 → Outro) dans l'ordre, fondu-enchaîné sur <code class="inline-code" style="background:#dbeafe;color:#1e3a8a;">transition_frames</code> images (8 par défaut). Entrées fixes <code class="inline-code" style="background:#dbeafe;color:#1e3a8a;">video_1</code> à <code class="inline-code" style="background:#dbeafe;color:#1e3a8a;">video_20</code>, non connectées au-delà du nombre réel de scènes.</div>
+        <div class="chips">
+          <span class="chip">Crossfade configurable</span>
+          <span class="chip">Jusqu'à 20 scènes</span>
+          <span class="chip">SaveVideo par scène + final</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="arrow-col">
+      <div class="arrow-label">CreateVideo × 11 → crossfade</div>
+      <div class="arrow-shaft"></div>
+      <div class="arrow-tip"></div>
+    </div>
+
+    <!-- Output -->
+    <div class="zone z-output">
+      <div class="zone-eyebrow">Sortie</div>
+      <div class="zone-title">Spot vidéo assemblé</div>
+      <div class="zone-desc">Vidéo unique écrite dans <code class="inline-code" style="background:#e2e8f0;color:#334155;">output/video/FINAL_ad_spot*</code>, prête à publier.</div>
+      <div class="chips">
+        <span class="chip">MP4</span>
+        <span class="chip">30 fps</span>
+        <span class="chip">1280×704</span>
+      </div>
+      <div style="margin-top:auto;padding-top:10px;border-top:1px solid #e2e8f0;">
+        <div style="font-size:0.64rem;color:#64748b;line-height:1.5;">Clips par scène<br><strong style="color:#0f172a;font-size:0.75rem;">conservés</strong><br>pour le contrôle qualité</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer">
+    <span class="footer-label">Stack</span>
+    <span class="footer-chip">ComfyUI (via Pinokio)</span>
+    <span class="footer-chip">Python</span>
+    <span class="footer-chip">Pillow (PIL)</span>
+    <span class="footer-chip">NumPy</span>
+    <span class="footer-dot">·</span>
+    <span class="footer-chip">Wan 2.2 TI2V 5B</span>
+    <span class="footer-chip">UMT5-XXL (text encoder)</span>
+    <span class="footer-chip">VAE Wan 2.2</span>
+    <span class="footer-chip">WanImageToVideoApi (variante cloud)</span>
+    <span class="footer-dot">·</span>
+    <span class="footer-chip">Workflows JSON versionnés Git</span>
+  </div>
+
+</div>
+</body>
+</html>

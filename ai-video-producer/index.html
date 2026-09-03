@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Video Producer — Ce que l'application apporte concrètement</title>
+<style>
+  :root {
+    --bg: #F1F5F9;
+    --surface: #FFFFFF;
+    --surface-2: #F8FAFC;
+    --text: #0F172A;
+    --text-dim: #64748B;
+    --border: #DDE1E8;
+    --accent: #7C6FF0;
+    --accent-ink: #6D28D9;
+    --code-bg: #E2E8F0;
+    --chip-bg: #E8EBF0;
+    --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+      --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+      --accent: #A78BFA; --accent-ink: #C4B5FD;
+      --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+      --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F172A; --surface: #1E293B; --surface-2: #172033;
+    --text: #F1F5F9; --text-dim: #94A3B8; --border: #334155;
+    --accent: #A78BFA; --accent-ink: #C4B5FD;
+    --code-bg: #273549; --chip-bg: #273549; --chip-color: #94A3B8;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --good-bg: #0F2A1A; --good-border: #22C55E; --good-text: #86EFAC;
+    --bad-bg: #2A1414; --bad-border: #EF4444; --bad-text: #FCA5A5;
+  }
+  :root[data-theme="light"] {
+    --bg: #F1F5F9; --surface: #FFFFFF; --surface-2: #F8FAFC;
+    --text: #0F172A; --text-dim: #64748B; --border: #DDE1E8;
+    --accent: #7C6FF0; --accent-ink: #6D28D9;
+    --code-bg: #E2E8F0; --chip-bg: #E8EBF0; --chip-color: #334155;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --good-bg: #F0FDF4; --good-border: #4ADE80; --good-text: #14532D;
+    --bad-bg: #FEF2F2; --bad-border: #FCA5A5; --bad-text: #7F1D1D;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  code, .mono {
+    font-family: ui-monospace, "Cascadia Code", "Fira Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+  code { background: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .page { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+  header.hero { padding: 3.5rem 0 2.2rem; border-bottom: 1px solid var(--border); }
+  .eyebrow {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4.2vw, 2.9rem); line-height: 1.12; letter-spacing: -0.015em;
+    margin: 0 0 1rem; text-wrap: balance; max-width: 22ch;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle { color: var(--text-dim); font-size: 1.12rem; max-width: 64ch; margin: 0 0 1.5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.76rem;
+    padding: 0.28rem 0.6rem; border-radius: 100px; background: var(--chip-bg); color: var(--chip-color);
+  }
+  .hero-cta { margin-top: 1.5rem; display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.88rem; }
+  .hero-cta a { font-weight: 600; text-decoration: none; }
+  .hero-cta a:hover { text-decoration: underline; }
+  .hero-cta a.secondary { color: var(--text-dim); font-weight: 500; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--border);
+    margin: 0 -1.5rem 2.5rem; padding: 0 1.5rem;
+  }
+  nav.toc .inner {
+    max-width: 1000px; margin: 0 auto; display: flex; gap: 1.2rem;
+    overflow-x: auto; padding: 0.75rem 0; font-size: 0.8rem;
+  }
+  nav.toc a { color: var(--text-dim); text-decoration: none; white-space: nowrap; }
+  nav.toc a:hover { color: var(--accent); }
+
+  section.block { padding: 2.8rem 0; border-bottom: 1px solid var(--border); scroll-margin-top: 4rem; }
+  section.block:last-of-type { border-bottom: none; }
+  .block-head { display: flex; align-items: baseline; gap: 0.7rem; margin-bottom: 0.4rem; }
+  .block-num { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.8rem; color: var(--text-dim); }
+  h2 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
+  h3 { font-size: 1rem; margin: 0 0 0.35rem; }
+  .block-desc { color: var(--text-dim); max-width: 66ch; margin: 0.6rem 0 1.6rem; }
+  .block-desc.center { margin-left: auto; margin-right: auto; text-align: center; }
+
+  /* ---------- Problem framing ---------- */
+  .framing { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .framing-card { border-radius: 10px; padding: 1.1rem 1.2rem; border: 1.5px solid; }
+  .framing-card.bad { background: var(--bad-bg); border-color: var(--bad-border); }
+  .framing-card.good { background: var(--good-bg); border-color: var(--good-border); }
+  .framing-card .label {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.65rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+  }
+  .framing-card.bad .label { color: var(--bad-text); }
+  .framing-card.good .label { color: var(--good-text); }
+  .framing-card ul { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; }
+  .framing-card.bad li { color: var(--bad-text); }
+  .framing-card.good li { color: var(--good-text); }
+  .framing-card li + li { margin-top: 0.4rem; }
+
+  /* ---------- Use case cards ---------- */
+  .usecases { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .usecase { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 0.55rem; }
+  .usecase .uc-tag {
+    font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.62rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); align-self: flex-start;
+    background: var(--chip-bg); padding: 0.2rem 0.55rem; border-radius: 100px;
+  }
+  .usecase h3 { font-size: 1.02rem; margin-top: 0.2rem; }
+  .uc-detail { display: flex; gap: 0.6rem; font-size: 0.82rem; }
+  .uc-detail .uc-k { flex: none; width: 76px; font-weight: 700; color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 0.15rem; }
+  .uc-detail .uc-v { color: var(--text-dim); line-height: 1.4; }
+  .usecase .uc-value { margin-top: auto; padding-top: 0.6rem; border-top: 1px dashed var(--border); font-size: 0.8rem; color: var(--text); }
+  .usecase .uc-value strong { color: var(--accent-ink); }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; min-width: 560px; }
+  th, td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); background: var(--surface-2); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.dim { color: var(--text-dim); }
+  td.hl { color: var(--accent-ink); font-weight: 600; }
+
+  /* ---------- Callout ---------- */
+  .callout { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 1rem 1.2rem; font-size: 0.88rem; color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+  .callout li + li { margin-top: 0.3rem; }
+
+  /* ---------- Hero blobs ---------- */
+  header.hero { position: relative; overflow: hidden; }
+  header.hero > * { position: relative; z-index: 1; }
+  .hero-blobs { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.28; }
+  .blob-a { width: 340px; height: 340px; background: var(--accent); top: -100px; left: -70px; }
+  .blob-b { width: 300px; height: 300px; background: #4FA3F7; top: -60px; right: -60px; }
+  @media (prefers-color-scheme: dark) { .blob { opacity: 0.16; } }
+  :root[data-theme="dark"] .blob { opacity: 0.16; }
+  :root[data-theme="light"] .blob { opacity: 0.28; }
+
+  /* ---------- Trust pills ---------- */
+  .trust-pills { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.2rem 0 1.3rem; }
+  .trust-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem; background: var(--good-bg); color: var(--good-text);
+    border: 1px solid var(--good-border); border-radius: 100px; padding: 0.4rem 0.9rem; font-size: 0.82rem; font-weight: 600;
+  }
+  .trust-pill .tp-check { font-weight: 800; }
+
+  /* ---------- Nav brand ---------- */
+  .nav-brand { display: flex; flex-direction: column; line-height: 1.15; margin-right: 0.4rem; flex: none; }
+  .nav-brand .nb-name { font-weight: 800; color: var(--accent); font-size: 0.88rem; white-space: nowrap; }
+  .nav-brand .nb-tag { font-size: 0.64rem; color: var(--text-dim); white-space: nowrap; }
+  .nav-sep { width: 1px; align-self: stretch; background: var(--border); flex: none; margin: 0.3rem 0; }
+
+  /* ---------- Step tracker ---------- */
+  .steps-tracker { display: flex; align-items: flex-start; justify-content: center; gap: 0; flex-wrap: wrap; margin-bottom: 2rem; }
+  .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; width: 108px; text-align: center; }
+  .step-bubble {
+    position: relative; width: 50px; height: 50px; border-radius: 50%; background: var(--surface);
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); box-shadow: var(--shadow);
+  }
+  .step-bubble svg { width: 22px; height: 22px; }
+  .step-item.done .step-bubble { border-color: var(--accent); color: var(--accent); }
+  .step-check {
+    position: absolute; bottom: -3px; right: -3px; width: 17px; height: 17px; border-radius: 50%;
+    background: var(--good-border); color: #fff; font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface);
+  }
+  .step-label { font-size: 0.76rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .step-line { flex: 1; height: 2px; background: var(--border); margin-top: 25px; min-width: 12px; }
+
+  /* ---------- Demo sequence ---------- */
+  .demo-flow { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 480px; margin: 0 auto; }
+  .v-connector { width: 2px; height: 26px; background: var(--border); position: relative; flex: none; }
+  .v-connector::after { content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid var(--border); }
+  .demo-bubble { align-self: flex-end; background: var(--accent); color: #fff; border-radius: 14px 14px 4px 14px; padding: 0.85rem 1.1rem; font-size: 0.95rem; max-width: 88%; box-shadow: var(--shadow); }
+  .demo-card { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; box-shadow: var(--shadow); }
+  .demo-card .dc-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-ink); font-weight: 800; margin-bottom: 0.45rem; }
+  .demo-card .dc-q { font-weight: 600; margin-bottom: 0.3rem; font-size: 0.92rem; }
+  .demo-card .dc-a { color: var(--text-dim); font-size: 0.86rem; line-height: 1.5; }
+  .demo-card.highlight { border: 1.5px solid var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
+  .demo-final { text-align: center; font-size: 0.82rem; color: var(--text-dim); margin-top: 0.4rem; }
+  .scene-strip { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+  .scene-tag { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.68rem; padding: 0.22rem 0.55rem; border-radius: 100px; background: var(--chip-bg); color: var(--chip-color); }
+  .scene-tag.noai { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent-ink); font-weight: 600; }
+
+  /* ---------- Features ---------- */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.9rem; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; box-shadow: var(--shadow); }
+  .feature-card .f-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.35rem; }
+  .feature-card p { margin: 0; font-size: 0.82rem; color: var(--text-dim); line-height: 1.45; }
+
+  /* ---------- Comparison progression ---------- */
+  .compare-steps { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.4rem; }
+  .compare-chip { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.82rem; font-weight: 700; padding: 0.55rem 1.1rem; border-radius: 100px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-dim); }
+  .compare-chip.mid { border-color: var(--accent); color: var(--accent-ink); background: var(--surface); box-shadow: var(--shadow); }
+  .compare-arrow { color: var(--text-dim); font-size: 1rem; }
+
+  /* ---------- Evolutions ---------- */
+  .evolutions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.7rem; }
+  .evo-item { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.86rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; color: var(--text-dim); }
+  .evo-item .evo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 0.55rem; flex: none; }
+
+  footer { padding-top: 2.5rem; color: var(--text-dim); font-size: 0.85rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+  @media (max-width: 700px) {
+    .framing { grid-template-columns: 1fr; }
+  }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-blobs"><span class="blob blob-a"></span><span class="blob blob-b"></span></div>
+    <p class="eyebrow">Production de spots vidéo publicitaires par IA</p>
+    <h1>Transformer un storyboard en <em>spot vidéo prêt à publier</em>, sans équipe de production</h1>
+    <p class="subtitle">
+      Produire un spot vidéo court coûte cher en tournage et montage classiques, et devient peu fiable
+      en génération vidéo 100 % IA dès qu'un logo, un sous-titre ou une capture d'écran doit rester
+      lisible : les modèles de diffusion vidéo hallucinent le texte. AI Video Producer prend un
+      storyboard — une image et un prompt par scène — et assemble un spot vidéo complet en hybridant
+      les deux mondes : le modèle de diffusion anime les scènes narratives, un compositing déterministe
+      maison (jamais l'IA) garantit que tout texte affiché reste pixel-parfait.
+    </p>
+    <div class="trust-pills">
+      <span class="trust-pill"><span class="tp-check">✓</span> Logo, sous-titres et formulaires jamais hallucinés — rendu déterministe</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Rendu 100 % local possible — zéro coût API</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Storyboard (images + prompts) versionné dans Git</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Mode fast-preview avant le rendu qualité finale</span>
+      <span class="trust-pill"><span class="tp-check">✓</span> Aucun LLM conversationnel impliqué dans le rendu</span>
+    </div>
+    <div class="chips">
+      <span class="chip">ComfyUI</span>
+      <span class="chip">Wan 2.2 TI2V 5B</span>
+      <span class="chip">Compositing PIL déterministe</span>
+      <span class="chip">Crossfade automatique</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#usages">Voir le cas DataToForm ↓</a>
+      <a href="architecture.html">Voir l'architecture technique →</a>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="inner">
+      <div class="nav-brand"><span class="nb-name">AI Video Producer</span><span class="nb-tag">Storyboard → spot vidéo assemblé</span></div>
+      <div class="nav-sep"></div>
+      <a href="#usages">Cas d'usage</a>
+      <a href="#demo">Comment ça marche</a>
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#valeur">Valeur métier</a>
+      <a href="#comparaison">Comparaison</a>
+      <a href="#hybride">Pourquoi hybride</a>
+      <a href="#limites">Garanties &amp; limites</a>
+      <a href="#evolutions">Évolutions</a>
+      <div class="nav-sep"></div>
+      <a href="architecture.html">Architecture technique →</a>
+    </div>
+  </nav>
+
+  <section class="block" id="usages">
+    <div class="block-head"><span class="block-num">01</span><h2>Cas d'usage</h2></div>
+    <p class="block-desc">Le premier spot produit avec ce pipeline, et le type de situation où l'approche s'applique.</p>
+    <div class="usecases">
+      <div class="usecase">
+        <span class="uc-tag">Cas réel · SaaS</span>
+        <h3>Spot publicitaire DataToForm</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Un SaaS solo-fondateur (DataToForm, remplissage automatique de formulaires) a besoin d'un spot publicitaire pour ses réseaux et sa landing page.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Pas de budget tournage ni d'équipe motion design ; un générateur vidéo 100 % IA ferait halluciner le logo et l'UI du produit affichée à l'écran.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">11 clips storyboardés (isolation → frustration → découverte → upload → remplissage automatique → liberté), logo et capture de formulaire rendus par compositing déterministe.</span></div>
+        <div class="uc-value">Valeur : <strong>spot complet produit en solo</strong>, texte et logo net à 100 % sur chaque plan.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Généralisable</span>
+        <h3>Teaser produit pour landing page</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Une landing page a besoin d'une vidéo courte qui montre le produit en action plutôt qu'un simple screenshot statique.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Filmer une vraie démo demande du temps ; une génération vidéo IA pure rend l'interface du produit illisible.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Les captures d'écran réelles du produit sont animées par compositing (zoom, révélation), jamais régénérées par le modèle.</span></div>
+        <div class="uc-value">Valeur : <strong>vidéo produit crédible</strong> sans tournage ni interface IA-générée trompeuse.</div>
+      </div>
+      <div class="usecase">
+        <span class="uc-tag">Généralisable</span>
+        <h3>Variantes créatives pour tests publicitaires</h3>
+        <div class="uc-detail"><span class="uc-k">Contexte</span><span class="uc-v">Une équipe marketing veut tester plusieurs accroches ou styles visuels avant de valider un budget média.</span></div>
+        <div class="uc-detail"><span class="uc-k">Problème</span><span class="uc-v">Produire plusieurs variantes en tournage classique multiplie le coût par le nombre de versions.</span></div>
+        <div class="uc-detail"><span class="uc-k">Solution</span><span class="uc-v">Le mode fast-preview valide chaque variante de storyboard en quelques minutes avant de lancer le rendu qualité finale retenu.</span></div>
+        <div class="uc-value">Valeur : <strong>itération créative rapide</strong>, coût de test marginal comparé à un tournage.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="demo">
+    <div class="block-head"><span class="block-num">02</span><h2>Comment ça marche</h2></div>
+    <p class="block-desc">Le parcours réel du pipeline, illustré avec le spot DataToForm : un storyboard entre, une vidéo assemblée sort.</p>
+
+    <div class="steps-tracker">
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Storyboard (image + prompt)</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" fill="currentColor"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Génération IA par scène</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 9h18M8 4v16" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Sous-titres / logo (no AI)</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item done">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="step-check">✓</span>
+        </span>
+        <span class="step-label">Assemblage crossfade</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <span class="step-bubble">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        </span>
+        <span class="step-label">Export vidéo finale</span>
+      </div>
+    </div>
+
+    <div class="demo-flow">
+      <div class="demo-bubble">Storyboard DataToForm : 11 images + prompts, dans <code>storyboard/datatoform-spot/</code></div>
+      <div class="v-connector"></div>
+
+      <div class="demo-card">
+        <div class="dc-label">Scène 2 — prompt de scène (IA)</div>
+        <div class="dc-a">"The man's shoulders tense slightly as he stares at the messy spreadsheet on his laptop screen, his hand slowly rubs his temple in frustration…" — ce texte pilote uniquement le mouvement généré par Wan 2.2 sur l'image source.</div>
+      </div>
+
+      <div class="v-connector"></div>
+      <div class="demo-card highlight">
+        <div class="dc-label">🎯 Scène 7 — formulaire : jamais généré par l'IA</div>
+        <div class="dc-a"><code>FormFillRevealVideo</code> balaie de l'image "vide" vers l'image "remplie" avec une ligne de scan — le texte du formulaire reste les pixels sources, jamais halluciné par un modèle.</div>
+        <div class="scene-strip">
+          <span class="scene-tag">07_autofill.png</span>
+          <span class="scene-tag">→</span>
+          <span class="scene-tag">07_autofill_filled.png</span>
+          <span class="scene-tag noai">no AI</span>
+        </div>
+      </div>
+
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">Sous-titre incrusté sur chaque scène narrative</div>
+        <div class="dc-a"><code>TextOverlayVideo</code> rend le badge + le texte via PIL (police système), jamais par le modèle de diffusion — "Watch it fill itself in." reste net à 100 %.</div>
+      </div>
+
+      <div class="v-connector"></div>
+      <div class="demo-card">
+        <div class="dc-label">Assemblage final</div>
+        <div class="dc-a"><code>AssembleAdVideoWithTransitions</code> concatène les 11 clips (Intro logo → scènes 1-9 → Outro logo) avec un fondu-enchaîné, puis exporte la vidéo unique du spot.</div>
+      </div>
+
+      <p class="demo-final">Le storyboard n'est écrit qu'une fois par spot ; ce qui se répète à chaque itération, c'est le rendu — pas la conception.</p>
+    </div>
+  </section>
+
+  <section class="block" id="fonctionnalites">
+    <div class="block-head"><span class="block-num">03</span><h2>Fonctionnalités</h2></div>
+    <p class="block-desc">Ce que le pipeline fait, concrètement.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-title">Storyboard versionné dans Git</div><p>Une image source et un prompt positif/négatif par scène, stockés dans le repo — pas seulement dans l'installation locale de ComfyUI.</p></div>
+      <div class="feature-card"><div class="f-title">Pipeline hybride IA / déterministe</div><p>Le modèle de diffusion anime les scènes narratives ; un package de nœuds ComfyUI maison gère tout ce qui doit rester pixel-parfait (logo, formulaire, sous-titres).</p></div>
+      <div class="feature-card"><div class="f-title">Sous-titres pixel-parfaits</div><p>Chaque légende est rendue par PIL (police système), jamais générée par le modèle — texte toujours net et fidèle au script.</p></div>
+      <div class="feature-card"><div class="f-title">Assemblage automatique avec crossfade</div><p>Les clips par scène sont concaténés dans l'ordre avec un fondu-enchaîné configurable, jusqu'à 20 scènes, en un seul nœud.</p></div>
+      <div class="feature-card"><div class="f-title">Mode fast-preview</div><p>Résolution et steps réduits pour valider le montage complet en quelques minutes avant de lancer le rendu qualité finale.</p></div>
+      <div class="feature-card"><div class="f-title">Local ou cloud API, au choix</div><p>Wan 2.2 tourne en local (zéro coût par appel) via les workflows <code>_LOCAL</code>, ou via l'API cloud ComfyOrg pour déporter le calcul.</p></div>
+    </div>
+
+    <div class="callout" style="margin-top:1.4rem;">
+      <strong>Deux natures de prompts, à ne pas confondre :</strong>
+      <ul>
+        <li><strong>Prompts de conception :</strong> l'architecture elle-même (le package de 5 nœuds ComfyUI custom, le câblage du graphe) a été obtenue en promptant un assistant IA de développement — pas écrite à la main.</li>
+        <li><strong>Prompts de scène :</strong> le texte positif/négatif de chaque <code>CLIPTextEncode</code>, écrit à la main, qui décrit l'action à animer sur l'image source de la scène.</li>
+      </ul>
+      Aucun des deux n'est généré automatiquement par un LLM au moment du rendu — voir le README pour le détail des prompts utilisés sur le spot DataToForm.
+    </div>
+  </section>
+
+  <section class="block" id="valeur">
+    <div class="block-head"><span class="block-num">04</span><h2>Valeur métier</h2></div>
+    <p class="block-desc">
+      Produire un spot vidéo court mobilise soit un budget de production classique, soit un outil de
+      génération vidéo IA qui ne sait pas garder un texte lisible d'un plan à l'autre.
+    </p>
+    <div class="framing">
+      <div class="framing-card bad">
+        <div class="label">Production classique ou IA 100 % générative</div>
+        <ul>
+          <li>Tournage + montage : coût et délai proportionnels au nombre de plans et de variantes</li>
+          <li>Génération vidéo IA pure : logo, sous-titres et UI hallucinés, texte flou ou faux</li>
+          <li>Chaque itération créative repart de zéro, rien n'est rejouable à l'identique</li>
+          <li>Aucune trace versionnée du storyboard ou des prompts utilisés</li>
+        </ul>
+      </div>
+      <div class="framing-card good">
+        <div class="label">AI Video Producer</div>
+        <ul>
+          <li>Le storyboard (images + prompts) est écrit une fois, versionné, puis rejoué pour chaque rendu</li>
+          <li>Texte, logo et UI restent pixel-parfaits car jamais produits par le modèle de diffusion</li>
+          <li>Un mode fast-preview limite le coût de chaque itération créative avant le rendu final</li>
+          <li>Rendu local possible : le coût marginal par rendu peut être nul (pas d'API payante)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2rem;">Ce que ça change concrètement</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Situation</th><th>Production classique / IA pure</th><th>AI Video Producer</th></tr></thead>
+        <tbody>
+          <tr><td>Logo ou capture d'écran affichée</td><td class="dim">Risque d'hallucination du texte avec un générateur vidéo IA</td><td class="dim">Compositing déterministe — pixels sources conservés à 100 %</td></tr>
+          <tr><td>Nouvelle variante créative</td><td class="dim">Nouveau tournage ou nouvelle génération complète</td><td class="dim">Storyboard modifié, rejoué via le même graphe versionné</td></tr>
+          <tr><td>Validation avant rendu final</td><td class="dim">Souvent impossible à moindre coût</td><td class="dim">Mode fast-preview en quelques minutes</td></tr>
+          <tr><td>Coût par rendu</td><td class="dim">Budget tournage, ou facturation API à chaque génération</td><td class="dim">Nul en local, ou à l'usage via l'API cloud si besoin</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="comparaison">
+    <div class="block-head"><span class="block-num">05</span><h2>Comparaison</h2></div>
+    <p class="block-desc">AI Video Producer occupe une place précise entre le tournage classique et la génération vidéo 100 % IA.</p>
+    <div class="compare-steps">
+      <span class="compare-chip">Tournage + montage classique</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip">Générateur vidéo 100 % IA</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip mid">AI Video Producer</span>
+      <span class="compare-arrow">→</span>
+      <span class="compare-chip">Agence de production complète</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Dimension</th><th>Tournage classique</th><th>Générateur vidéo 100 % IA</th><th>AI Video Producer</th><th>Agence complète</th></tr></thead>
+        <tbody>
+          <tr><td>Fidélité du texte/logo affiché</td><td class="dim">Parfaite (filmé réellement)</td><td class="dim">Souvent hallucinée, floue ou fausse</td><td class="hl">Parfaite — compositing déterministe sur les pixels sources</td><td class="dim">Parfaite</td></tr>
+          <tr><td>Coût par itération créative</td><td class="dim">Élevé — nouveau tournage</td><td class="dim">Faible mais qualité imprévisible</td><td class="hl">Faible — storyboard versionné rejoué, fast-preview disponible</td><td class="dim">Élevé</td></tr>
+          <tr><td>Budget/équipe requis</td><td class="dim">Tournage, acteurs, montage</td><td class="dim">Aucun, mais résultat non fiable</td><td class="hl">Une machine avec GPU (ou API cloud), aucune équipe</td><td class="dim">Agence + budget média</td></tr>
+          <tr><td>Reproductibilité</td><td class="dim">Faible — dépend du tournage réel</td><td class="dim">Faible — sortie non déterministe</td><td class="hl">Storyboard et graphe versionnés dans Git</td><td class="dim">Variable selon prestataire</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="hybride">
+    <div class="block-head"><span class="block-num">06</span><h2>Pourquoi hybride plutôt que 100 % génératif ?</h2></div>
+    <p class="block-desc">
+      Beaucoup d'outils de génération vidéo IA promettent un rendu de bout en bout à partir d'un simple
+      prompt. AI Video Producer fait un choix différent, volontairement : l'IA anime, le compositing
+      déterministe garantit le texte.
+    </p>
+    <div class="framing">
+      <div class="framing-card bad">
+        <div class="label">Générateur vidéo 100 % IA</div>
+        <ul>
+          <li>Le modèle réinterprète le logo ou l'UI à chaque frame, sans garantie de fidélité</li>
+          <li>Un sous-titre généré par le modèle peut être flou, tronqué ou orthographié différemment</li>
+          <li>Impossible de garantir que deux rendus successifs affichent le même texte</li>
+          <li>Aucun contrôle fin sur le timing exact d'un élément graphique</li>
+        </ul>
+      </div>
+      <div class="framing-card good">
+        <div class="label">AI Video Producer</div>
+        <ul>
+          <li>Le modèle de diffusion (Wan 2.2) n'est sollicité que là où une variation naturelle est souhaitable</li>
+          <li>Logo, sous-titres et capture de formulaire sont des transformations de pixels calculées, pas générées</li>
+          <li><code>TextOverlayVideo</code>, <code>CreativeLogoVideo</code> et <code>FormFillRevealVideo</code> ne contiennent aucun appel à un modèle de diffusion, par conception</li>
+          <li>Le rendu d'un même storyboard reste visuellement cohérent d'une exécution à l'autre pour ces éléments</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="limites">
+    <div class="block-head"><span class="block-num">07</span><h2>Garanties &amp; limites actuelles</h2></div>
+    <p class="block-desc">Ce que le pipeline garantit, et ce qu'il ne fait pas encore — pour évaluer le fit sans surprise.</p>
+    <div class="callout">
+      <strong>Garanties par conception :</strong>
+      <ul>
+        <li>Logo, sous-titres et capture de formulaire ne passent jamais par le modèle de diffusion — rendu par compositing PIL/pixels déterministe</li>
+        <li>Aucun LLM conversationnel ni modèle de vision multimodal n'intervient dans le rendu (voir le README pour le détail du seul modèle de langage impliqué, l'encodeur de texte UMT5-XXL)</li>
+        <li>Le storyboard (images + prompts) est versionné dans Git, pas seulement présent dans l'installation locale de ComfyUI</li>
+        <li>Le rendu peut tourner 100 % en local, sans appel réseau ni coût variable</li>
+      </ul>
+    </div>
+    <div class="table-wrap" style="margin-top:1rem;">
+      <table>
+        <thead><tr><th>Limite actuelle</th><th>Détail</th></tr></thead>
+        <tbody>
+          <tr><td>Rendu local exigeant</td><td class="dim">Wan 2.2 TI2V 5B nécessite un GPU correct pour un rendu qualité en temps raisonnable</td></tr>
+          <tr><td>20 scènes maximum par spot</td><td class="dim">L'assembleur expose des entrées fixes <code>video_1</code> à <code>video_20</code></td></tr>
+          <tr><td>Storyboard écrit à la main</td><td class="dim">Pas encore de génération assistée du storyboard depuis un brief marketing</td></tr>
+          <tr><td>Un seul spot produit à ce jour</td><td class="dim">Le pipeline est générique mais n'a été exercé que sur le cas DataToForm pour l'instant</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="evolutions">
+    <div class="block-head"><span class="block-num">08</span><h2>Évolutions possibles</h2></div>
+    <p class="block-desc">Le storyboard manuel est le point d'entrée actuel, pas une limite définitive.</p>
+    <div class="evolutions-grid">
+      <div class="evo-item"><span class="evo-dot"></span>Génération assistée du storyboard (images + prompts de scène) depuis un brief marketing, via un LLM en amont du rendu</div>
+      <div class="evo-item"><span class="evo-dot"></span>Export multi-format (9:16, 1:1, 16:9) depuis un même storyboard, pour s'adapter à chaque plateforme</div>
+      <div class="evo-item"><span class="evo-dot"></span>Voix off / TTS synchronisée avec les sous-titres déjà versionnés par scène</div>
+      <div class="evo-item"><span class="evo-dot"></span>Un dossier <code>storyboard/</code> par nouveau spot produit, pour capitaliser sur plusieurs projets au-delà de DataToForm</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>AI Video Producer — Storyboard vers spot vidéo publicitaire assemblé</span>
+    <span>Généré le 2026-09-03 · <a href="architecture.html">Architecture technique complète</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
