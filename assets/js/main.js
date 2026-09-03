@@ -20,17 +20,21 @@ const priorityProjects = [
     description: "AI-powered recommendation engine combining content-based, collaborative and hybrid filtering.",
     status: "ACTIVE",
     stack: ["Python", "Recommendation Systems", "API"],
-    github: "https://github.com/arnoweb/likyly-recsys"
+    github: "https://github.com/arnoweb/likyly-recsys",
+    docsUrl: "https://arnoweb.github.io/projects-docs/likyly-recsys/",
+    architectureUrl: "https://arnoweb.github.io/projects-docs/likyly-recsys/architecture.html"
   },
   {
     id: "002",
     name: "DATA TO FORM",
     category: "SaaS Form Automation",
-    value: "Turn spreadsheets into completed web forms in minutes, not hours.",
-    description: "Node.js/Playwright automation pipeline using multi-provider LLMs to map and prefill web forms from Excel and CSV data.",
+    value: "Turn your unstructured data into ready-to-submit web forms — no manual re-typing.",
+    description: "A 4-level matching cascade (synonyms, learned memory, local semantic model, then LLM fallback) maps spreadsheet columns to form fields with confidence scoring.",
     status: "ACTIVE",
     stack: ["Node.js", "Playwright", "LLM", "ONNX"],
-    github: "https://github.com/arnoweb/data-to-form"
+    github: "https://github.com/arnoweb/data-to-form",
+    docsUrl: "https://arnoweb.github.io/projects-docs/data-to-form/",
+    architectureUrl: "https://arnoweb.github.io/projects-docs/data-to-form/architecture.html"
   },
   {
     id: "003",
@@ -40,7 +44,9 @@ const priorityProjects = [
     description: "Fine-tuned Hugging Face language models power a retrieval-driven FAQ interface.",
     status: "ACTIVE",
     stack: ["Python", "Hugging Face", "Generative AI"],
-    github: "https://github.com/arnoweb/gen-ai-faq"
+    github: "https://github.com/arnoweb/gen-ai-faq",
+    docsUrl: "https://arnoweb.github.io/projects-docs/gen-ai-faq/",
+    architectureUrl: "https://arnoweb.github.io/projects-docs/gen-ai-faq/architecture.html"
   }
 ];
 
@@ -131,7 +137,9 @@ function renderPriorityProjects() {
         ${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}
       </div>
       <div class="card-links">
-        <a href="${p.github}" target="_blank" rel="noopener">[ VIEW ON GITHUB ]</a>
+        <a href="${p.github}" target="_blank" rel="noopener">[ GITHUB ]</a>
+        <a href="${p.docsUrl}" target="_blank" rel="noopener">[ BUSINESS VALUE ]</a>
+        <a href="${p.architectureUrl}" target="_blank" rel="noopener">[ ARCHITECTURE ]</a>
       </div>
     </article>
   `).join("");

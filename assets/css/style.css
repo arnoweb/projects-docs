@@ -442,7 +442,8 @@ button { font: inherit; cursor: pointer; }
 }
 .card-links {
   display: flex;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 10px 18px;
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--border-soft);
