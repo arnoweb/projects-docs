@@ -739,7 +739,7 @@
             <div class="compat-category">
               <div class="compat-cat-label">Réponse JSON</div>
               <div class="compat-items">
-                <span class="compat-item">work_id, title, score</span>
+                <span class="compat-item">recommendation_id, strategy, item_id, title, score</span>
                 <span class="compat-item">explanation (reason + scores)</span>
               </div>
             </div>
@@ -790,8 +790,10 @@
         <thead><tr><th>Table / composant</th><th>Rôle</th><th>Écrit par</th></tr></thead>
         <tbody>
           <tr><td><code>clients</code></td><td class="dim">id, nom, hash de clé API, statut actif</td><td class="dim">create_client.py</td></tr>
-          <tr><td>Profil produit (title, description, genre_1, ...)</td><td class="dim">Contenu léger — prix/stock/images restent dans le système du client</td><td class="dim">PUT/DELETE /products/&lcub;id&rcub;/profile</td></tr>
-          <tr><td><code>interactions</code></td><td class="dim">Événements purchase/view, quantité, horodatage</td><td class="dim">POST /events/purchase, /events/view</td></tr>
+          <tr><td>Item (title, description, properties libres)</td><td class="dim">Contenu léger — prix/stock/images restent dans le système du client</td><td class="dim">PUT/DELETE /items/&lcub;item_id&rcub;, POST /items/import</td></tr>
+          <tr><td><code>id_map</code></td><td class="dim">Identifiants du client (chaînes : SKU, UUID, gid Shopify…) ↔ entiers internes denses du moteur (l'ALS est indexé par ces entiers)</td><td class="dim">écritures d'items, d'users et d'événements</td></tr>
+          <tr><td><code>interactions</code></td><td class="dim">Événements (impression, view, click, add_to_cart, remove_from_cart, purchase…), user et/ou session anonyme, recommendation_id, placement, properties, quantité, horodatage</td><td class="dim">POST /events/&lcub;event_type&rcub;, POST /events/batch</td></tr>
+          <tr><td><code>recommendations</code></td><td class="dim">Trace minimale de chaque appel de recommandation (ids uniquement) pour l'attribution : CTR, conversion, revenu par stratégie et par placement</td><td class="dim">POST /getRec et endpoints par stratégie</td></tr>
           <tr><td><code>product_embeddings</code> (pgvector)</td><td class="dim">Embedding sentence-transformers (384 dim, all-MiniLM-L12-v2) par produit</td><td class="dim">compute_and_store_product_embedding(), backfill_embeddings.py</td></tr>
           <tr><td><code>model_versions</code></td><td class="dim">Historique d'entraînement ALS : hyperparamètres, precision@10, version active</td><td class="dim">train_and_maybe_promote_model()</td></tr>
           <tr><td>migrate_csv_to_postgres.py</td><td class="dim">Bascule le jeu de données CSV historique (movies/books/shoes) vers Postgres</td><td class="dim">exécuté manuellement, une fois par migration</td></tr>
@@ -953,11 +955,19 @@
       </div>
       <div class="deploy-card">
         <h4>Routage Caddy (hôte)</h4>
-        <p>Le reverse proxy Caddy du droplet route <code>api.likyly.com</code> et <code>www.likyly.com/recsys-api/</code> vers le conteneur <code>recsys-api</code> sur le port 6061.</p>
+        <p>Le reverse proxy Caddy du droplet route <code>api.likyly.com</code> et <code>www.likyly.com/recsys-api/</code> vers la passerelle APISIX, qui transmet ensuite au conteneur <code>recsys-api</code> sur le port 6061.</p>
       </div>
       <div class="deploy-card">
         <h4>Séparation entraînement / service</h4>
         <p>Le réentraînement s'exécute en tâche d'arrière-plan dans le même process API (background_tasks) ; seul le fichier modèle versionné et sa ligne MLflow sont produits, le service continue de répondre pendant l'entraînement.</p>
+      </div>
+      <div class="deploy-card">
+        <h4>Passerelle API (APISIX)</h4>
+        <p>Déployée (config dans <code>gateway/</code>) : Apache APISIX (etcd + dashboard intégré, exposé uniquement en localhost via tunnel SSH) s'intercale entre Caddy et <code>recsys-api</code>, rate-limiting actif (20 req/s, burst 10), sans modifier l'authentification applicative par <code>X-API-Key</code>.</p>
+      </div>
+      <div class="deploy-card">
+        <h4>Outillage — Hoppscotch</h4>
+        <p>Client API auto-hébergé (<code>gateway/</code>, image <code>hoppscotch/hoppscotch</code> aio) pour tester <code>recsys-api</code> à la main, hors chemin de requête de production. Déployé ; en attente du DNS <code>hoppscotch.likyly.com</code> pour être accessible publiquement.</p>
       </div>
     </div>
   </section>
