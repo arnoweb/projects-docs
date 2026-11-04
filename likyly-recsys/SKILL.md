@@ -144,11 +144,19 @@ URL, or call the push endpoint from their own code when products change.
    interaction (view the page, click a card, ...) before it shows up - say so rather than
    treating it as broken on the first check.
 
+**Cached answers.** LIKYLY keeps an anonymous visitor's answer for a product for an hour (and
+the site's SDK keeps it in the browser): a page can show the previous recommendations right after
+a change. A catalog or placement change empties LIKYLY's cache on its own; for anything else
+(stock handled outside LIKYLY, a deploy) or when the developer wants to see fresh results now,
+call `purge_recommendation_cache` (the developer can also run `npx @likyly/wizard cache clear
+[placement]` or `/likyly-clear-cache` in Claude Code), and tell them the browser keeps its own
+copy per tab: open the page in a new tab to see the fresh recommendations. Never purge on every check: it is not needed to validate an integration.
+
 ## Final report
 
 End every LIKYLY task - finished or stopped - with this report and nothing after it: a table
 the developer reads in five seconds, links to check for themselves, and the single next
-action. Write it in the developer's language. **12 lines at most** outside the table. No
+action. Write it in the developer's language. **16 lines at most** outside the table. No
 narration of what you did, no tool names, no scopes, no explanations of how LIKYLY works,
 no list of optional clean-ups.
 
@@ -169,6 +177,11 @@ Code: <N> files changed - `<main file>`, `<other file>`
 - In LIKYLY: https://www.likyly.com/account/recommendations (status of each placement)
 - Your catalog: https://www.likyly.com/account/catalogues/<catalog>/parcourir
 
+**Your setup**
+- Account: <email> · workspace <name> - sign in to likyly.com with it to see this catalog
+- Cache: LIKYLY keeps an anonymous visitor's answer 1 h per product, the browser 1 h per tab; both refresh on their own when the catalog or the placement changes
+- Commands: `/likyly-clear-cache [placement]` · `/likyly-uninstall` · in a terminal: `npx @likyly/wizard cache clear` · `npx @likyly/wizard uninstall`
+
 **Next:** <one action, who does it (you / LIKYLY)>
 ```
 
@@ -176,7 +189,15 @@ Code: <N> files changed - `<main file>`, `<other file>`
   something that matters to the result (a missing purchase event when the shop has no
   checkout is not a row: leave it out).
 - ✅ Live only when `validate_integration` shows recommendations requested and returned with
-  no ✗. A server error from LIKYLY: ❌ Display, and put its request id in **Next**, nowhere else.
+  no ✗. A server error from LIKYLY (5xx) is ❌ Display.
+- **Next** says what the developer does, in plain words, never an id or a code. For a LIKYLY
+  server error: "Nothing to change in your code: LIKYLY's API fails on this placement. Reload the
+  page once it is fixed, then ask me to check again." Give the request id only if the developer
+  asks how to report it.
+- **Your setup**: read the account and workspace from the comment lines of
+  `.likyly/credentials.env` (`# Account:`, `# Workspace:`); leave the line out if they are not
+  there. List only the commands that exist in the project (`.claude/commands/likyly-*.md`); the
+  two terminal commands always exist.
 - **Next** is the single most useful action. If you made a mistake along the way (a file
   changed by accident), it goes there instead, in one line.
 - The developer can ask for details: then, and only then, explain.
