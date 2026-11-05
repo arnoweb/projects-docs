@@ -47,9 +47,10 @@ const priorityProjects = [
     name: "DATA TO FORM",
     category: "SaaS Form Automation",
     value: "Turn your unstructured data into ready-to-submit web forms — no manual re-typing.",
-    description: "A 4-level matching cascade (synonyms, learned memory, local semantic model, then LLM fallback) maps spreadsheet columns to form fields with confidence scoring.",
+    description: "A 4-level matching cascade (synonyms, learned memory, local semantic model, then LLM fallback) maps spreadsheet columns to form fields. The server-side browser is streamed live into the user's tab, who can watch and take over at any time.",
     status: "ACTIVE",
-    stack: ["Local Encoder (ONNX)", "LLM (fallback)", "Node.js", "Playwright"],
+    highlight: "Live Browser Streaming (CDP Screencast)",
+    stack: ["Node.js", "Playwright", "WebSocket", "Local Encoder (ONNX)", "LLM (fallback)", "SQLite"],
     // TODO: github.com/arnoweb/data-to-form currently 404s — confirm the real repo URL
     github: "https://github.com/arnoweb",
     liveUrl: "https://datatoform.com",

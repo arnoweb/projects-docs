@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data To Form — Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="Data To Form — the 4-level column-matching cascade and technical stack.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .dg text { font-family: var(--font-mono); fill: var(--text-dim); font-size: 10px; }
+    .dg .t { fill: var(--text); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+    .dg .ta { fill: var(--accent); font-size: 11px; font-weight: 700; }
+    .dg .tb { fill: var(--accent-amber); font-size: 9.5px; letter-spacing: .06em; }
+    .dg .lbl { fill: var(--accent-amber); font-size: 9.5px; }
+    .dg .box { fill: var(--bg); stroke: var(--border); stroke-width: 1; }
+    .dg .box-a { fill: var(--bg); stroke: var(--accent-dim); stroke-width: 1.2; }
+    .dg .zone { fill: none; stroke: var(--border-soft); stroke-dasharray: 4 4; }
+    .dg .ln { stroke: var(--accent); stroke-width: 1.3; fill: none; }
+    .dg .ah { fill: var(--accent); }
+  </style>
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 003 — SAAS FORM AUTOMATION</div>
+    <h1 class="doc-title">DATA TO FORM <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
+    <p class="doc-lede">A full Node.js stack: the automated browser is streamed live into the user's tab
+    (CDP screencast), and the LLM is only the 4th and last level of matching.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Node.js · Express</span>
+      <span class="tag-chip">CDP Screencast</span>
+      <span class="tag-chip">WebSocket</span>
+      <span class="tag-chip">Playwright</span>
+      <span class="tag-chip">SheetJS</span>
+      <span class="tag-chip">SQLite</span>
+      <span class="tag-chip">ONNX Runtime</span>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">4-Level Matching Cascade</h2>
+      <p>Each spreadsheet column walks through these levels in order — as soon as one answers with enough confidence, the rest are skipped.</p>
+      <div class="doc-steps">
+        <div class="doc-step">
+          <div class="doc-step-num">01</div>
+          <div>
+            <div class="doc-step-title">Synonyms</div>
+            <div class="doc-step-desc">A dictionary of roughly 190 known labels (FR/EN/ES) instantly
+            recognizes common columns — name, email, address, date of birth, and similar.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">02</div>
+          <div>
+            <div class="doc-step-title">Memory</div>
+            <div class="doc-step-desc">Matches already validated for a given form — by a user, or by
+            a previous LLM call — are cached and reused automatically the next time (threshold ≥ 0.92,
+            source: cache / user).</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">03</div>
+          <div>
+            <div class="doc-step-title">Local encoder (ONNX)</div>
+            <div class="doc-step-desc">A quantized <span class="mono">Xenova/all-MiniLM-L6-v2</span>
+            model (~23MB) runs in-process — no network call — and ranks candidates by cosine
+            similarity between the column's embedding and each form field's embedding.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">04</div>
+          <div>
+            <div class="doc-step-title">LLM — last resort</div>
+            <div class="doc-step-desc">Rare: only the columns still unresolved after the first three
+            levels are sent to an LLM (local model, or Anthropic / OpenAI / Hugging Face with your
+            own key).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Live Browser Streaming (CDP Screencast)</h2>
+      <p>
+        The browser that fills the form runs on the server, yet the user <strong>sees it and
+        controls it live in their own tab</strong>. There is nothing to install and no VNC client.
+        Playwright drives a headed Chromium inside the Docker container, which renders to a
+        virtual screen (Xvfb). The Chrome DevTools Protocol command
+        <span class="mono">Page.startScreencast</span> sends JPEG frames, which go to the page over
+        a WebSocket and are drawn on a <span class="mono">&lt;canvas&gt;</span>.
+      </p>
+      <div class="doc-diagram">
+        <svg class="dg" viewBox="0 0 760 250" role="img" aria-labelledby="sc-title sc-desc">
+          <title id="sc-title">CDP screencast streaming</title>
+          <desc id="sc-desc">In the Docker container, Playwright drives a headed Chromium rendered on Xvfb. The Chrome DevTools Protocol screencast produces JPEG frames that the Node.js server sends over a WebSocket to a canvas in the user's browser. Clicks and keystrokes go back over the same WebSocket and Playwright replays them.</desc>
+          <defs><marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+          <rect class="zone" x="10" y="24" width="440" height="216" rx="3"/>
+          <text class="tb" x="20" y="18">SERVER · DOCKER CONTAINER</text>
+          <rect class="zone" x="520" y="24" width="230" height="216" rx="3"/>
+          <text class="tb" x="530" y="18">USER'S BROWSER TAB</text>
+
+          <rect class="box" x="30" y="45" width="190" height="80" rx="3"/>
+          <text class="t" x="44" y="67">HEADED CHROMIUM</text>
+          <text x="44" y="87">on Xvfb (virtual screen)</text>
+          <text x="44" y="103">the target web form</text>
+
+          <rect class="box" x="30" y="150" width="190" height="70" rx="3"/>
+          <text class="t" x="44" y="172">PLAYWRIGHT</text>
+          <text x="44" y="190">fills fields, replays</text>
+          <text x="44" y="205">clicks &amp; keystrokes</text>
+
+          <rect class="box-a" x="250" y="45" width="180" height="175" rx="3"/>
+          <text class="ta" x="264" y="67">NODE.JS SERVER</text>
+          <text x="264" y="87">Express + ws</text>
+          <text x="264" y="111">CDP session:</text>
+          <text x="264" y="126">Page.startScreencast</text>
+          <text x="264" y="141">JPEG q75, 1280×900</text>
+          <text x="264" y="165">ack each frame</text>
+          <text x="264" y="180">restart after every</text>
+          <text x="264" y="195">navigation</text>
+
+          <rect class="box-a" x="540" y="45" width="190" height="175" rx="3"/>
+          <text class="ta" x="554" y="67">&lt;CANVAS&gt; LIVE VIEW</text>
+          <text x="554" y="87">frames drawn as they</text>
+          <text x="554" y="102">arrive</text>
+          <text x="554" y="126">mouse &amp; keyboard</text>
+          <text x="554" y="141">captured on the canvas</text>
+          <text x="554" y="165">no plugin, no VNC,</text>
+          <text x="554" y="180">nothing to install</text>
+
+          <line class="ln" x1="220" y1="85" x2="248" y2="85" marker-end="url(#sa)"/>
+          <line class="ln" x1="248" y1="185" x2="222" y2="185" marker-end="url(#sa)"/>
+          <line class="ln" x1="125" y1="150" x2="125" y2="127" marker-end="url(#sa)"/>
+
+          <line class="ln" x1="430" y1="95" x2="538" y2="95" marker-end="url(#sa)"/>
+          <text class="lbl" x="440" y="87">JPEG frames</text>
+          <text class="lbl" x="440" y="110">WebSocket</text>
+          <line class="ln" x1="540" y1="160" x2="432" y2="160" marker-end="url(#sa)"/>
+          <text class="lbl" x="440" y="152">click · type</text>
+          <text class="lbl" x="440" y="175">key · move</text>
+        </svg>
+        <div class="doc-diagram-caption">FIG. 1 — The browser runs on the server; the user sees and steers it from their own tab.</div>
+      </div>
+      <p>
+        Each frame is acknowledged (<span class="mono">screencastFrameAck</span>), so a slow
+        client slows the stream down instead of freezing it. The screencast stops at every
+        navigation, so it starts again automatically. Clicks, typing and key presses go back
+        over the same WebSocket and Playwright replays them on the page. The user can log in or
+        solve a captcha by hand, then let the automatic filling continue.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">One Node.js Stack</h2>
+      <p>
+        There is no Python service. One Node.js process (Express) serves the site, runs the
+        WebSocket sessions, drives Playwright and runs the ONNX encoder in-process through
+        Transformers.js. The source file is parsed with SheetJS and is never written to disk.
+        Validated mappings are stored in SQLite (better-sqlite3) and reused on later runs.
+        LLM calls are traced in Langfuse.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="https://datatoform.com" target="_blank" rel="noopener" class="btn btn-secondary">[ LIVE SITE ]</a>
+      <a href="portfolio-business-value.html" class="btn btn-secondary">[ BUSINESS VALUE ]</a>
+      <a href="https://github.com/arnoweb/data-to-form" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>
