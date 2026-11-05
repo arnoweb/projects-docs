@@ -39,7 +39,6 @@ const priorityProjects = [
     stack: ["Multi-agent LLM review", "n8n", "Langfuse", "FastAPI + APISIX", "Tauri / Rust", "MCP"],
     github: "https://github.com/skillzforest/skillzforest-skills",
     liveUrl: "https://skillzforest.com",
-    video: "assets/videos/skillzforest-demo.mp4",
     docsUrl: "skillzforest/portfolio-business-value.html",
     architectureUrl: "skillzforest/portfolio-architecture.html"
   },
@@ -53,6 +52,7 @@ const priorityProjects = [
     stack: ["Local Encoder (ONNX)", "LLM (fallback)", "Node.js", "Playwright"],
     // TODO: github.com/arnoweb/data-to-form currently 404s — confirm the real repo URL
     github: "https://github.com/arnoweb",
+    liveUrl: "https://datatoform.com",
     docsUrl: "data-to-form/portfolio-business-value.html",
     architectureUrl: "data-to-form/portfolio-architecture.html"
   },
