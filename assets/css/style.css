@@ -505,6 +505,9 @@ button { font: inherit; cursor: pointer; }
   padding: 16px;
   transition: border-color .2s var(--ease), transform .2s var(--ease);
 }
+.lab-card { display: flex; flex-direction: column; }
+.lab-card .card-links { margin-top: auto !important; }
+.lab-tags { margin: 10px 0 12px; }
 .lab-card:hover { border-color: var(--accent-amber); transform: translateY(-2px); }
 .lab-id {
   font-family: var(--font-mono);

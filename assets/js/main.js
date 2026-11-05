@@ -75,19 +75,29 @@ const priorityProjects = [
 // Source: https://github.com/arnoweb (pinned repositories)
 const labProjects = [
   {
-    id: "ML-014",
-    name: "Golf & Performance",
-    description: "Linear regression case study predicting golf performance from player and course statistics.",
-    status: "OPEN SOURCE",
-    github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb"
+    id: "AI-031",
+    name: "ROMKADE",
+    description: "Turns a retro handheld (Anbernic, Miyoo…) into a console run from the computer over Wi-Fi. Duke, the AI assistant, knows every game on the card and drives the console. An MCP server lets ChatGPT, Claude or Google Home launch a game, and a typo-tolerant search finds any title.",
+    status: "ACTIVE",
+    stack: ["AI Assistant", "MCP Server", "Typesense Search", "Local LLM (Ollama)", "FastAPI + React"],
+    liveUrl: "https://romkade.com",
+    github: "https://github.com/RomKade/romkade-manager"
   },
   {
-    // TODO: confirm the real repository URL and description for X-Plane MCP
-    id: "MCP-027",
-    name: "X-Plane MCP",
-    description: "Model Context Protocol server to pilot X-Plane directly from an AI agent.",
-    status: "EXPERIMENTAL",
-    github: "https://github.com/arnoweb"
+    id: "SIM-027",
+    name: "XP-FlightDeck",
+    description: "Gamification of the X-Plane 12 flight simulator. A web deck on a tablet flies the plane and runs scored missions: race gates and pylons, balloons to pop, ribbons to cut, a landing on a moving truck. A Node.js relay talks to X-Plane over WebSocket, and a native C++ plugin draws the mission objects in the sim.",
+    status: "ACTIVE",
+    stack: ["Gamification", "WebSocket", "C++ Plugin (X-Plane SDK)", "Node.js Relay"],
+    liveUrl: "https://www.xp-flightdeck.com"
+  },
+  {
+    id: "ML-014",
+    name: "Golf & Performance",
+    description: "Pure machine learning: predicts the carry distance of a 3-wood from launch-monitor data. Univariate and multivariate KNN regression and linear regression, compared with K-fold cross-validation, hyperparameter tuning and RMSE.",
+    status: "OPEN SOURCE",
+    stack: ["Machine Learning", "Linear Regression", "KNN Regression", "K-Fold CV", "scikit-learn"],
+    github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb"
   },
   {
     id: "EDGE-021",
@@ -205,15 +215,18 @@ function setupClickableCards() {
 function renderLabProjects() {
   const grid = document.getElementById("lab-projects-grid");
   if (!grid) return;
+  const ext = 'target="_blank" rel="noopener"';
   grid.innerHTML = labProjects.map((p) => `
     <article class="lab-card reveal">
       <div class="lab-id">[ ${p.id} ]</div>
       <h4 class="lab-name">${p.name}</h4>
       <p class="lab-desc">${p.description}</p>
+      ${p.stack ? `<div class="tech-tags lab-tags">${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}</div>` : ""}
       <div class="lab-status">STATUS: ${p.status}</div>
-      <div class="card-links" style="border-top: none; padding-top: 8px; margin-top: 8px;">
-        <a href="${p.github}" target="_blank" rel="noopener">GITHUB</a>
-        ${p.video ? `<a href="#" data-video="${p.video}" data-video-title="${p.name}">WATCH DEMO</a>` : ""}
+      <div class="card-links card-links--icons" style="border-top: none; padding-top: 8px; margin-top: 8px;">
+        ${p.liveUrl ? cardLink("site", "SITE", "Live site", `href="${p.liveUrl}" ${ext}`) : ""}
+        ${p.github ? cardLink("github", "GITHUB", "Source code on GitHub", `href="${p.github}" ${ext}`) : ""}
+        ${p.video ? cardLink("demo", "DEMO", "Watch the demo", `href="#" data-video="${p.video}" data-video-title="${p.name}"`) : ""}
       </div>
     </article>
   `).join("");
