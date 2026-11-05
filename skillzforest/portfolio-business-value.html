@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillzForest — Business Value | ARNAUD.BRETON</title>
+  <meta name="description" content="SkillzForest — a marketplace and desktop manager for AI skills: every skill reviewed by AI agents and a human, installed in one click in Claude, Codex, Cursor and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 002 — AI SKILLS MARKETPLACE &amp; DESKTOP MANAGER</div>
+    <h1 class="doc-title">SKILLZFOREST <span class="mono" style="color: var(--text-dim);">// BUSINESS VALUE</span></h1>
+    <p class="doc-lede">Find trusted AI skills, install them in one click in the AI tools you already use,
+    and keep them up to date — without ever touching a file path or a <code>SKILL.md</code>.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Agent Skills</span>
+      <span class="tag-chip">AI Security Review</span>
+      <span class="tag-chip">Multi-runtime Distribution</span>
+      <span class="tag-chip">n8n Automation</span>
+      <span class="tag-chip">MCP (in design)</span>
+    </div>
+
+    <div class="doc-video">
+      <video src="../assets/videos/skillzforest-demo.mp4" poster="../assets/videos/skillzforest-demo-poster.jpg" controls playsinline preload="none"></video>
+      <div class="doc-video-caption">DEMO — From a goal to a skill working in your AI. Rendered in code with Remotion.</div>
+    </div>
+
+    <div class="doc-note"><strong>STATUS: PRE-LAUNCH</strong> — the website, API and desktop app run end to end;
+    the public site is not online yet. Screens below are from the running build.</div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Problem</h2>
+      <p>
+        Agent Skills (Claude Code, Codex, Cursor, Gemini CLI, Copilot…) turn a general assistant into
+        a specialist. But today they are shared as zip files and GitHub folders: nobody knows if a skill
+        is safe, whether it works on <em>their</em> tool, or where to copy it. A skill is code and
+        instructions that an agent runs with access to your files, your terminal and your keys —
+        installing an unchecked one is a real security risk.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">The Solution</h2>
+      <ul class="doc-check-list">
+        <li><strong>A marketplace with a trust layer</strong> — skills, packs, rules, workflows and MCP
+        servers, from SkillzForest, publishers or the community. Each one shows who made it, how it was
+        checked and which tools it works with.</li>
+        <li><strong>Every skill reviewed, whoever wrote it</strong> — security scanners, five specialised
+        AI auditors, a real run in a sandbox with no Internet, then a human decision. A live skill is
+        re-reviewed as soon as the rules change.</li>
+        <li><strong>One skill, every tool</strong> — a reviewed skill is converted automatically for 13
+        targets: folders for Claude Code, Cursor, Codex, Gemini CLI, Copilot, OpenCode, Mistral Vibe; upload
+        packages for Copilot Studio, Gemini Enterprise, Perplexity, AWS AgentCore…</li>
+        <li><strong>A desktop Manager</strong> — detects the AI tools on the computer, installs a skill or a
+        whole pack in the right place, finds skills already installed by hand, and keeps everything updated.</li>
+        <li><strong>Teams &amp; enterprises</strong> — organizations, enterprise sign-in (Keycloak, SSO),
+        a dedicated Manager per company.</li>
+      </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">What It Looks Like</h2>
+      <div class="doc-shots">
+        <figure class="doc-shot">
+          <a href="screens/web-home.jpg" target="_blank" rel="noopener"><img src="screens/web-home.jpg" alt="SkillzForest home page: search a goal, find skills and packs, works with Claude, Codex, ChatGPT, Cursor and more" loading="lazy"></a>
+          <figcaption>Website — start from a goal, not from a file</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/web-pack.jpg" target="_blank" rel="noopener"><img src="screens/web-pack.jpg" alt="Product page of the From GitHub ticket to code pack, with its generated video" loading="lazy"></a>
+          <figcaption>Product page — the video is generated by an automated pipeline</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/web-trust-path.jpg" target="_blank" rel="noopener"><img src="screens/web-trust-path.jpg" alt="The seven review stages of a skill, from submission to publication" loading="lazy"></a>
+          <figcaption>AI security page — the 7 review stages, made public</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/mgr-home.jpg" target="_blank" rel="noopener"><img src="screens/mgr-home.jpg" alt="SkillzForest Manager desktop app home: install a skill or a pack in 4 steps" loading="lazy"></a>
+          <figcaption>Desktop Manager — install a skill or a pack in 4 steps</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Where AI Does the Work</h2>
+      <p>The product is built around agents — on the user's side and behind the scenes:</p>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Job</th><th>Before</th><th>With SkillzForest</th></tr></thead>
+          <tbody>
+            <tr><td>Checking a skill is safe</td><td>Read every file by hand</td><td>Scanners + 5 LLM auditors + sandboxed run + judge, then one human decision</td></tr>
+            <tr><td>Making it work on another tool</td><td>Rewrite it per tool</td><td>Automatic conversion for 13 targets from the reviewed bytes</td></tr>
+            <tr><td>Product page video</td><td>Hours of editing</td><td>One click: Claude Code writes it, Remotion renders it in FR and EN</td></tr>
+            <tr><td>SEO &amp; blog</td><td>Manual audits and writing</td><td>SkillzForest's own SEO skills audit the site and draft its articles; a dedicated agent token can write drafts, never publish</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Who It's For</h2>
+      <p>
+        <strong>Individuals</strong> who want their AI to do more (social media, CV, writing, gaming…),
+        <strong>professionals and teams</strong> (development, SEO, presales, design) who want vetted,
+        maintained skills, <strong>publishers</strong> who want to distribute and sell theirs, and
+        <strong>companies</strong> that need to control which AI capabilities their people install.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="portfolio-architecture.html" class="btn btn-secondary">[ TECHNICAL ARCHITECTURE ]</a>
+      <a href="https://github.com/skillzforest/skillzforest-skills" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB — SKILLS ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillzForest — Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="SkillzForest — decoupled architecture (FastAPI behind APISIX, Next.js, Tauri/Rust), multi-agent LLM skill review orchestrated by n8n and traced in Langfuse, sandboxed functional tests, multi-runtime distribution and the MCP gateway in design.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    /* Diagram styles: colours come from the portfolio tokens */
+    .dg text { font-family: var(--font-mono); fill: var(--text-dim); font-size: 10px; }
+    .dg .t { fill: var(--text); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+    .dg .ta { fill: var(--accent); font-size: 11px; font-weight: 700; }
+    .dg .tw { fill: var(--accent-amber); font-size: 11px; font-weight: 700; }
+    .dg .tb { fill: var(--accent-amber); font-size: 9.5px; letter-spacing: .06em; }
+    .dg .lbl { fill: var(--accent-amber); font-size: 9.5px; }
+    .dg .bad { fill: var(--danger); font-size: 9.5px; }
+    .dg .box { fill: var(--bg); stroke: var(--border); stroke-width: 1; }
+    .dg .box-a { fill: var(--bg); stroke: var(--accent-dim); stroke-width: 1.2; }
+    .dg .box-w { fill: var(--bg); stroke: var(--accent-amber); stroke-width: 1.1; stroke-dasharray: 5 4; }
+    .dg .zone { fill: none; stroke: var(--border-soft); stroke-dasharray: 4 4; }
+    .dg .zone-w { fill: none; stroke: var(--accent-amber); stroke-opacity: .45; stroke-dasharray: 4 4; }
+    .dg .sub { fill: var(--panel); stroke: var(--border-soft); }
+    .dg .ln { stroke: var(--accent); stroke-width: 1.3; fill: none; }
+    .dg .ln-d { stroke: var(--text-faint); stroke-width: 1.2; fill: none; stroke-dasharray: 3 3; }
+    .dg .ln-w { stroke: var(--accent-amber); stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
+    .dg .ah { fill: var(--accent); }
+    .dg .ah-d { fill: var(--text-faint); }
+    .dg .ah-w { fill: var(--accent-amber); }
+    .doc-chain { white-space: pre; line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+    <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+  </header>
+
+  <main class="doc-page">
+    <div class="doc-kicker">// PROJECT ID: 002 — AI SKILLS MARKETPLACE &amp; DESKTOP MANAGER</div>
+    <h1 class="doc-title">SKILLZFOREST <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
+    <p class="doc-lede">A decoupled platform: one API that only keeps state, a website, a desktop app that
+    does the installing, and AI workers outside the API that review skills and make videos — orchestrated
+    by n8n, traced in Langfuse. An MCP gateway is being designed on the same edge.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">FastAPI · Postgres</span>
+      <span class="tag-chip">Apache APISIX</span>
+      <span class="tag-chip">Next.js 16</span>
+      <span class="tag-chip">Tauri 2 · Rust</span>
+      <span class="tag-chip">n8n</span>
+      <span class="tag-chip">Langfuse</span>
+      <span class="tag-chip">Claude Code headless</span>
+      <span class="tag-chip">Docker sandbox</span>
+      <span class="tag-chip">MCP</span>
+    </div>
+
+    <div class="doc-tabs" role="tablist" aria-label="Architecture views">
+      <button class="doc-tab" role="tab" id="tab-platform" aria-controls="platform" aria-selected="true">01 · Decoupled platform</button>
+      <button class="doc-tab" role="tab" id="tab-ai" aria-controls="ai" aria-selected="false" tabindex="-1">02 · AI agents</button>
+      <button class="doc-tab" role="tab" id="tab-automation" aria-controls="automation" aria-selected="false" tabindex="-1">03 · n8n automations</button>
+      <button class="doc-tab" role="tab" id="tab-sandbox" aria-controls="sandbox" aria-selected="false" tabindex="-1">04 · Sandbox &amp; trust</button>
+      <button class="doc-tab" role="tab" id="tab-distribution" aria-controls="distribution" aria-selected="false" tabindex="-1">05 · Distribution &amp; Manager</button>
+      <button class="doc-tab" role="tab" id="tab-mcp" aria-controls="mcp" aria-selected="false" tabindex="-1">06 · MCP (in design)</button>
+      <button class="doc-tab" role="tab" id="tab-stack" aria-controls="stack" aria-selected="false" tabindex="-1">07 · Stack</button>
+    </div>
+
+    <!-- ============================== 01 PLATFORM ============================== -->
+    <div class="doc-panel" role="tabpanel" id="platform" aria-labelledby="tab-platform">
+      <section class="doc-section">
+        <h2 class="doc-section-title">Five pieces, one rule each</h2>
+        <p>Each piece has one job and talks to the others only through HTTP contracts. The API
+        <strong>never executes anything</strong>: it doesn't run a skill, call an LLM for a catalog item,
+        read user code or touch a filesystem. That is what keeps it small, testable and safe to expose.</p>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 500" role="img" aria-labelledby="pf-title pf-desc">
+            <title id="pf-title">SkillzForest platform architecture</title>
+            <desc id="pf-desc">The website, the Manager desktop app, the developer portal and, later, AI agents through MCP reach the FastAPI service through the Apache APISIX gateway. FastAPI stores state in PostgreSQL, searches with Typesense, verifies Supabase and Keycloak tokens and takes payments with Stripe. AI workers on the admin's Mac — n8n, the reviewer runner, the video runner and Langfuse — are told about jobs by webhook and report back to the API.</desc>
+            <defs>
+              <marker id="p1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="p1w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-w" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="p1d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-d" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <text class="tb" x="10" y="24">CLIENTS</text>
+            <text class="tb" x="215" y="24">EDGE</text>
+            <text class="tb" x="305" y="24">SKILLZFOREST API · STATE ONLY</text>
+            <text class="tb" x="560" y="24">DATA &amp; SERVICES</text>
+
+            <!-- Clients -->
+            <rect class="box" x="10" y="40" width="170" height="68" rx="3"/>
+            <text class="t" x="22" y="61">WEBSITE</text>
+            <text x="22" y="79">Next.js 16 · React 19</text>
+            <text x="22" y="94">catalog · trust · checkout</text>
+
+            <rect class="box" x="10" y="122" width="170" height="68" rx="3"/>
+            <text class="t" x="22" y="143">DESKTOP MANAGER</text>
+            <text x="22" y="161">Tauri 2 · Rust · React</text>
+            <text x="22" y="176">installs · SQLite · keychain</text>
+
+            <rect class="box" x="10" y="204" width="170" height="55" rx="3"/>
+            <text class="t" x="22" y="225">DEVELOPER PORTAL</text>
+            <text x="22" y="243">Hoppscotch · "Try API"</text>
+
+            <rect class="box-w" x="10" y="273" width="170" height="62" rx="3"/>
+            <text class="tw" x="22" y="294">AI AGENTS · MCP</text>
+            <text x="22" y="311">Claude · Codex · Cursor</text>
+            <text class="lbl" x="22" y="326">in design</text>
+
+            <!-- Edge -->
+            <rect class="box-a" x="215" y="40" width="60" height="295" rx="3"/>
+            <text class="ta" transform="translate(240 188) rotate(-90)" text-anchor="middle">APACHE APISIX</text>
+            <text transform="translate(258 188) rotate(-90)" text-anchor="middle">rate limit · CORS · IP rules · req-id</text>
+
+            <line class="ln" x1="180" y1="74" x2="213" y2="74" marker-end="url(#p1)"/>
+            <line class="ln" x1="180" y1="156" x2="213" y2="156" marker-end="url(#p1)"/>
+            <line class="ln" x1="180" y1="231" x2="213" y2="231" marker-end="url(#p1)"/>
+            <line class="ln-w" x1="180" y1="304" x2="213" y2="304" marker-end="url(#p1w)"/>
+            <line class="ln" x1="275" y1="188" x2="303" y2="188" marker-end="url(#p1)"/>
+
+            <!-- API -->
+            <rect class="box-a" x="305" y="40" width="220" height="295" rx="3"/>
+            <rect class="sub" x="316" y="50" width="198" height="38" rx="2"/>
+            <text class="t" x="326" y="66">AUTH</text>
+            <text x="326" y="80">verifies JWT · routed by issuer</text>
+            <rect class="sub" x="316" y="96" width="198" height="38" rx="2"/>
+            <text class="t" x="326" y="112">CATALOG &amp; SEARCH</text>
+            <text x="326" y="126">one CatalogItem table · 8 types</text>
+            <rect class="sub" x="316" y="142" width="198" height="38" rx="2"/>
+            <text class="t" x="326" y="158">COMMERCE</text>
+            <text x="326" y="172">purchases ≠ entitlements</text>
+            <rect class="sub" x="316" y="188" width="198" height="38" rx="2"/>
+            <text class="t" x="326" y="204">INSTALL STATE</text>
+            <text x="326" y="218">devices · declarative sync</text>
+            <rect class="sub" x="316" y="234" width="198" height="38" rx="2"/>
+            <text class="t" x="326" y="250">REVIEW &amp; VIDEO JOBS</text>
+            <text x="326" y="264">queue · webhooks · results</text>
+            <rect class="sub" x="316" y="280" width="198" height="46" rx="2"/>
+            <text class="t" x="326" y="296">SKILL PIPELINE</text>
+            <text x="326" y="310">detect → review → convert</text>
+            <text x="326" y="322">→ live (admin approves)</text>
+
+            <!-- Data -->
+            <rect class="box-a" x="560" y="40" width="190" height="62" rx="3"/>
+            <text class="ta" x="572" y="61">POSTGRESQL</text>
+            <text x="572" y="79">SQLAlchemy async · Alembic</text>
+            <text x="572" y="93">catalog · users · jobs</text>
+            <rect class="box" x="560" y="114" width="190" height="50" rx="3"/>
+            <text class="t" x="572" y="135">TYPESENSE</text>
+            <text x="572" y="152">typo-tolerant search index</text>
+            <rect class="box" x="560" y="176" width="190" height="64" rx="3"/>
+            <text class="t" x="572" y="197">SUPABASE AUTH</text>
+            <text class="t" x="572" y="212">+ KEYCLOAK</text>
+            <text x="572" y="229">personal · enterprise SSO</text>
+            <rect class="box" x="560" y="252" width="190" height="40" rx="3"/>
+            <text class="t" x="572" y="276">STRIPE · payment links</text>
+            <rect class="box" x="560" y="302" width="190" height="33" rx="3"/>
+            <text class="t" x="572" y="323">FILE STORAGE</text>
+
+            <line class="ln" x1="525" y1="71" x2="558" y2="71" marker-start="url(#p1)" marker-end="url(#p1)"/>
+            <line class="ln" x1="525" y1="139" x2="558" y2="139" marker-end="url(#p1)"/>
+            <line class="ln" x1="525" y1="208" x2="558" y2="208" marker-end="url(#p1)"/>
+            <line class="ln" x1="558" y1="272" x2="527" y2="272" marker-end="url(#p1)"/>
+            <text class="lbl" x="530" y="266">hooks</text>
+            <line class="ln" x1="525" y1="318" x2="558" y2="318" marker-end="url(#p1)"/>
+
+            <!-- Workers -->
+            <rect class="zone" x="10" y="370" width="740" height="110" rx="3"/>
+            <text class="tb" x="750" y="364" text-anchor="end">AI WORKERS · ADMIN'S MAC · OUTSIDE THE API</text>
+            <rect class="box-a" x="22" y="385" width="160" height="82" rx="3"/>
+            <text class="ta" x="34" y="406">N8N</text>
+            <text x="34" y="424">order, gates, approvals</text>
+            <text x="34" y="439">alerts, weekly re-scan</text>
+            <text x="34" y="454">4 workflows</text>
+            <rect class="box" x="202" y="385" width="170" height="82" rx="3"/>
+            <text class="t" x="214" y="406">REVIEWER RUNNER</text>
+            <text x="214" y="424">Python · scanners</text>
+            <text x="214" y="439">5 auditors · judge</text>
+            <text x="214" y="454">sandboxed Claude Code</text>
+            <rect class="box" x="392" y="385" width="170" height="82" rx="3"/>
+            <text class="t" x="404" y="406">VIDEO RUNNER</text>
+            <text x="404" y="424">Claude Code writes</text>
+            <text x="404" y="439">Remotion renders</text>
+            <text x="404" y="454">FR + EN · Discord</text>
+            <rect class="box" x="582" y="385" width="156" height="82" rx="3"/>
+            <text class="t" x="594" y="406">LANGFUSE</text>
+            <text x="594" y="424">self-hosted</text>
+            <text x="594" y="439">versioned prompts</text>
+            <text x="594" y="454">trace · tokens · cost</text>
+
+            <path class="ln-w" d="M340 335 V352 H102 V383" marker-end="url(#p1w)"/>
+            <text class="lbl" x="110" y="349">webhooks: review.queued · video.queued</text>
+            <path class="ln" d="M287 383 V358 H477 V337" marker-end="url(#p1)"/>
+            <path class="ln" d="M477 383 V358" />
+            <text class="lbl" x="296" y="377">claim · progress · result</text>
+            <line class="ln" x1="182" y1="426" x2="200" y2="426" marker-end="url(#p1)"/>
+            <path class="ln" d="M102 467 V475 H440 V469" marker-end="url(#p1)"/>
+            <text class="lbl" x="200" y="489">n8n drives both runners</text>
+            <line class="ln-d" x1="562" y1="426" x2="580" y2="426" marker-end="url(#p1d)"/>
+            <text class="lbl" x="582" y="489">every LLM call traced</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 1 — The API is only the meeting point. Heavy and risky work (running skills, LLM calls, rendering) happens in workers it never trusts with more than a job.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Who owns what</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Piece</th><th>Owns</th><th>Never does</th></tr></thead>
+            <tbody>
+              <tr><td>API (FastAPI)</td><td>Catalog, accounts, commerce, installation <em>state</em>, job queues</td><td>Execute a skill, call an LLM for an item, touch a disk</td></tr>
+              <tr><td>APISIX</td><td>Rate limits, CORS, IP/geo rules, request IDs, logs</td><td>Any business decision (auth, entitlements stay in FastAPI)</td></tr>
+              <tr><td>Website</td><td>Discovery, search, trust pages, checkout, publisher flow, back office</td><td>Install anything locally</td></tr>
+              <tr><td>Manager</td><td>Runtime detection, install / update / uninstall, local inventory, device sync</td><td>Payments, a second marketplace</td></tr>
+              <tr><td>Workers</td><td>Reviews, conversions, videos — pulled as jobs</td><td>Hold state: the API stays the source of truth</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Design decisions</h2>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-title">One CatalogItem table</div>
+            <p>Skill, rule, pack, workflow, plugin, framework, MCP server and tool differ only by
+            <code>type</code>. Packs and workflows are edges in a relation table, never copies.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Library is derived</div>
+            <p><code>GET /me/library</code> is computed live from entitlements, so it can never drift.
+            Owning a pack grants its items dynamically.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Installations are declarative</div>
+            <p>The Manager is the truth about the disk; the API only stores its last report and
+            reconciles statuses (<code>installed</code>, <code>outdated</code>, <code>missing</code>…).</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Two identity providers</div>
+            <p>Supabase for personal accounts, Keycloak organizations for enterprise SSO. The API routes
+            each token by its <code>iss</code> and provisions users on first call.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Search as a second read path</div>
+            <p>Typesense on the internal network for typo-tolerant, as-you-type search; Postgres stays the
+            source for plain browsing. The browser never talks to Typesense.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Mock-first front ends</div>
+            <p>The website and the Manager both run on fixtures with no backend
+            (<code>npm run dev:mock</code>), so UI work never waits on the API.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 02 AI AGENTS ============================== -->
+    <div class="doc-panel" role="tabpanel" id="ai" aria-labelledby="tab-ai" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Where LLMs are used — and where they are not</h2>
+        <p>LLMs do the reading and judging no human could do at scale. Deterministic code keeps the last
+        word on safety: <strong>no agent can lower a verdict set by a rule or a scanner</strong>, and nothing
+        goes live without an admin.</p>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <span class="doc-card-tag">REVIEW · STAGE A</span>
+            <div class="doc-card-title">5 specialised auditors</div>
+            <p>Prompt injection, exfiltration, persistence &amp; tampering, supply chain, intent (does it do
+            what the page promises?). One subject each, run side by side on the whole skill.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">REVIEW · STAGE C</span>
+            <div class="doc-card-title">Claude Code, headless</div>
+            <p><code>claude -p "&lt;example prompt&gt;"</code> with the skill installed, in a sandbox: the
+            product page's own example is actually run.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">REVIEW · STAGE C′ / D</span>
+            <div class="doc-card-title">Evaluator &amp; judge</div>
+            <p>Did the run use the skill, finish, match the page? Then a judge writes the synthesis for the
+            moderator — it can only make the verdict stricter.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">CONTENT</span>
+            <div class="doc-card-title">Product videos</div>
+            <p>Claude Code writes the texts of a Remotion template (checked against its zod schema), or a
+            whole custom composition, then renders FR and EN.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">CONTENT</span>
+            <div class="doc-card-title">SEO &amp; articles</div>
+            <p>SkillzForest's own <code>skf-seo-*</code> skills audit the site and plan articles. An articles
+            agent has a dedicated token: it writes drafts, never publishes or deletes.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">CLASSIFICATION</span>
+            <div class="doc-card-title">AI classification</div>
+            <p>An agent suggests the category, tags and compatible environments of a submitted skill; a person
+            confirms.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">The review chain</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 370" role="img" aria-labelledby="rv-title rv-desc">
+            <title id="rv-title">Skill review chain</title>
+            <desc id="rv-desc">A review job is queued by webhook. Stage 0 runs deterministic rules and scanners and can block the skill. Stage A runs five LLM auditors. A gate decides if a human must approve the run. Stage C runs the skill in a sandboxed Claude Code and C prime evaluates the run. Stage D's judge writes the synthesis and the verdict is posted to the API. A pass or warn is converted for every tool and emailed to the moderator. Every LLM call is traced in Langfuse.</desc>
+            <defs>
+              <marker id="r1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="r1w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-w" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <!-- Row 1 -->
+            <rect class="box" x="10" y="30" width="130" height="110" rx="3"/>
+            <text class="t" x="22" y="52">QUEUED</text>
+            <text x="22" y="72">file attached in</text>
+            <text x="22" y="87">the back office</text>
+            <text class="lbl" x="22" y="110">webhook →</text>
+            <text class="lbl" x="22" y="124">review.queued</text>
+
+            <rect class="box-a" x="165" y="30" width="160" height="110" rx="3"/>
+            <text class="ta" x="177" y="52">0 · RULES</text>
+            <text x="177" y="72">invisible Unicode, blobs</text>
+            <text x="177" y="87">pipe-to-shell, ~/.ssh</text>
+            <text x="177" y="102">gitleaks · shellcheck</text>
+            <text x="177" y="117">bandit · Cisco · NVIDIA</text>
+            <text class="lbl" x="177" y="132">no network · no LLM</text>
+
+            <rect class="box-a" x="350" y="30" width="200" height="110" rx="3"/>
+            <text class="ta" x="362" y="52">A · 5 LLM AUDITORS</text>
+            <text x="362" y="72">prompt injection</text>
+            <text x="362" y="87">exfiltration</text>
+            <text x="362" y="102">persistence · tampering</text>
+            <text x="362" y="117">supply chain</text>
+            <text x="362" y="132">intent vs. behaviour</text>
+
+            <rect class="box-w" x="575" y="30" width="175" height="110" rx="3"/>
+            <text class="tw" x="587" y="52">GATE</text>
+            <text x="587" y="72">risky enough to</text>
+            <text x="587" y="87">ask a human first?</text>
+            <text x="587" y="110">email: run / skip</text>
+            <text x="587" y="125">24 h, then skip</text>
+
+            <line class="ln" x1="140" y1="85" x2="163" y2="85" marker-end="url(#r1)"/>
+            <line class="ln" x1="325" y1="85" x2="348" y2="85" marker-end="url(#r1)"/>
+            <line class="ln" x1="550" y1="85" x2="573" y2="85" marker-end="url(#r1)"/>
+            <line class="ln-w" x1="245" y1="140" x2="245" y2="178" marker-end="url(#r1w)"/>
+            <text class="bad" x="252" y="166">critical → stop</text>
+            <line class="ln" x1="662" y1="140" x2="662" y2="178" marker-end="url(#r1)"/>
+
+            <!-- Row 2 (right to left) -->
+            <rect class="box-a" x="575" y="180" width="175" height="100" rx="3"/>
+            <text class="ta" x="587" y="202">C · SANDBOX RUN</text>
+            <text x="587" y="222">claude -p, skill in</text>
+            <text x="587" y="237">fixtures as workspace</text>
+            <text x="587" y="252">canaries · fs diff</text>
+            <text class="lbl" x="587" y="270">C′ · run evaluated</text>
+
+            <rect class="box-a" x="350" y="180" width="200" height="100" rx="3"/>
+            <text class="ta" x="362" y="202">D · JUDGE + VERDICT</text>
+            <text x="362" y="222">synthesis for the moderator</text>
+            <text x="362" y="237">deterministic floor:</text>
+            <text x="362" y="252">no agent can lower it</text>
+            <text class="lbl" x="362" y="270">pass · warn · fail</text>
+
+            <rect class="box" x="165" y="180" width="160" height="100" rx="3"/>
+            <text class="t" x="177" y="202">API</text>
+            <text x="177" y="222">result stored</text>
+            <text x="177" y="237">fail → item taken down</text>
+            <text class="lbl" x="177" y="270">review.finished</text>
+
+            <rect class="box" x="10" y="180" width="130" height="100" rx="3"/>
+            <text class="t" x="22" y="202">AFTER</text>
+            <text x="22" y="222">convert ×13 tools</text>
+            <text x="22" y="237">email moderator</text>
+            <text x="22" y="252">human puts it live</text>
+
+            <line class="ln" x1="575" y1="230" x2="552" y2="230" marker-end="url(#r1)"/>
+            <line class="ln" x1="350" y1="230" x2="327" y2="230" marker-end="url(#r1)"/>
+            <line class="ln" x1="165" y1="230" x2="142" y2="230" marker-end="url(#r1)"/>
+
+            <!-- Langfuse -->
+            <rect class="sub" x="10" y="305" width="740" height="52" rx="3"/>
+            <text class="t" x="22" y="326">LANGFUSE (SELF-HOSTED)</text>
+            <text x="22" y="344">prompts review/&lt;name&gt; versioned, label "production" · one trace per review: input, output, tokens, cost, prompt version</text>
+            <line class="ln-w" x1="450" y1="140" x2="450" y2="170" />
+            <line class="ln-w" x1="450" y1="280" x2="450" y2="303" marker-end="url(#r1w)"/>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 2 — Rules first, agents second, a sandboxed run third, a human last. Exit code of a local review: 0 pass, 1 warn, 2 fail.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Prompts as versioned assets</h2>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Edited in Langfuse, kept in git</div>
+            <div class="doc-step-desc">Each agent's prompt lives in Langfuse (<code>review/auditor-intent</code>,
+            <code>review/judge</code>…). A version is tried under the <code>staging</code> label, promoted to
+            <code>production</code>, then pulled back into <code>prompts/*.md</code>. If Langfuse is down, the
+            runner falls back to the files.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">A ruleset id on every report</div>
+            <div class="doc-step-desc">Static rules version + scanner versions + each prompt version are hashed into a
+            16-character <code>ruleset</code> id. When it changes, live skills reviewed under the old one are
+            re-reviewed — and taken down if they now fail.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Any provider, per agent</div>
+            <div class="doc-step-desc">Every agent speaks the Anthropic Messages API; a provider is only a base URL and a
+            model. Mixing providers per auditor keeps one model's blind spot from passing a skill. Ollama works too:
+            a local 12B model caught a planted injection and exfiltration script.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">In Langfuse</h2>
+        <div class="doc-shots">
+          <figure class="doc-shot">
+            <a href="screens/langfuse-trace.jpg" target="_blank" rel="noopener"><img src="screens/langfuse-trace.jpg" data-fallback="SCREENSHOT TO ADD — screens/langfuse-trace.jpg" alt="Langfuse trace of a skill review" loading="lazy"></a>
+            <figcaption>One trace per review — each auditor, tokens and cost</figcaption>
+          </figure>
+          <figure class="doc-shot">
+            <a href="screens/langfuse-prompts.jpg" target="_blank" rel="noopener"><img src="screens/langfuse-prompts.jpg" data-fallback="SCREENSHOT TO ADD — screens/langfuse-prompts.jpg" alt="Versioned review prompts in Langfuse" loading="lazy"></a>
+            <figcaption>The agents' prompts, versioned and labelled</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 03 N8N ============================== -->
+    <div class="doc-panel" role="tabpanel" id="automation" aria-labelledby="tab-automation" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">n8n decides the order, the runners do the work</h2>
+        <p>The runners keep no schedule of their own. Every chain — what runs, in which order, when a human
+        must approve, who is alerted — lives in n8n, where each review is an execution you can open node by
+        node and change without redeploying code. The API only fires webhooks and receives results.</p>
+        <div class="doc-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+          <div class="doc-card">
+            <span class="doc-card-tag">33 NODES · WEBHOOK + EVERY 10 MIN</span>
+            <div class="doc-card-title">skill-review</div>
+            <p>Drives the runner stage by stage (claim → A → gate → C → D), asks for approval by email when
+            needed, emails the report, converts a pass/warn for every tool, re-queues from a form, drains the
+            queue if a webhook was missed.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">8 NODES · MONDAY 3 AM</span>
+            <div class="doc-card-title">rescan</div>
+            <p>Reads the runner's current ruleset and re-queues every live skill reviewed under another one or
+            over 30 days ago (50 per sweep). Skips the sweep if Langfuse is down.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">14 NODES · ERROR WORKFLOW + EVERY 5 MIN</span>
+            <div class="doc-card-title">review-alerts</div>
+            <p>Any n8n error, runner down / back, jobs queued &gt; 30 min or running &gt; 60 min, and the daily
+            LLM spend read from Langfuse over budget.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card-tag">20 NODES · WEBHOOK</span>
+            <div class="doc-card-title">product-video</div>
+            <p>One click in the back office: n8n starts the video runner, waits (40 min max), puts the video on
+            the product page, and keeps one Discord message per video updated at each step.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Human in the loop, by design</h2>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Before a risky run</div>
+            <div class="doc-step-desc">A code node scores the stage 0 and A findings. Above the threshold, the
+            workflow pauses and emails an admin with run / skip links; no answer in 24 h means skip.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Before going live</div>
+            <div class="doc-step-desc">Whatever the verdict, an uploaded file stays inactive until an admin approves it.
+            <code>pass</code> only moves an item to <code>automated</code>; <code>verified</code> stays a human decision.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">When something breaks</div>
+            <div class="doc-step-desc">A runner call that fails gives the job back as failed and emails; the alerts
+            workflow watches the runner, stuck jobs and the LLM budget.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Product video pipeline</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 150" role="img" aria-labelledby="vd-title vd-desc">
+            <title id="vd-title">Product video pipeline</title>
+            <desc id="vd-desc">An admin clicks Generate video in the back office. The API queues a job and calls n8n. n8n posts a Discord message and starts the video runner. The runner has Claude Code write the video, Remotion renders it in French and English, and it uploads the files. n8n then puts the video on the product page.</desc>
+            <defs>
+              <marker id="v1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="box" x="10" y="30" width="110" height="90" rx="3"/>
+            <text class="t" x="20" y="52">BACK OFFICE</text>
+            <text x="20" y="72">"Generate</text>
+            <text x="20" y="87">the video"</text>
+            <rect class="box" x="135" y="30" width="110" height="90" rx="3"/>
+            <text class="t" x="145" y="52">API</text>
+            <text x="145" y="72">job queued</text>
+            <text x="145" y="87">10 per day max</text>
+            <rect class="box-a" x="260" y="30" width="110" height="90" rx="3"/>
+            <text class="ta" x="270" y="52">N8N</text>
+            <text x="270" y="72">runner up?</text>
+            <text x="270" y="87">Discord msg</text>
+            <text x="270" y="102">wait ≤ 40 min</text>
+            <rect class="box-a" x="385" y="30" width="110" height="90" rx="3"/>
+            <text class="ta" x="395" y="52">CLAUDE CODE</text>
+            <text x="395" y="72">writes texts</text>
+            <text x="395" y="87">zod-checked</text>
+            <text x="395" y="102">or custom comp.</text>
+            <rect class="box-a" x="510" y="30" width="110" height="90" rx="3"/>
+            <text class="ta" x="520" y="52">REMOTION</text>
+            <text x="520" y="72">render FR + EN</text>
+            <text x="520" y="87">MP4 + poster</text>
+            <text x="520" y="102">upload</text>
+            <rect class="box" x="635" y="30" width="115" height="90" rx="3"/>
+            <text class="t" x="645" y="52">PRODUCT PAGE</text>
+            <text x="645" y="72">media updated</text>
+            <text x="645" y="87">old one kept</text>
+            <text x="645" y="102">Discord: online</text>
+            <line class="ln" x1="120" y1="75" x2="133" y2="75" marker-end="url(#v1)"/>
+            <line class="ln" x1="245" y1="75" x2="258" y2="75" marker-end="url(#v1)"/>
+            <line class="ln" x1="370" y1="75" x2="383" y2="75" marker-end="url(#v1)"/>
+            <line class="ln" x1="495" y1="75" x2="508" y2="75" marker-end="url(#v1)"/>
+            <line class="ln" x1="620" y1="75" x2="633" y2="75" marker-end="url(#v1)"/>
+            <text class="lbl" x="260" y="140">runs on the Mac's Claude plan · the back office polls the job's progress</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 3 — Template mode: about a minute. Custom mode: Claude Code writes its own composition, 10–15 min.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">In n8n</h2>
+        <div class="doc-shots wide">
+          <figure class="doc-shot">
+            <a href="screens/n8n-skill-review.jpg" target="_blank" rel="noopener"><img src="screens/n8n-skill-review.jpg" data-fallback="SCREENSHOT TO ADD — screens/n8n-skill-review.jpg" alt="The skill-review workflow in n8n" loading="lazy"></a>
+            <figcaption>The skill-review workflow — 33 nodes, every review is an execution</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 04 SANDBOX ============================== -->
+    <div class="doc-panel" role="tabpanel" id="sandbox" aria-labelledby="tab-sandbox" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Running an untrusted skill safely</h2>
+        <p>A skill is instructions an agent executes with access to files, a shell and keys. Stage C runs it
+        for real — so the run happens where it can't reach anything, and where every attempt to get out is
+        recorded as evidence.</p>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 300" role="img" aria-labelledby="sb-title sb-desc">
+            <title id="sb-title">Functional test sandbox</title>
+            <desc id="sb-desc">The sandbox container runs Claude Code with the skill on an internal Docker network with no route out. Its only neighbours are a model proxy that holds the real key and forwards only the messages endpoint, and an egress sinkhole that is its DNS and HTTP proxy, logs every attempt and refuses all. Findings come from canary secrets, undeclared domains and a filesystem diff.</desc>
+            <defs>
+              <marker id="s1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="s1w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-w" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="zone-w" x="10" y="25" width="515" height="260" rx="3"/>
+            <text class="tb" x="20" y="18">INTERNAL DOCKER NETWORK — NO ROUTE OUT</text>
+
+            <rect class="box-a" x="28" y="45" width="250" height="220" rx="3"/>
+            <text class="ta" x="40" y="67">SF-REVIEW-RUN</text>
+            <text x="40" y="87">claude -p "&lt;example prompt&gt;"</text>
+            <text x="40" y="102">skill installed · fixtures</text>
+            <text x="40" y="127">read-only root · tmpfs</text>
+            <text x="40" y="142">all capabilities dropped</text>
+            <text x="40" y="157">no-new-privileges</text>
+            <text x="40" y="172">CPU · memory · PID caps</text>
+            <text x="40" y="187">WebSearch disabled</text>
+            <text class="lbl" x="40" y="212">canaries planted:</text>
+            <text x="40" y="227">~/.ssh key · ~/.aws creds</text>
+            <text x="40" y="242">gh token · workspace .env</text>
+            <text x="40" y="257">dummy API key only</text>
+
+            <rect class="box" x="315" y="45" width="190" height="95" rx="3"/>
+            <text class="t" x="327" y="67">MODEL PROXY</text>
+            <text x="327" y="87">holds the real key</text>
+            <text x="327" y="102">/v1/messages only</text>
+            <text x="327" y="117">max requests per run</text>
+
+            <rect class="box" x="315" y="165" width="190" height="100" rx="3"/>
+            <text class="t" x="327" y="187">EGRESS SINKHOLE</text>
+            <text x="327" y="207">its DNS + HTTP(S)_PROXY</text>
+            <text x="327" y="222">logs names, SNI, CONNECT</text>
+            <text x="327" y="237">body sizes</text>
+            <text class="bad" x="327" y="255">refuses all, forwards none</text>
+
+            <line class="ln" x1="278" y1="92" x2="313" y2="92" marker-end="url(#s1)"/>
+            <line class="ln-w" x1="278" y1="215" x2="313" y2="215" marker-end="url(#s1w)"/>
+            <text class="lbl" x="282" y="208">else</text>
+
+            <rect class="box-a" x="560" y="45" width="190" height="95" rx="3"/>
+            <text class="ta" x="572" y="67">MODEL PROVIDER</text>
+            <text x="572" y="87">Anthropic API</text>
+            <text x="572" y="102">or local Ollama</text>
+            <line class="ln" x1="505" y1="92" x2="558" y2="92" marker-end="url(#s1)"/>
+
+            <rect class="box" x="560" y="165" width="190" height="100" rx="3"/>
+            <text class="t" x="572" y="187">FINDINGS</text>
+            <text class="bad" x="572" y="207">canary sent → critical</text>
+            <text x="572" y="222">home canary read → critical</text>
+            <text x="572" y="237">undeclared domain → high</text>
+            <text x="572" y="252">fs diff before / after</text>
+            <line class="ln-w" x1="505" y1="215" x2="558" y2="215" marker-end="url(#s1w)"/>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 4 — The sandbox can talk to a model and nothing else. Every external name resolves to the sinkhole, so the connection that follows lands there too.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Verdict rules</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Finding</th><th>Verdict</th><th>Why</th></tr></thead>
+            <tbody>
+              <tr><td>Any critical</td><td>fail</td><td>Canary leaked, home secrets read, blocked pattern</td></tr>
+              <tr><td>High from a rule, gitleaks or bandit</td><td>fail</td><td>Deterministic tools rarely misfire</td></tr>
+              <tr><td>High from an LLM or a pattern scanner</td><td>warn</td><td>Pattern matches over prose misfire more often</td></tr>
+              <tr><td>Medium, or no / failed functional test</td><td>warn</td><td>A human looks closer</td></tr>
+              <tr><td>The judge's opinion</td><td>stricter only</td><td>An agent can never lower the floor</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:16px">Stage 0 never unpacks the archive on the host: it inspects it in memory; the
+        scanners (gitleaks, shellcheck, bandit, Cisco AI Defense skill-scanner, NVIDIA SkillSpector) run in their
+        own container with <code>--network none</code> and pinned versions.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Made public on the site</h2>
+        <div class="doc-shots wide">
+          <figure class="doc-shot">
+            <a href="screens/web-trust-path.jpg" target="_blank" rel="noopener"><img src="screens/web-trust-path.jpg" alt="The seven stages of a skill's review on the SkillzForest website" loading="lazy"></a>
+            <figcaption>The AI security page explains the same 7 stages to users</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 05 DISTRIBUTION ============================== -->
+    <div class="doc-panel" role="tabpanel" id="distribution" aria-labelledby="tab-distribution" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">One skill, every tool</h2>
+        <p>A skill is written once, with a runtime-agnostic id. Distributions per tool are generated, never
+        hand-maintained.</p>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Detected</div>
+            <div class="doc-step-desc">At upload, the raw archive tells which tool it was laid out for
+            (<code>.claude/skills/</code>, Cursor, Codex, Copilot, Gemini CLI, a root <code>SKILL.md</code>…) and its
+            frontmatter is checked against the open Agent Skills standard.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Reviewed</div>
+            <div class="doc-step-desc">The chain in tabs 02–04. A <code>fail</code> blocks the file, and takes down a
+            file that was live.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Converted ×13</div>
+            <div class="doc-step-desc">From the reviewed bytes, only the frontmatter rewritten — so no second review.
+            7 folder targets the Manager installs (Claude Code, Cursor, OpenCode, Copilot, Codex, Mistral Vibe,
+            Gemini CLI) and 6 upload packages (Copilot Studio, Gemini Enterprise, Dust, Perplexity, Mistral Work,
+            AWS AgentCore). Each says <code>native</code> / <code>converted</code> / <code>partial</code> /
+            <code>unsupported</code>.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Live</div>
+            <div class="doc-step-desc">Only when an admin publishes it. A community package also needs a completed
+            sandboxed run.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Inside the Manager</h2>
+        <p>A Tauri 2 app: React never touches the filesystem, the keychain or the network layer that installs.
+        Every sensitive operation is a Rust command. A website link <code>skillzforest://install/{slug}</code>
+        opens it — and it never installs without the user confirming.</p>
+        <div class="doc-terminal doc-chain"><span class="dim"># core domain chain — every type of item goes through it</span>
+CatalogItem
+  └─ Distribution
+       └─ DistributionProvider    <span class="dim">SkillzForest · GitHub · External</span>
+            └─ InstallationStrategy  <span class="dim">automatic · assisted · external · manual</span>
+                 └─ RuntimeAdapter     <span class="dim">Claude Code · Codex · Cursor · …</span>
+                      └─ PlatformAdapter  <span class="dim">macOS · Windows · Linux</span>
+                           └─ local install + SQLite registry</div>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-title">Detect &amp; adopt</div>
+            <p>Finds the AI tools on the computer and the skills already installed by hand; recognised ones can be
+            adopted so their updates are tracked. Nothing is ever modified during a scan.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Guest mode</div>
+            <p>Every local feature works without an account. Signing in (PKCE code hand-off from the website, or
+            Keycloak for a work account) only adds ownership data.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Safe installs, signed updates</div>
+            <p>Conflicts detected, nothing overwritten silently, logs redacted, tokens in the OS keychain, releases
+            signed and published from tags. CI builds macOS, Windows and Linux.</p>
+          </div>
+        </div>
+        <div class="doc-shots">
+          <figure class="doc-shot">
+            <a href="screens/mgr-installed.jpg" target="_blank" rel="noopener"><img src="screens/mgr-installed.jpg" alt="Manager: detected AI tools and skills, with adoption and updates" loading="lazy"></a>
+            <figcaption>Detect my skills — tools found, skills adopted, updates</figcaption>
+          </figure>
+          <figure class="doc-shot">
+            <a href="screens/mgr-detect.jpg" target="_blank" rel="noopener"><img src="screens/mgr-detect.jpg" alt="Manager: skills and packs owned, with trust labels and compatible tools" loading="lazy"></a>
+            <figcaption>My skills — trust labels, compatible tools, install a whole pack</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 06 MCP ============================== -->
+    <div class="doc-panel" role="tabpanel" id="mcp" aria-labelledby="tab-mcp" hidden>
+      <div class="doc-note"><strong>IN DESIGN</strong> — the edge is ready and the route is reserved; the MCP
+      gateway service itself is being built.</div>
+      <section class="doc-section">
+        <h2 class="doc-section-title">The catalog, inside the AI assistant</h2>
+        <p>Users already live in Claude, Codex or Cursor. The goal is to let those assistants reach SkillzForest
+        directly through the Model Context Protocol, on <code>mcp.skillzforest.com</code> — with the same
+        protections as the REST API, but its own policy.</p>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 150" role="img" aria-labelledby="mc-title mc-desc">
+            <title id="mc-title">Target MCP flow</title>
+            <desc id="mc-desc">Claude, Codex and Cursor call mcp.skillzforest.com. APISIX already has a disabled route for it. The MCP gateway, still to build, sits behind it and calls FastAPI, which keeps every business decision.</desc>
+            <defs>
+              <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="m1w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-w" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="box" x="10" y="30" width="165" height="85" rx="3"/>
+            <text class="t" x="22" y="52">AI ASSISTANTS</text>
+            <text x="22" y="72">Claude · Codex</text>
+            <text x="22" y="87">Cursor · …</text>
+            <rect class="box-a" x="205" y="30" width="165" height="85" rx="3"/>
+            <text class="ta" x="217" y="52">APISIX</text>
+            <text x="217" y="72">mcp.skillzforest.com</text>
+            <text x="217" y="87">route reserved,</text>
+            <text class="lbl" x="217" y="102">status: 0 (off)</text>
+            <rect class="box-w" x="400" y="30" width="165" height="85" rx="3"/>
+            <text class="tw" x="412" y="52">MCP GATEWAY</text>
+            <text x="412" y="72">skillzforest-mcp</text>
+            <text x="412" y="87">own service</text>
+            <text class="lbl" x="412" y="102">being built</text>
+            <rect class="box-a" x="595" y="30" width="155" height="85" rx="3"/>
+            <text class="ta" x="607" y="52">FASTAPI</text>
+            <text x="607" y="72">auth · entitlements</text>
+            <text x="607" y="87">catalog · library</text>
+            <line class="ln" x1="175" y1="72" x2="203" y2="72" marker-end="url(#m1)"/>
+            <line class="ln-w" x1="370" y1="72" x2="398" y2="72" marker-end="url(#m1w)"/>
+            <line class="ln-w" x1="565" y1="72" x2="593" y2="72" marker-end="url(#m1w)"/>
+            <text class="lbl" x="10" y="140">same rate limits, IP / geo rules, logs, request IDs and TLS as the REST API — with independent tiers</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 5 — The MCP layer is a thin gateway: it translates, FastAPI still decides.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">What is already in place</h2>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Reserved route</div>
+            <div class="doc-step-desc">A declarative APISIX route for <code>mcp.skillzforest.com</code> /
+            <code>mcp.localhost</code>, disabled on purpose: no fake MCP behind it.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Service skeleton</div>
+            <div class="doc-step-desc">A commented-out <code>skillzforest-mcp</code> service in the Docker Compose file,
+            on the same internal network.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Its own policy</div>
+            <div class="doc-step-desc"><code>RATE_LIMIT_MCP</code> defined but not wired: the MCP layer will never be
+            forced to share the REST tiers. Whether its transport needs browser CORS is an open decision.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">MCP servers as catalog items</div>
+            <div class="doc-step-desc"><code>mcp_server</code> is already one of the 8 catalog types: SkillzForest
+            distributes MCP servers like skills, and the Manager installs them.</div></div></div>
+        </div>
+        <p style="margin-top:18px">The same pattern is already in production on <strong>LIKYLY</strong>, where an MCP
+        server lets the developer's coding assistant configure and integrate the product.</p>
+      </section>
+    </div>
+
+    <!-- ============================== 07 STACK ============================== -->
+    <div class="doc-panel" role="tabpanel" id="stack" aria-labelledby="tab-stack" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Repositories</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Repo</th><th>Role</th><th>Technology</th></tr></thead>
+            <tbody>
+              <tr><td>skillzforest-api</td><td>State, catalog, commerce, jobs, gateway</td><td>Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 async, Alembic, PostgreSQL, Typesense, APISIX, Keycloak, Stripe, Hoppscotch</td></tr>
+              <tr><td>skillzforest-website</td><td>Marketplace, trust pages, back office</td><td>Next.js 16 App Router, React 19, TypeScript, Tailwind v4, Radix UI, next-intl (FR/EN), Supabase Auth, Turnstile, MDX, Vitest, Playwright</td></tr>
+              <tr><td>skillzforest-manager</td><td>Desktop install &amp; inventory</td><td>Tauri 2, Rust, React, TypeScript, Vite, SQLite, OS keychain, signed updates</td></tr>
+              <tr><td>skillzforest-reviewer</td><td>AI review runner + n8n workflows</td><td>Python, Anthropic SDK (any provider / Ollama), Docker sandbox, gitleaks, shellcheck, bandit, Cisco &amp; NVIDIA skill scanners, n8n, Langfuse</td></tr>
+              <tr><td>skillzforest-video</td><td>Videos in code + video runner</td><td>Remotion 4, React, zod, Claude Code headless</td></tr>
+              <tr><td>skillzforest-skills</td><td>The skills factory (public)</td><td>26 skills, 6 packs, JSON Schemas, build scripts per runtime</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Quality</h2>
+        <p>The API's test suite runs on in-memory SQLite with pytest; the gateway has its own lint and end-to-end
+        checks (<code>make gateway-validate</code>, <code>make gateway-test</code>). The website has unit tests and
+        Playwright end-to-end tests; the Manager has Vitest on the front and <code>cargo test</code> on the Rust
+        side, with a CI compile check on macOS, Windows and Linux. The reviewer is tuned on local files before it
+        ever touches the queue.</p>
+      </section>
+    </div>
+
+    <div class="doc-footer-links">
+      <a href="portfolio-business-value.html" class="btn btn-secondary">[ BUSINESS VALUE ]</a>
+      <a href="https://github.com/skillzforest/skillzforest-skills" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB — SKILLS ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+  </footer>
+
+  <script>
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.doc-tab'));
+      var ids = tabs.map(function (t) { return t.getAttribute('aria-controls'); });
+      function show(id, focus) {
+        tabs.forEach(function (t) {
+          var on = t.getAttribute('aria-controls') === id;
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+          if (on && focus) t.focus();
+        });
+        if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () { show(t.getAttribute('aria-controls')); });
+        t.addEventListener('keydown', function (e) {
+          var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (!d) return;
+          var next = tabs[(i + d + tabs.length) % tabs.length];
+          show(next.getAttribute('aria-controls'), true);
+        });
+      });
+      var initial = location.hash.slice(1);
+      if (ids.indexOf(initial) !== -1) show(initial);
+
+      // Screenshots not added yet show a labelled placeholder instead of a broken image.
+      document.querySelectorAll('img[data-fallback]').forEach(function (img) {
+        function swap() {
+          var ph = document.createElement('div');
+          ph.className = 'doc-shot-placeholder';
+          ph.textContent = img.getAttribute('data-fallback');
+          var target = img.parentElement.tagName === 'A' ? img.parentElement : img;
+          target.replaceWith(ph);
+        }
+        if (img.complete && img.naturalWidth === 0 && img.currentSrc) swap();
+        else img.addEventListener('error', swap);
+      });
+    })();
+  </script>
+</body>
+</html>

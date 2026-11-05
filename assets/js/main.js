@@ -22,11 +22,25 @@ const priorityProjects = [
     stack: ["Embeddings", "Machine Learning (ALS)", "PostgreSQL + pgvector", "MCP", "FastAPI"],
     github: "https://github.com/Likyly/likyly-recsys",
     liveUrl: "https://likyly.com",
+    video: "assets/videos/likyly-demo.mp4",
     docsUrl: "likyly-recsys/portfolio-business-value.html",
     architectureUrl: "likyly-recsys/portfolio-architecture.html"
   },
   {
     id: "002",
+    name: "SKILLZFOREST",
+    category: "AI Skills Marketplace & Desktop Manager",
+    value: "Find trusted AI skills, install them in one click in Claude, Codex or Cursor, and keep them up to date.",
+    description: "Decoupled platform (FastAPI API behind APISIX, Next.js site, Tauri/Rust desktop app). Every skill goes through an n8n-driven review: scanners, five LLM auditors, a sandboxed Claude Code run and a judge — traced in Langfuse. MCP gateway in design.",
+    status: "PRE-LAUNCH",
+    stack: ["Multi-agent LLM review", "n8n", "Langfuse", "FastAPI + APISIX", "Tauri / Rust", "MCP"],
+    github: "https://github.com/skillzforest/skillzforest-skills",
+    video: "assets/videos/skillzforest-demo.mp4",
+    docsUrl: "skillzforest/portfolio-business-value.html",
+    architectureUrl: "skillzforest/portfolio-architecture.html"
+  },
+  {
+    id: "003",
     name: "DATA TO FORM",
     category: "SaaS Form Automation",
     value: "Turn your unstructured data into ready-to-submit web forms — no manual re-typing.",
@@ -39,7 +53,7 @@ const priorityProjects = [
     architectureUrl: "data-to-form/portfolio-architecture.html"
   },
   {
-    id: "003",
+    id: "004",
     name: "GEN AI FAQ",
     category: "Generative AI Knowledge Assistant",
     value: "Give your customers instant, accurate answers around the clock.",
@@ -135,6 +149,7 @@ function renderPriorityProjects() {
       </div>
       <div class="card-links">
         ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank" rel="noopener">LIVE SITE</a>` : ""}
+        ${p.video ? `<a href="#" data-video="${p.video}" data-video-title="${p.name}">WATCH DEMO</a>` : ""}
         <a href="${p.github}" target="_blank" rel="noopener">GITHUB</a>
         <a href="${p.docsUrl}" target="_blank" rel="noopener">BUSINESS VALUE</a>
         <a href="${p.architectureUrl}" target="_blank" rel="noopener">ARCHITECTURE</a>
