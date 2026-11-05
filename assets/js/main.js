@@ -8,7 +8,9 @@
    1. PROJECT DATA — edit these arrays to add/remove/update projects.
    -------------------------------------------------------------------------- */
 
-// Main, highlighted projects. status: "ACTIVE" | "EXPERIMENTAL" | "ARCHIVED"
+// Main, highlighted projects. Optional: liveUrl (the card and its title open
+// it, and the domain becomes the title), highlight (a standout tag).
+// status: "ACTIVE" | "EXPERIMENTAL" | "ARCHIVED"
 // Each project pairs a business-value sentence (why it matters) with a
 // technical sentence (how it's built). Source: https://github.com/arnoweb
 const priorityProjects = [
@@ -17,8 +19,9 @@ const priorityProjects = [
     name: "LIKYLY",
     category: "SaaS Recommendation System",
     value: "Help your users discover what they'll love next.",
-    description: "Multi-tenant recommendation API (content-based, collaborative ALS and hybrid) installed with one npx command — an MCP server lets your AI coding assistant wire it into your code.",
+    description: "Multi-tenant recommendation API (content-based, collaborative ALS and hybrid). An agentic install wizard sets it up, then your AI coding assistant wires it into your code through an MCP server.",
     status: "ACTIVE",
+    highlight: "Agentic Install Wizard",
     stack: ["Embeddings", "Machine Learning (ALS)", "PostgreSQL + pgvector", "MCP", "FastAPI"],
     github: "https://github.com/Likyly/likyly-recsys",
     liveUrl: "https://likyly.com",
@@ -35,6 +38,7 @@ const priorityProjects = [
     status: "PRE-LAUNCH",
     stack: ["Multi-agent LLM review", "n8n", "Langfuse", "FastAPI + APISIX", "Tauri / Rust", "MCP"],
     github: "https://github.com/skillzforest/skillzforest-skills",
+    liveUrl: "https://skillzforest.com",
     video: "assets/videos/skillzforest-demo.mp4",
     docsUrl: "skillzforest/portfolio-business-value.html",
     architectureUrl: "skillzforest/portfolio-architecture.html"
@@ -131,34 +135,54 @@ function statusClass(status) {
   return "experimental";
 }
 
+// Small line icons for the card links (stroke = currentColor, so they follow
+// the link colour and its hover state).
+const linkIcons = {
+  site: '<circle cx="8" cy="8" r="6.5"/><path d="M1.5 8h13M8 1.5c2 2 2.8 4.2 2.8 6.5S10 12.5 8 14.5M8 1.5C6 3.5 5.2 5.7 5.2 8S6 12.5 8 14.5"/>',
+  demo: '<rect x="1.5" y="3" width="13" height="10" rx="1"/><path d="M6.5 5.8v4.4L10.3 8z" fill="currentColor"/>',
+  github: '<path d="M6 13.5c-3 .9-3-1.5-4.2-1.8M10 15.5v-2.4c0-.7.1-1.2-.4-1.6 2-.2 4-1 4-4.4a3.4 3.4 0 0 0-.9-2.4 3.2 3.2 0 0 0-.1-2.4s-.7-.2-2.4.9a8 8 0 0 0-4.2 0C4.3 2.1 3.6 2.3 3.6 2.3a3.2 3.2 0 0 0-.1 2.4 3.4 3.4 0 0 0-.9 2.4c0 3.4 2 4.2 4 4.4-.5.4-.5.9-.4 1.6v2.4"/>',
+  value: '<path d="M1.5 12.5l4-4 3 3 6-6.5M10.5 5h4v4"/>',
+  architecture: '<rect x="1.5" y="1.5" width="5" height="4" rx=".5"/><rect x="9.5" y="1.5" width="5" height="4" rx=".5"/><rect x="5.5" y="10.5" width="5" height="4" rx=".5"/><path d="M4 5.5v2.5h8V5.5M8 8v2.5"/>'
+};
+
+function cardLink(icon, label, title, attrs) {
+  return `<a ${attrs} title="${title}"><svg class="link-icon" viewBox="0 0 16 16" aria-hidden="true">${linkIcons[icon]}</svg>${label}</a>`;
+}
+
 function renderPriorityProjects() {
   const grid = document.getElementById("priority-projects-grid");
   if (!grid) return;
-  grid.innerHTML = priorityProjects.map((p) => `
-    <article class="project-card reveal" data-href="${p.github}" tabindex="0" role="link" aria-label="Open ${p.name} on GitHub">
+  grid.innerHTML = priorityProjects.map((p) => {
+    const target = p.liveUrl || p.github;
+    const title = p.liveUrl ? new URL(p.liveUrl).hostname.replace(/^www\./, "") : p.name;
+    const ext = 'target="_blank" rel="noopener"';
+    return `
+    <article class="project-card reveal" data-href="${target}" tabindex="0" role="link" aria-label="Open ${title}">
       <div class="card-top">
         <span>PROJECT ID: ${p.id}</span>
         <span class="status-badge ${statusClass(p.status)}">${p.status}</span>
       </div>
       <div class="project-category">${p.category}</div>
-      <h3 class="project-name">${p.name}</h3>
+      <h3 class="project-name"><a href="${target}" ${ext}>${title}</a></h3>
       <p class="project-value">${p.value}</p>
       <p class="project-desc">${p.description}</p>
       <div class="tech-tags">
+        ${p.highlight ? `<span class="tech-tag tech-tag--highlight">${p.highlight}</span>` : ""}
         ${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}
       </div>
-      <div class="card-links">
-        ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank" rel="noopener">LIVE SITE</a>` : ""}
-        ${p.video ? `<a href="#" data-video="${p.video}" data-video-title="${p.name}">WATCH DEMO</a>` : ""}
-        <a href="${p.github}" target="_blank" rel="noopener">GITHUB</a>
-        <a href="${p.docsUrl}" target="_blank" rel="noopener">BUSINESS VALUE</a>
-        <a href="${p.architectureUrl}" target="_blank" rel="noopener">ARCHITECTURE</a>
+      <div class="card-links card-links--icons">
+        ${p.liveUrl ? cardLink("site", "SITE", "Live site", `href="${p.liveUrl}" ${ext}`) : ""}
+        ${p.video ? cardLink("demo", "DEMO", "Watch the demo", `href="#" data-video="${p.video}" data-video-title="${p.name}"`) : ""}
+        ${cardLink("github", "GITHUB", "Source code on GitHub", `href="${p.github}" ${ext}`)}
+        ${cardLink("value", "VALUE", "Business value", `href="${p.docsUrl}" ${ext}`)}
+        ${cardLink("architecture", "ARCHITECTURE", "Technical architecture", `href="${p.architectureUrl}" ${ext}`)}
       </div>
     </article>
-  `).join("");
+  `;
+  }).join("");
 }
 
-// Priority cards are clickable (open the GitHub repo) without hijacking
+// Priority cards are clickable (open the live site, or the GitHub repo) without hijacking
 // clicks on the links inside them.
 function setupClickableCards() {
   const grid = document.getElementById("priority-projects-grid");

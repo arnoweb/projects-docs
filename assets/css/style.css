@@ -464,6 +464,33 @@ button { font: inherit; cursor: pointer; }
 }
 .card-links a:hover,
 .card-links a:focus-visible { color: var(--accent); }
+.card-links--icons { flex-wrap: nowrap; gap: 8px; }
+.card-links--icons:not(:has(> :nth-child(5))) { justify-content: flex-start; gap: 18px; }
+.card-links--icons a { display: inline-flex; align-items: center; gap: 5px; }
+.link-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--accent-dim);
+  transition: color .15s var(--ease);
+}
+.card-links--icons a:hover .link-icon,
+.card-links--icons a:focus-visible .link-icon { color: var(--accent); }
+
+.project-name a { color: inherit; position: relative; z-index: 1; }
+.project-name a:hover { color: var(--accent); }
+
+.tech-tag--highlight {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  background: rgba(61, 220, 132, 0.08);
+}
+.tech-tag--highlight::before { content: '✦ '; }
 
 /* ---- Lab / secondary projects ------------------------------------------------ */
 .lab-grid {
