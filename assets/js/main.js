@@ -17,10 +17,11 @@ const priorityProjects = [
     name: "LIKYLY",
     category: "SaaS Recommendation System",
     value: "Help your users discover what they'll love next.",
-    description: "AI-powered recommendation engine combining content-based, collaborative and hybrid filtering.",
+    description: "Multi-tenant recommendation API (content-based, collaborative ALS and hybrid) installed with one npx command — an MCP server lets your AI coding assistant wire it into your code.",
     status: "ACTIVE",
-    stack: ["Embeddings", "Machine Learning (ALS)", "Recommendation Systems"],
+    stack: ["Embeddings", "Machine Learning (ALS)", "PostgreSQL + pgvector", "MCP", "FastAPI"],
     github: "https://github.com/Likyly/likyly-recsys",
+    liveUrl: "https://likyly.com",
     docsUrl: "likyly-recsys/portfolio-business-value.html",
     architectureUrl: "likyly-recsys/portfolio-architecture.html"
   },
@@ -133,6 +134,7 @@ function renderPriorityProjects() {
         ${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}
       </div>
       <div class="card-links">
+        ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank" rel="noopener">LIVE SITE</a>` : ""}
         <a href="${p.github}" target="_blank" rel="noopener">GITHUB</a>
         <a href="${p.docsUrl}" target="_blank" rel="noopener">BUSINESS VALUE</a>
         <a href="${p.architectureUrl}" target="_blank" rel="noopener">ARCHITECTURE</a>

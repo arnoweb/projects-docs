@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Likyly — Business Value | ARNAUD.BRETON</title>
-  <meta name="description" content="Likyly — SaaS recommendation system: business value, use cases and why it avoids a per-request LLM.">
+  <meta name="description" content="Likyly — SaaS recommendation system: business value, one-command install with an AI-assisted integration, and why it avoids a per-request LLM.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -24,6 +24,8 @@
       <span class="tag-chip">Embeddings</span>
       <span class="tag-chip">Machine Learning (ALS)</span>
       <span class="tag-chip">Recommendation Systems</span>
+      <span class="tag-chip">MCP</span>
+      <span class="tag-chip">Developer Experience</span>
     </div>
 
     <section class="doc-section">
@@ -51,6 +53,35 @@
         parameter, adjustable per request, and it works from the first pageview — with or
         without an account.</li>
       </ul>
+      <p>
+        It is a multi-tenant SaaS, live at <a href="https://likyly.com" target="_blank" rel="noopener" style="color:var(--accent)">likyly.com</a>.
+        Each customer's catalog, events and models are isolated, and each customer gets its own
+        model: its data never trains a shared one. Models retrain on their own and go live only
+        when they beat the current version.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Integrated in Minutes, by Your Own AI Assistant</h2>
+      <p>
+        Integration is usually the slowest part of buying a recommendation engine: reading the
+        docs, mapping the catalog, wiring the tracking events. LIKYLY treats developer
+        experience as part of the product. Like PostHog's install wizard, one command
+        installs it:
+      </p>
+      <div class="doc-terminal"><span class="dim">$</span> npx @likyly/wizard</div>
+      <ul class="doc-check-list">
+        <li><strong>One command</strong> — it detects the framework, installs the right SDK, signs
+        the developer in and writes the keys in the right place. Nothing is overwritten, and it
+        works on its own git branch.</li>
+        <li><strong>The AI assistant does the integration</strong> — an MCP server lets Claude Code,
+        Cursor or VS Code connect the catalog, configure the recommendation block, write it into
+        the real components and add the tracking events.</li>
+        <li><strong>Plain-language prompts</strong> — "show 4 related products on the product page,
+        no out-of-stock items" replaces a configuration screen.</li>
+        <li><strong>Checked, not guessed</strong> — LIKYLY verifies the integration from the data it
+        actually receives, then reports what each block served and earned.</li>
+      </ul>
     </section>
 
     <section class="doc-section">
@@ -59,7 +90,8 @@
         It's tempting to ask a general-purpose LLM "what should this user see next?" on every
         request. Likyly deliberately doesn't: specialized models (TF-IDF, embeddings, ALS),
         tracked and versioned with MLflow, are precomputed or resolve in a few tens of
-        milliseconds — free to run, fully private (self-hosted), and deterministic. A generic
+        milliseconds — cheap to run, private to each customer, and deterministic. AI is used
+        where it pays off: helping the developer integrate, not answering every visitor. A generic
         LLM call is billed per request, adds seconds of latency at e-commerce traffic scale,
         and depends on a third-party provider for a decision that needs to be instant and
         explainable.
@@ -71,8 +103,8 @@
           </thead>
           <tbody>
             <tr><td>Latency</td><td>Instant</td><td>Instant / tens of ms</td><td>Several seconds</td></tr>
-            <tr><td>Cost per recommendation</td><td>Free</td><td>Free (local compute)</td><td>Billed per call</td></tr>
-            <tr><td>Data privacy</td><td>Total</td><td>Total (self-hosted)</td><td>Depends on the provider</td></tr>
+            <tr><td>Cost per recommendation</td><td>Free</td><td>Near zero (no per-call LLM)</td><td>Billed per call</td></tr>
+            <tr><td>Data privacy</td><td>Total</td><td>Isolated per customer, own model</td><td>Depends on the provider</td></tr>
             <tr><td>Adapts to behavior</td><td>No</td><td>Yes</td><td>Variable, not guaranteed</td></tr>
           </tbody>
         </table>
@@ -84,13 +116,16 @@
       <p>
         SaaS products, e-commerce catalogs and content platforms (products, films, articles,
         cultural content) that want real personalization without shipping user or catalog
-        data to a third-party LLM on every request. Ships as Python, JS/TS and PHP SDKs.
+        data to a third-party LLM on every request. It plugs into Shopify, WooCommerce, any
+        REST API or a CSV file, and ships 8 official SDKs (JS/TS with React components, PHP,
+        Python, Java, .NET, Go, Ruby, Rust).
       </p>
     </section>
 
     <div class="doc-footer-links">
+      <a href="https://likyly.com" target="_blank" rel="noopener" class="btn btn-secondary">[ LIVE SITE ]</a>
       <a href="portfolio-architecture.html" class="btn btn-secondary">[ TECHNICAL ARCHITECTURE ]</a>
-      <a href="https://github.com/arnoweb/likyly-recsys" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+      <a href="https://github.com/Likyly/likyly-recsys" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
     </div>
   </main>
 

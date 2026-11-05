@@ -4,11 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Likyly — Architecture | ARNAUD.BRETON</title>
-  <meta name="description" content="Likyly — technical architecture: content-based, collaborative and hybrid recommendation pipeline.">
+  <meta name="description" content="Likyly — features, developer experience (npx install wizard + MCP server) and technical architecture of a multi-tenant recommendation API.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    /* Diagram styles: colours come from the portfolio tokens */
+    .dg text { font-family: var(--font-mono); fill: var(--text-dim); font-size: 10px; }
+    .dg .t { fill: var(--text); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+    .dg .ta { fill: var(--accent); font-size: 11px; font-weight: 700; }
+    .dg .tb { fill: var(--accent-amber); font-size: 9.5px; letter-spacing: .06em; }
+    .dg .lbl { fill: var(--accent-amber); font-size: 9.5px; }
+    .dg .box { fill: var(--bg); stroke: var(--border); stroke-width: 1; }
+    .dg .box-a { fill: var(--bg); stroke: var(--accent-dim); stroke-width: 1.2; }
+    .dg .zone { fill: none; stroke: var(--border-soft); stroke-dasharray: 4 4; }
+    .dg .sub { fill: var(--panel); stroke: var(--border-soft); }
+    .dg .ln { stroke: var(--accent); stroke-width: 1.3; fill: none; }
+    .dg .ln-d { stroke: var(--text-faint); stroke-width: 1.2; fill: none; stroke-dasharray: 3 3; }
+    .dg .ah { fill: var(--accent); }
+    .dg .ah-d { fill: var(--text-faint); }
+  </style>
 </head>
 <body>
   <header class="doc-header">
@@ -19,82 +35,528 @@
   <main class="doc-page">
     <div class="doc-kicker">// PROJECT ID: 001 — SAAS RECOMMENDATION SYSTEM</div>
     <h1 class="doc-title">LIKYLY <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
-    <p class="doc-lede">A hybrid recommendation pipeline: two specialized model families, tracked and served independently, blended at request time.</p>
+    <p class="doc-lede">A multi-tenant recommendation API, installed with one <code>npx</code> command
+    and integrated by the developer's own AI coding assistant through an MCP server.</p>
     <div class="doc-badges">
-      <span class="tag-chip">Python</span>
-      <span class="tag-chip">pgvector</span>
+      <span class="tag-chip">Python · FastAPI</span>
+      <span class="tag-chip">PostgreSQL + pgvector</span>
+      <span class="tag-chip">Implicit ALS</span>
       <span class="tag-chip">MLflow</span>
-      <span class="tag-chip">API</span>
+      <span class="tag-chip">MCP</span>
+      <span class="tag-chip">Node.js wizard (npx)</span>
     </div>
 
-    <section class="doc-section">
-      <h2 class="doc-section-title">Pipeline</h2>
-      <div class="doc-steps">
-        <div class="doc-step">
-          <div class="doc-step-num">01</div>
-          <div>
-            <div class="doc-step-title">Content-based layer</div>
-            <div class="doc-step-desc">TF-IDF combined with sentence-transformer embeddings, stored in
-            pgvector, capture thematic similarity directly from product text — computed at
-            ingestion time, so a brand-new product is recommendable immediately.</div>
-          </div>
-        </div>
-        <div class="doc-step">
-          <div class="doc-step-num">02</div>
-          <div>
-            <div class="doc-step-title">Collaborative layer</div>
-            <div class="doc-step-desc">Implicit ALS (Alternating Least Squares) trained on real
-            interaction signals — a purchase carries more weight than a view — with no
-            fabricated 1-5 star ratings.</div>
-          </div>
-        </div>
-        <div class="doc-step">
-          <div class="doc-step-num">03</div>
-          <div>
-            <div class="doc-step-title">Weighted hybrid</div>
-            <div class="doc-step-desc">Content and collaborative scores combine through an alpha
-            parameter, tunable per request, so the balance can shift toward content for cold-start
-            cases or toward behavior once enough interaction data exists.</div>
-          </div>
-        </div>
-        <div class="doc-step">
-          <div class="doc-step-num">04</div>
-          <div>
-            <div class="doc-step-title">Model governance</div>
-            <div class="doc-step-desc">MLflow tracks and versions each specialized model, so quality
-            can be monitored and rolled back over time — the same discipline applied to a
-            production ML system, not a one-off script.</div>
-          </div>
-        </div>
-        <div class="doc-step">
-          <div class="doc-step-num">05</div>
-          <div>
-            <div class="doc-step-title">Delivery</div>
-            <div class="doc-step-desc">Precomputed or low-latency (tens of ms) recommendations are
-            exposed through Python, JS/TS and PHP SDKs, self-hosted end to end — no visitor or
-            catalog data leaves the client's infrastructure.</div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="doc-tabs" role="tablist" aria-label="Architecture views">
+      <button class="doc-tab" role="tab" id="tab-features" aria-controls="features" aria-selected="true">01 · Features</button>
+      <button class="doc-tab" role="tab" id="tab-dx" aria-controls="dx" aria-selected="false" tabindex="-1">02 · Developer experience</button>
+      <button class="doc-tab" role="tab" id="tab-tech" aria-controls="tech" aria-selected="false" tabindex="-1">03 · Technical architecture</button>
+    </div>
 
-    <section class="doc-section">
-      <h2 class="doc-section-title">Cold-Start Handling</h2>
-      <p>
-        A new product becomes recommendable the moment it's ingested — through its content
-        profile and embedding, plus popularity — without waiting for a retraining cycle. The
-        collaborative layer only retrains once enough new interactions accumulate.
-      </p>
-    </section>
+    <!-- ============================== 01 FEATURES ============================== -->
+    <div class="doc-panel" role="tabpanel" id="features" aria-labelledby="tab-features">
+      <section class="doc-section">
+        <h2 class="doc-section-title">What LIKYLY does</h2>
+        <p>LIKYLY puts "you may also like" blocks on a site and learns from what visitors
+        actually do. Each customer gets <strong>its own model</strong>, trained only on its
+        own catalog and events.</p>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-title">Connect a catalog</div>
+            <p>Shopify, a REST API, a CSV or JSON URL, a webhook, or the WooCommerce connector.
+            You choose which fields are used. Syncs are full, incremental or push.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Placements</div>
+            <p>A named recommendation block, such as "4 related products on a product page, no
+            out-of-stock items". You configure it once and call it by name.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">From the first pageview</div>
+            <p>Anonymous visitors get content-based and session recommendations. Logged-in users
+            also get their history (collaborative and hybrid). The <code>auto</code> strategy
+            picks the right one for each request.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Events &amp; attribution</div>
+            <p>Impression, view, click, add to cart, purchase, or your own event types. Each
+            answer has a <code>recommendation_id</code>, so you can see what each block earned.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Self-retraining models</div>
+            <p>A model retrains when enough new interactions come in. A new version goes live only
+            if it does better than the one in production.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Integrate anywhere</div>
+            <p>8 official SDKs (JS/TS, PHP, Python, Java, .NET, Go, Ruby, Rust), React components
+            and a WordPress connector, all generated from one OpenAPI contract.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">A typical integration, in three steps</h2>
+        <div class="doc-steps">
+          <div class="doc-step">
+            <div class="doc-step-num">01</div>
+            <div>
+              <div class="doc-step-title">Connect the catalog</div>
+              <div class="doc-step-desc">Create a data source, preview it, map the fields
+              (identifier, text used for content, price, stock, image), then run a first sync.</div>
+            </div>
+          </div>
+          <div class="doc-step">
+            <div class="doc-step-num">02</div>
+            <div>
+              <div class="doc-step-title">Configure a placement</div>
+              <div class="doc-step-desc">Choose how many items, the strategy and the filters. Then
+              preview the result on real products before any code is written.</div>
+            </div>
+          </div>
+          <div class="doc-step">
+            <div class="doc-step-num">03</div>
+            <div>
+              <div class="doc-step-title">Integrate and validate</div>
+              <div class="doc-step-desc">Add the block and its tracking events to the site. LIKYLY
+              then checks from its own data that the integration works: requests and events
+              actually arrive.</div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:18px">These three steps don't need a dashboard. The developer's AI
+        assistant does them through the MCP server (see <a href="#dx" data-tab-link="dx" style="color:var(--accent)">Developer experience</a>).</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Accounts &amp; keys</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Key</th><th>Where it lives</th><th>What it can do</th></tr></thead>
+            <tbody>
+              <tr><td>Public <code>pk_</code></td><td>Browser code</td><td>Recommendations and event tracking only</td></tr>
+              <tr><td>Secret <code>sk_</code></td><td>Server side</td><td>Full access to the account</td></tr>
+              <tr><td>Developer <code>lk_</code></td><td>The developer's machine, for the AI assistant</td><td>Data sources and placements, with scopes</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 02 DX ============================== -->
+    <div class="doc-panel" role="tabpanel" id="dx" aria-labelledby="tab-dx" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">One command, then the AI assistant does the work</h2>
+        <p>Developer experience (DX) is part of the product. Like PostHog's install wizard,
+        LIKYLY is installed from the terminal in one command. A visual dashboard is not needed:</p>
+        <div class="doc-terminal"><span class="dim">$</span> npx @likyly/wizard</div>
+        <p>The wizard has an interactive terminal UI (Ink). At the end, it opens
+        <strong>Claude Code</strong> (or Cursor) with an integration prompt. LIKYLY has no chat of
+        its own: <strong>the developer's coding agent is the interface</strong>. It reads the
+        project, calls LIKYLY's MCP tools and writes the integration into the codebase.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">The flow</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 470" role="img" aria-labelledby="dx-title dx-desc">
+            <title id="dx-title">LIKYLY developer experience flow</title>
+            <desc id="dx-desc">The npx wizard signs the developer in on likyly.com, gets the keys back on a local one-time server, installs the SDK, writes the MCP configuration, then launches Claude Code. The assistant calls the LIKYLY MCP server, which calls the LIKYLY API, and writes the integration into the codebase. At runtime the site calls the API with the public key.</desc>
+            <defs>
+              <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="a1d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-d" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="22" width="430" height="440" rx="3"/>
+            <text class="tb" x="20" y="16">DEVELOPER MACHINE</text>
+            <rect class="zone" x="480" y="22" width="270" height="440" rx="3"/>
+            <text class="tb" x="490" y="16">LIKYLY CLOUD</text>
+
+            <!-- Wizard -->
+            <rect class="box-a" x="30" y="45" width="390" height="80" rx="3"/>
+            <text class="ta" x="44" y="68">$ npx @likyly/wizard</text>
+            <text x="44" y="88">detect framework &amp; package manager → show the plan</text>
+            <text x="44" y="104">→ install SDK → sign in → connect assistant → verify</text>
+
+            <!-- likyly.com -->
+            <rect class="box" x="500" y="45" width="230" height="80" rx="3"/>
+            <text class="t" x="514" y="68">LIKYLY.COM</text>
+            <text x="514" y="88">Next.js · Supabase Auth</text>
+            <text x="514" y="104">email · GitHub · Google</text>
+
+            <line class="ln" x1="420" y1="70" x2="498" y2="70" marker-end="url(#a1)"/>
+            <text class="lbl" x="426" y="63">① sign-in</text>
+            <line class="ln" x1="500" y1="100" x2="422" y2="100" marker-end="url(#a1)"/>
+            <text class="lbl" x="426" y="118">② keys</text>
+
+            <!-- Assistant + MCP -->
+            <rect class="box" x="30" y="200" width="185" height="85" rx="3"/>
+            <text class="t" x="44" y="222">AI CODING ASSISTANT</text>
+            <text x="44" y="242">Claude Code · Cursor</text>
+            <text x="44" y="257">VS Code</text>
+            <text x="44" y="272">+ LIKYLY skill, /likyly-*</text>
+
+            <rect class="box-a" x="245" y="200" width="175" height="85" rx="3"/>
+            <text class="ta" x="259" y="222">@likyly/mcp-server</text>
+            <text x="259" y="242">stdio, via npx</text>
+            <text x="259" y="257">developer key read from</text>
+            <text x="259" y="272">.likyly/credentials.env</text>
+
+            <line class="ln" x1="215" y1="242" x2="243" y2="242" marker-end="url(#a1)"/>
+
+            <!-- API -->
+            <rect class="box-a" x="500" y="190" width="230" height="130" rx="3"/>
+            <text class="ta" x="514" y="213">LIKYLY API</text>
+            <text x="514" y="231">api.likyly.com</text>
+            <text x="514" y="253">data sources · sync</text>
+            <text x="514" y="269">placements · preview</text>
+            <text x="514" y="285">integration recipe</text>
+            <text x="514" y="301">validation · model report</text>
+
+            <line class="ln" x1="420" y1="242" x2="498" y2="242" marker-end="url(#a1)"/>
+            <text class="lbl" x="426" y="235">MCP tools</text>
+            <text class="lbl" x="426" y="258">HTTPS</text>
+
+            <!-- Wizard -> assistant / codebase -->
+            <line class="ln" x1="120" y1="125" x2="120" y2="198" marker-end="url(#a1)"/>
+            <text class="lbl" x="128" y="158">④ launch with</text>
+            <text class="lbl" x="128" y="171">the prompt</text>
+            <line class="ln" x1="230" y1="125" x2="230" y2="368" marker-end="url(#a1)"/>
+            <text class="lbl" x="240" y="158">③ install SDK,</text>
+            <text class="lbl" x="240" y="171">write .mcp.json</text>
+
+            <!-- Codebase -->
+            <rect class="box" x="30" y="370" width="390" height="78" rx="3"/>
+            <text class="t" x="44" y="392">YOUR CODEBASE</text>
+            <text x="44" y="411">@likyly/sdk + @likyly/react · public key in .env</text>
+            <text x="44" y="427">.mcp.json · .cursor/mcp.json · .vscode/mcp.json</text>
+
+            <line class="ln" x1="120" y1="285" x2="120" y2="368" marker-end="url(#a1)"/>
+            <text class="lbl" x="128" y="322">⑤ writes the</text>
+            <text class="lbl" x="128" y="335">integration</text>
+
+            <!-- Runtime -->
+            <path class="ln-d" d="M420 410 H 615 V 322" marker-end="url(#a1d)"/>
+            <text x="432" y="402">runtime: recommendations</text>
+            <text x="432" y="430">+ events (public key)</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 1 — npx wizard, MCP server and API. The developer key never goes into a config file.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">The wizard, step by step</h2>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Detect</div>
+            <div class="doc-step-desc">Reads the framework from the project's own files (<code>package.json</code>,
+            <code>composer.json</code>, <code>pyproject.toml</code>, <code>go.mod</code>, <code>wp-config.php</code>…)
+            and the package manager already in use.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Review the plan</div>
+            <div class="doc-step-desc">Shows every command and every file before anything
+            happens. Nothing existing is overwritten. In a git repository it offers to work on a
+            <code>likyly/setup</code> branch, and it never commits.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Install the SDK</div>
+            <div class="doc-step-desc"><code>@likyly/sdk</code>, plus <code>@likyly/react</code> for
+            React frameworks. The package manager's output is shown live.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Connect the account</div>
+            <div class="doc-step-desc">Opens likyly.com to sign in. The keys come back to a
+            one-time server on <code>127.0.0.1</code>, protected by a random <code>state</code>.
+            The public key is written under the name the framework exposes to the browser
+            (<code>NEXT_PUBLIC_LIKYLY_KEY</code>, <code>VITE_LIKYLY_KEY</code>…). Secret keys are refused.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">05</div><div>
+            <div class="doc-step-title">Connect the AI assistant</div>
+            <div class="doc-step-desc">Writes the MCP configuration for Claude Code, Cursor and
+            VS Code, plus the LIKYLY skill and slash commands. The configuration only refers to
+            <code>LIKYLY_DEVELOPER_KEY</code>. The key itself stays in
+            <code>.likyly/credentials.env</code>, which is ignored by git and readable only by the
+            developer.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">06</div><div>
+            <div class="doc-step-title">Verify, then hand over</div>
+            <div class="doc-step-desc">Checks the SDK version, that the stack is supported, that
+            the keys are accepted and that the assistants are connected. It lists the changes to
+            review in <code>git diff</code>, then launches Claude Code with the integration prompt.</div></div></div>
+        </div>
+        <p style="margin-top:18px"><code>npx @likyly/wizard uninstall</code> shows its plan,
+        then removes everything the wizard added, on its own branch. It also has
+        <code>--dry-run</code> and a non-interactive CI mode.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Prompts instead of documentation</h2>
+        <p>Each integration step is one plain-language prompt. The agent chains the MCP tools
+        it needs. If an MCP tool can give the information, the developer doesn't have to read
+        the documentation.</p>
+        <div class="doc-prompt">
+          <span class="doc-prompt-label">PROMPT — CONNECT MY CATALOG</span>
+          "Connect my Shopify catalog to Likyly. Use product.id as the identifier, title and
+          description for content, and pull price, categories, image and stock. Run a first sync."
+          <span class="doc-prompt-result">→ list_source_types · create_data_source · test_data_source · preview_data_source · configure_field_mapping · sync_data_source · get_catalog_stats</span>
+        </div>
+        <div class="doc-prompt">
+          <span class="doc-prompt-label">PROMPT — CONFIGURE RECOMMENDATIONS</span>
+          "On a product page, show 4 recommendations. For an anonymous visitor, use the current
+          product and the session. For a logged-in user, add their history. Exclude unavailable products."
+          <span class="doc-prompt-result">→ create_placement (strategy auto, in_stock_only) · preview_placement · get_placement_requirements</span>
+        </div>
+        <div class="doc-prompt">
+          <span class="doc-prompt-label">PROMPT — INTEGRATE AND VALIDATE</span>
+          "Add the pdp-related placement to this React product page. Show 4 cards that match the
+          existing design and add every event Likyly needs to learn."
+          <span class="doc-prompt-result">→ get_integration_recipe · get_tracking_requirements · writes &lt;LikylyRecommendations&gt; + events · validate_integration</span>
+        </div>
+        <p style="margin-top:16px">The agent always reads the repository first (framework,
+        rendering mode, whether user context exists). It adapts the recipe to the real
+        component instead of pasting a whole file. <code>validate_integration</code> then checks the
+        result from LIKYLY's own data, not by guessing from the source code.
+        <code>/likyly-inventory</code> and <code>/likyly-model</code> report what was added to the
+        site and how the model performs (precision@10, version in production).</p>
+      </section>
+    </div>
+
+    <!-- ============================== 03 TECH ============================== -->
+    <div class="doc-panel" role="tabpanel" id="tech" aria-labelledby="tab-tech" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Runtime architecture</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 420" role="img" aria-labelledby="rt-title rt-desc">
+            <title id="rt-title">LIKYLY runtime architecture</title>
+            <desc id="rt-desc">Client sites, catalog sources and AI assistants reach the recsys-api through Caddy and the APISIX gateway. The FastAPI service holds the placement engine, recommender, cache, ingestion and training. It stores everything in PostgreSQL with pgvector, tracks models in MLflow and DVC, authenticates accounts with Supabase and reports to Prometheus and Sentry.</desc>
+            <defs>
+              <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <text class="tb" x="10" y="22">CLIENTS</text>
+            <text class="tb" x="215" y="22">EDGE</text>
+            <text class="tb" x="305" y="22">RECSYS-API · FASTAPI · DOCKER</text>
+            <text class="tb" x="570" y="22">DATA &amp; OPS</text>
+
+            <rect class="box" x="10" y="40" width="170" height="90" rx="3"/>
+            <text class="t" x="22" y="62">YOUR SITE / APP</text>
+            <text x="22" y="82">8 SDKs · React</text>
+            <text x="22" y="97">public key pk_</text>
+            <text x="22" y="112">getRec · events</text>
+
+            <rect class="box" x="10" y="165" width="170" height="115" rx="3"/>
+            <text class="t" x="22" y="187">CATALOG SOURCES</text>
+            <text x="22" y="207">Shopify · REST API</text>
+            <text x="22" y="222">CSV / JSON URL</text>
+            <text x="22" y="237">WooCommerce (push)</text>
+            <text x="22" y="252">webhook (push)</text>
+            <text x="22" y="267">CSV upload</text>
+
+            <rect class="box" x="10" y="315" width="170" height="75" rx="3"/>
+            <text class="t" x="22" y="337">AI ASSISTANT · MCP</text>
+            <text x="22" y="357">developer key lk_</text>
+            <text x="22" y="372">sources · placements</text>
+
+            <rect class="box-a" x="215" y="40" width="60" height="350" rx="3"/>
+            <text class="ta" transform="translate(240 215) rotate(-90)" text-anchor="middle">CADDY (TLS) → APISIX</text>
+            <text transform="translate(258 215) rotate(-90)" text-anchor="middle">rate limit 20 req/s · burst 10</text>
+
+            <line class="ln" x1="180" y1="85" x2="213" y2="85" marker-end="url(#a2)"/>
+            <line class="ln" x1="182" y1="222" x2="213" y2="222" marker-start="url(#a2)" marker-end="url(#a2)"/>
+            <line class="ln" x1="180" y1="352" x2="213" y2="352" marker-end="url(#a2)"/>
+            <line class="ln" x1="275" y1="215" x2="303" y2="215" marker-end="url(#a2)"/>
+
+            <rect class="box-a" x="305" y="40" width="230" height="350" rx="3"/>
+            <rect class="sub" x="318" y="52" width="204" height="40" rx="2"/>
+            <text class="t" x="328" y="69">AUTH</text>
+            <text x="328" y="84">X-API-Key · scopes · per tenant</text>
+            <rect class="sub" x="318" y="100" width="204" height="40" rx="2"/>
+            <text class="t" x="328" y="117">PLACEMENT ENGINE</text>
+            <text x="328" y="132">strategy auto · filters</text>
+            <rect class="sub" x="318" y="148" width="204" height="40" rx="2"/>
+            <text class="t" x="328" y="165">RECOMMENDER</text>
+            <text x="328" y="180">content·ALS·hybrid·session</text>
+            <rect class="sub" x="318" y="196" width="204" height="40" rx="2"/>
+            <text class="t" x="328" y="213">REC CACHE</text>
+            <text x="328" y="228">in-process, self-invalidating</text>
+            <rect class="sub" x="318" y="244" width="204" height="40" rx="2"/>
+            <text class="t" x="328" y="261">INGESTION &amp; SYNC</text>
+            <text x="328" y="276">full · incremental · push</text>
+            <rect class="sub" x="318" y="292" width="204" height="40" rx="2"/>
+            <text class="t" x="328" y="309">TRAINING (background)</text>
+            <text x="328" y="324">promotion gate vs production</text>
+            <rect class="sub" x="318" y="340" width="204" height="40" rx="2"/>
+            <text class="t" x="328" y="357">MIGRATIONS</text>
+            <text x="328" y="372">idempotent SQL at startup</text>
+
+            <rect class="box-a" x="570" y="40" width="180" height="115" rx="3"/>
+            <text class="ta" x="582" y="62">POSTGRESQL</text>
+            <text class="ta" x="582" y="77">+ PGVECTOR</text>
+            <text x="582" y="97">catalog · events · clients</text>
+            <text x="582" y="112">embeddings (384-d)</text>
+            <text x="582" y="127">model versions</text>
+            <text x="582" y="142">scoped by client_id</text>
+
+            <rect class="box" x="570" y="175" width="180" height="65" rx="3"/>
+            <text class="t" x="582" y="197">MLFLOW + DVC</text>
+            <text x="582" y="215">runs · model registry</text>
+            <text x="582" y="230">.npz model artefacts</text>
+
+            <rect class="box" x="570" y="260" width="180" height="60" rx="3"/>
+            <text class="t" x="582" y="282">SUPABASE AUTH</text>
+            <text x="582" y="300">likyly.com → /clients/me</text>
+
+            <rect class="box" x="570" y="340" width="180" height="50" rx="3"/>
+            <text class="t" x="582" y="362">PROMETHEUS · SENTRY</text>
+            <text x="582" y="378">metrics · errors</text>
+
+            <line class="ln" x1="535" y1="97" x2="568" y2="97" marker-start="url(#a2)" marker-end="url(#a2)"/>
+            <line class="ln" x1="535" y1="207" x2="568" y2="207" marker-end="url(#a2)"/>
+            <line class="ln" x1="568" y1="290" x2="537" y2="290" marker-end="url(#a2)"/>
+            <line class="ln" x1="535" y1="365" x2="568" y2="365" marker-end="url(#a2)"/>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 2 — One API service and one database. Embeddings live in Postgres, so there is no separate vector database to run.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Recommendation pipeline</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 220" role="img" aria-labelledby="ml-title ml-desc">
+            <title id="ml-title">LIKYLY recommendation pipeline</title>
+            <desc id="ml-desc">Catalog items feed a content model computed at ingestion. Events feed an implicit ALS model, which goes live only after a promotion gate. Both are blended by a hybrid alpha with session recommendations and served through a placement.</desc>
+            <defs>
+              <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="box" x="10" y="25" width="150" height="55" rx="3"/>
+            <text class="t" x="22" y="47">CATALOG</text>
+            <text x="22" y="65">items + properties</text>
+            <rect class="box" x="10" y="140" width="150" height="55" rx="3"/>
+            <text class="t" x="22" y="162">EVENTS</text>
+            <text x="22" y="180">view · cart · purchase</text>
+
+            <rect class="box-a" x="200" y="25" width="200" height="55" rx="3"/>
+            <text class="ta" x="212" y="47">CONTENT MODEL</text>
+            <text x="212" y="65">TF-IDF + MiniLM, at ingestion</text>
+            <rect class="box-a" x="200" y="140" width="200" height="55" rx="3"/>
+            <text class="ta" x="212" y="162">COLLABORATIVE</text>
+            <text x="212" y="180">implicit ALS, weighted events</text>
+
+            <rect class="box" x="435" y="140" width="150" height="55" rx="3"/>
+            <text class="t" x="447" y="162">PROMOTION GATE</text>
+            <text x="447" y="180">precision@10 · MLflow</text>
+            <rect class="box" x="435" y="25" width="150" height="55" rx="3"/>
+            <text class="t" x="447" y="47">HYBRID α</text>
+            <text x="447" y="65">+ session recs</text>
+
+            <rect class="box-a" x="620" y="80" width="130" height="60" rx="3"/>
+            <text class="ta" x="632" y="103">PLACEMENT</text>
+            <text x="632" y="121">ranked items +</text>
+            <text x="632" y="134">recommendation_id</text>
+
+            <line class="ln" x1="160" y1="52" x2="198" y2="52" marker-end="url(#a3)"/>
+            <line class="ln" x1="160" y1="167" x2="198" y2="167" marker-end="url(#a3)"/>
+            <line class="ln" x1="400" y1="52" x2="433" y2="52" marker-end="url(#a3)"/>
+            <line class="ln" x1="400" y1="167" x2="433" y2="167" marker-end="url(#a3)"/>
+            <line class="ln" x1="510" y1="140" x2="510" y2="82" marker-end="url(#a3)"/>
+            <path class="ln" d="M585 52 H 600 V 100 H 618" marker-end="url(#a3)"/>
+            <text class="lbl" x="206" y="122">retrains when enough new interactions</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 3 — Two kinds of models, blended at request time.</div>
+        </div>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Content-based</div>
+            <div class="doc-step-desc">TF-IDF similarity combined with sentence-transformer
+            embeddings (all-MiniLM-L12-v2, 384 dimensions) stored in pgvector. They are computed
+            when a product is ingested, so a new product can be recommended right away.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Collaborative</div>
+            <div class="doc-step-desc">Implicit ALS on real interactions: a purchase weighs more
+            than a view. No made-up 1–5 star ratings.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Hybrid &amp; session</div>
+            <div class="doc-step-desc">A tunable <code>alpha</code> blends content and
+            collaborative scores. Session mode recommends from recently viewed items, with no
+            login.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Model governance</div>
+            <div class="doc-step-desc">Retraining is triggered by interaction volume, not by a
+            fixed schedule. MLflow tracks each run and DVC versions the artefacts. A new model goes
+            live only if it beats the production version.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">05</div><div>
+            <div class="doc-step-title">Cache</div>
+            <div class="doc-step-desc">Anonymous answers for a product page are cached per
+            placement. The cache empties itself when the placement or the catalog changes. Each
+            call still gets its own <code>recommendation_id</code>, so attribution is not affected.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Stack</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+            <tbody>
+              <tr><td>API</td><td>Python 3.11, FastAPI, Uvicorn, background training tasks</td></tr>
+              <tr><td>Storage</td><td>PostgreSQL + pgvector, SQLAlchemy: catalog, events, embeddings, model versions, all scoped by <code>client_id</code></td></tr>
+              <tr><td>ML</td><td>scikit-learn (TF-IDF), sentence-transformers, implicit (ALS), SciPy sparse matrices</td></tr>
+              <tr><td>MLOps</td><td>MLflow (tracking + registry), DVC</td></tr>
+              <tr><td>Edge</td><td>Caddy (TLS), Apache APISIX (rate limiting), Docker on a DigitalOcean droplet</td></tr>
+              <tr><td>Accounts &amp; site</td><td>likyly.com in Next.js, Supabase Auth, PostHog</td></tr>
+              <tr><td>Developer tooling</td><td>npx wizard (Node.js, Ink), MCP server (TypeScript), Claude Code skill</td></tr>
+              <tr><td>SDKs</td><td>JS/TS, React, PHP, Python, Java, .NET, Go, Ruby, Rust</td></tr>
+              <tr><td>Observability</td><td>Prometheus, Sentry</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Keeping 8 SDKs correct</h2>
+        <p>The OpenAPI document is the single source of truth. 43 shared request/response
+        scenarios are checked against it, and every SDK's test suite replays them. The SDK
+        READMEs and code samples are generated, and a CI check fails if they drift from the
+        code. The test suite runs the real app against a real Postgres + pgvector.</p>
+      </section>
+    </div>
 
     <div class="doc-footer-links">
+      <a href="https://likyly.com" target="_blank" rel="noopener" class="btn btn-secondary">[ LIVE SITE ]</a>
       <a href="portfolio-business-value.html" class="btn btn-secondary">[ BUSINESS VALUE ]</a>
-      <a href="https://github.com/arnoweb/likyly-recsys" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
+      <a href="https://github.com/Likyly/likyly-recsys" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
     </div>
   </main>
 
   <footer class="site-footer">
     <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
   </footer>
+
+  <script>
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.doc-tab'));
+      function show(id, focus) {
+        tabs.forEach(function (t) {
+          var on = t.getAttribute('aria-controls') === id;
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+          if (on && focus) t.focus();
+        });
+        if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () { show(t.getAttribute('aria-controls')); });
+        t.addEventListener('keydown', function (e) {
+          var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (!d) return;
+          var next = tabs[(i + d + tabs.length) % tabs.length];
+          show(next.getAttribute('aria-controls'), true);
+        });
+      });
+      document.querySelectorAll('[data-tab-link]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          show(a.getAttribute('data-tab-link'));
+          window.scrollTo({ top: document.querySelector('.doc-tabs').offsetTop - 80 });
+        });
+      });
+      var initial = location.hash.slice(1);
+      if (['features', 'dx', 'tech'].indexOf(initial) !== -1) show(initial);
+    })();
+  </script>
 </body>
 </html>
