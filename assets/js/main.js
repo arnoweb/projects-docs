@@ -112,9 +112,9 @@ const labProjects = [
 // Tech stack, grouped by category — shown as a terminal-style inventory.
 // Source: https://github.com/arnoweb (profile README)
 const techStack = {
-  "AI / ML": ["Python", "PyTorch", "Scikit-learn", "FastAPI", "LangChain", "Hugging Face", "Vector DB", "n8n", "MCP"],
+  "AI / ML": ["Python", "PyTorch", "Scikit-learn", "FastAPI", "LangChain / Langfuse", "Hugging Face", "Vector DB", "n8n", "MCP"],
   "BACKEND / WEB": ["PHP", "Laravel", "WordPress", "React", "Node.js", "API Design"],
-  "DEVOPS / CLOUD": ["Docker", "AWS", "Linux", "Git", "CI/CD"],
+  "DEVOPS / CLOUD": ["Docker", "Apache APISIX", "AWS", "Linux", "Git", "CI/CD"],
   "PROJECT MGMT": ["Agile", "Scrum", "Jira", "Confluence"]
 };
 
