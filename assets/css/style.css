@@ -506,6 +506,21 @@ button { font: inherit; cursor: pointer; }
   transition: border-color .2s var(--ease), transform .2s var(--ease);
 }
 .lab-card { display: flex; flex-direction: column; }
+.lab-groups { display: flex; flex-direction: column; gap: 44px; }
+.lab-group-title {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.lab-group-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+}
 .lab-card .card-links { margin-top: auto !important; }
 .lab-tags { margin: 10px 0 12px; }
 .lab-card:hover { border-color: var(--accent-amber); transform: translateY(-2px); }

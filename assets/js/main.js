@@ -56,56 +56,65 @@ const priorityProjects = [
     liveUrl: "https://datatoform.com",
     docsUrl: "data-to-form/portfolio-business-value.html",
     architectureUrl: "data-to-form/portfolio-architecture.html"
-  },
-  {
-    id: "004",
-    name: "GEN AI FAQ",
-    category: "Generative AI Knowledge Assistant",
-    value: "Give your customers instant, accurate answers around the clock.",
-    description: "Fine-tuned Hugging Face language models power a retrieval-driven FAQ interface.",
-    status: "ACTIVE",
-    stack: ["Fine-tuned Encoder", "RAG", "LLM"],
-    github: "https://github.com/arnoweb/gen-ai-faq",
-    docsUrl: "gen-ai-faq/portfolio-business-value.html",
-    architectureUrl: "gen-ai-faq/portfolio-architecture.html"
   }
 ];
 
-// Secondary / experimental projects, shown in "THE LAB" section.
-// Source: https://github.com/arnoweb (pinned repositories)
-const labProjects = [
+// Secondary projects, shown in "THE LAB" section, in two groups.
+const labGroups = [
   {
-    id: "AI-031",
-    name: "ROMKADE",
-    description: "Turns a retro handheld (Anbernic, Miyoo…) into a console run from the computer over Wi-Fi. Duke, the AI assistant, knows every game on the card and drives the console. An MCP server lets ChatGPT, Claude or Google Home launch a game, and a typo-tolerant search finds any title.",
-    status: "ACTIVE",
-    stack: ["AI Assistant", "MCP Server", "Typesense Search", "Local LLM (Ollama)", "FastAPI + React"],
-    liveUrl: "https://romkade.com",
-    github: "https://github.com/RomKade/romkade-manager"
+    title: "GAMING & SIMULATION",
+    sub: "AI assistants, MCP and real-time control for games and flight simulation",
+    projects: [
+      {
+        id: "AI-031",
+        name: "ROMKADE",
+        description: "Turns a retro handheld (Anbernic, Miyoo…) into a console run from the computer over Wi-Fi. Duke, the AI assistant, knows every game on the card and drives the console. An MCP server lets ChatGPT, Claude or Google Home launch a game, and a typo-tolerant search finds any title.",
+        status: "ACTIVE",
+        stack: ["AI Assistant", "MCP Server", "Typesense Search", "Local LLM (Ollama)", "FastAPI + React"],
+        liveUrl: "https://romkade.com",
+        github: "https://github.com/RomKade/romkade-manager"
+      },
+      {
+        id: "SIM-027",
+        name: "XP-FlightDeck",
+        description: "Gamification of the X-Plane 12 flight simulator. A web deck on a tablet flies the plane and runs scored missions: race gates and pylons, balloons to pop, ribbons to cut, a landing on a moving truck. A Node.js relay talks to X-Plane over WebSocket, and a native C++ plugin draws the mission objects in the sim.",
+        status: "ACTIVE",
+        stack: ["Gamification", "WebSocket", "C++ Plugin (X-Plane SDK)", "Node.js Relay"],
+        liveUrl: "https://www.xp-flightdeck.com"
+      }
+    ]
   },
   {
-    id: "SIM-027",
-    name: "XP-FlightDeck",
-    description: "Gamification of the X-Plane 12 flight simulator. A web deck on a tablet flies the plane and runs scored missions: race gates and pylons, balloons to pop, ribbons to cut, a landing on a moving truck. A Node.js relay talks to X-Plane over WebSocket, and a native C++ plugin draws the mission objects in the sim.",
-    status: "ACTIVE",
-    stack: ["Gamification", "WebSocket", "C++ Plugin (X-Plane SDK)", "Node.js Relay"],
-    liveUrl: "https://www.xp-flightdeck.com"
-  },
-  {
-    id: "ML-014",
-    name: "Golf & Performance",
-    description: "Pure machine learning: predicts the carry distance of a 3-wood from launch-monitor data. Univariate and multivariate KNN regression and linear regression, compared with K-fold cross-validation, hyperparameter tuning and RMSE.",
-    status: "OPEN SOURCE",
-    stack: ["Machine Learning", "Linear Regression", "KNN Regression", "K-Fold CV", "scikit-learn"],
-    github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb"
-  },
-  {
-    id: "EDGE-021",
-    name: "Google Coral Edge AI",
-    description: "Edge AI inference scripts for the Google Coral Dev Board.",
-    status: "OPEN SOURCE",
-    github: "https://github.com/arnoweb/googlecoral",
-    video: "assets/videos/coral-vid-test.mp4"
+    title: "ML & LLM EXPERIMENTS",
+    sub: "Machine learning, LLM fine-tuning and edge AI",
+    projects: [
+      {
+        id: "LLM-004",
+        name: "Gen AI FAQ",
+        description: "LLM fine-tuning experiment: fine-tuned Hugging Face language models power a retrieval-driven FAQ assistant that answers customers' questions.",
+        status: "ARCHIVED",
+        stack: ["LLM Fine-tuning", "Hugging Face", "RAG"],
+        github: "https://github.com/arnoweb/gen-ai-faq",
+        docsUrl: "gen-ai-faq/portfolio-business-value.html",
+        architectureUrl: "gen-ai-faq/portfolio-architecture.html"
+      },
+      {
+        id: "ML-014",
+        name: "Golf & Performance",
+        description: "Pure machine learning: predicts the carry distance of a 3-wood from launch-monitor data. Univariate and multivariate KNN regression and linear regression, compared with K-fold cross-validation, hyperparameter tuning and RMSE.",
+        status: "OPEN SOURCE",
+        stack: ["Machine Learning", "Linear Regression", "KNN Regression", "K-Fold CV", "scikit-learn"],
+        github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb"
+      },
+      {
+        id: "EDGE-021",
+        name: "Google Coral Edge AI",
+        description: "Edge AI inference scripts for the Google Coral Dev Board.",
+        status: "OPEN SOURCE",
+        github: "https://github.com/arnoweb/googlecoral",
+        video: "assets/videos/coral-vid-test.mp4"
+      }
+    ]
   }
 ];
 
@@ -118,12 +127,6 @@ const techStack = {
   "PROJECT MGMT": ["Agile", "Scrum", "Jira", "Confluence"]
 };
 
-// Current mission — edit freely, progress is 0-100.
-const currentMission = {
-  text: "Deploying agentic AI systems on-site — forward-deployed engineering from architecture to production for GenAI and LLM-driven workflows.",
-  status: "IN PROGRESS",
-  progress: 70
-};
 
 // Ongoing training / skill upgrade — shown in "CURRENTLY TRAINING".
 const currentTraining = {
@@ -216,7 +219,7 @@ function renderLabProjects() {
   const grid = document.getElementById("lab-projects-grid");
   if (!grid) return;
   const ext = 'target="_blank" rel="noopener"';
-  grid.innerHTML = labProjects.map((p) => `
+  const card = (p) => `
     <article class="lab-card reveal">
       <div class="lab-id">[ ${p.id} ]</div>
       <h4 class="lab-name">${p.name}</h4>
@@ -227,8 +230,17 @@ function renderLabProjects() {
         ${p.liveUrl ? cardLink("site", "SITE", "Live site", `href="${p.liveUrl}" ${ext}`) : ""}
         ${p.github ? cardLink("github", "GITHUB", "Source code on GitHub", `href="${p.github}" ${ext}`) : ""}
         ${p.video ? cardLink("demo", "DEMO", "Watch the demo", `href="#" data-video="${p.video}" data-video-title="${p.name}"`) : ""}
+        ${p.docsUrl ? cardLink("value", "VALUE", "Business value", `href="${p.docsUrl}" ${ext}`) : ""}
+        ${p.architectureUrl ? cardLink("architecture", "ARCHITECTURE", "Technical architecture", `href="${p.architectureUrl}" ${ext}`) : ""}
       </div>
     </article>
+  `;
+  grid.innerHTML = labGroups.map((g) => `
+    <div class="lab-group">
+      <h3 class="lab-group-title">${g.title}</h3>
+      <p class="lab-group-sub">// ${g.sub}</p>
+      <div class="lab-grid">${g.projects.map(card).join("")}</div>
+    </div>
   `).join("");
 }
 
@@ -293,19 +305,6 @@ function renderTraining() {
       <a href="${t.url}" target="_blank" rel="noopener" class="btn btn-secondary">[ VIEW PROGRAM ]</a>
     </div>
   `;
-}
-
-function renderMission() {
-  const desc = document.getElementById("mission-desc");
-  const status = document.getElementById("mission-status");
-  const fill = document.getElementById("mission-progress-fill");
-  const label = document.getElementById("mission-progress-label");
-  if (!desc || !status || !fill || !label) return;
-  desc.textContent = currentMission.text;
-  status.textContent = `STATUS: ${currentMission.status}`;
-  label.textContent = `PROGRESS: ${currentMission.progress}%`;
-  // Width set on next frame so the CSS transition animates in.
-  requestAnimationFrame(() => { fill.style.width = `${currentMission.progress}%`; });
 }
 
 /* --------------------------------------------------------------------------
@@ -415,7 +414,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderPriorityProjects();
   renderLabProjects();
   renderTechStack();
-  renderMission();
   renderTraining();
   setupNavToggle();
   setupClickableCards();
