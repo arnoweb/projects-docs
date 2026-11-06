@@ -136,7 +136,23 @@ const currentTraining = {
   logo: "assets/images/blent-logo.png",
   description: "Deepening hands-on expertise in generative AI, LLM engineering and applied machine learning.",
   status: "IN PROGRESS",
-  url: "https://blent.ai/thematique/ia-generative"
+  url: "https://blent.ai/thematique/ia-generative",
+  // The track's modules. Optional: pdf (a link to my presentation for that module).
+  modules: [
+    {
+      name: "Python",
+      description: "Python fundamentals, applied to building a REST API.",
+      pdf: ""
+    },
+    {
+      name: "LLM Engineer",
+      description: "Building applications on top of large language models."
+    },
+    {
+      name: "Agentic AI",
+      description: "Designing AI agents that plan, use tools and act."
+    }
+  ]
 };
 
 /* --------------------------------------------------------------------------
@@ -339,6 +355,16 @@ function renderTraining() {
       <p class="training-desc">${t.description}</p>
       <a href="${t.url}" target="_blank" rel="noopener" class="btn btn-secondary">[ VIEW PROGRAM ]</a>
     </div>
+    ${t.modules && t.modules.length ? `
+    <ol class="training-modules">
+      ${t.modules.map((m, i) => `
+        <li class="training-module">
+          <span class="training-module-num">MODULE ${String(i + 1).padStart(2, "0")}</span>
+          <span class="training-module-name">${m.name}</span>
+          <span class="training-module-desc">${m.description}</span>
+          ${m.pdf ? `<a href="${m.pdf}" target="_blank" rel="noopener" class="training-module-link">&gt; VIEW MY PRESENTATION (PDF)</a>` : ""}
+        </li>`).join("")}
+    </ol>` : ""}
   `;
 }
 

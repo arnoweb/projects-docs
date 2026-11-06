@@ -684,6 +684,48 @@ button { font: inherit; cursor: pointer; }
   margin-bottom: 16px;
 }
 
+.training-modules {
+  list-style: none;
+  flex-basis: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 8px 0 0;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--border-soft);
+}
+.training-module {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.training-module-num {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+.training-module-name {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.training-module-desc { color: var(--text-dim); font-size: 0.9rem; }
+.training-module-link {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+.training-module-link:hover { opacity: 0.75; }
+
 /* ---- GitHub section --------------------------------------------------------------- */
 .github-panel {
   text-align: center;
