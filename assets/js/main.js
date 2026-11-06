@@ -124,8 +124,9 @@ const labGroups = [
       {
         id: "MZ-LOUVRE",
         name: "Musée du Louvre",
-        description: "Digital platform for the Musée du Louvre.",
-        status: "DELIVERED · MAZARINE"
+        description: "Technical direction of louvre.fr, the museum's website: quarterly releases with a team of 6.",
+        status: "DELIVERED · MAZARINE",
+        stack: ["Technical direction", "Cultural institution", "Quarterly releases"]
       },
       {
         id: "MZ-OPERA",
