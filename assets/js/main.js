@@ -137,12 +137,13 @@ const currentTraining = {
   description: "Deepening hands-on expertise in generative AI, LLM engineering and applied machine learning.",
   status: "IN PROGRESS",
   url: "https://blent.ai/thematique/ia-generative",
-  // The track's modules. Optional: pdf (a link to my presentation for that module).
+  // The track's modules. Optional: pdf (my presentation for that module), github (its code).
   modules: [
     {
       name: "Python",
-      description: "Python fundamentals, applied to building a REST API.",
-      pdf: ""
+      description: "Python fundamentals, applied to DigiMarket: an e-commerce REST API with Flask, JWT auth, SQLAlchemy and pytest.",
+      pdf: "assets/pdf/DigiMarket_API_Python_Module_Blent.pdf",
+      github: "https://github.com/arnoweb/formation-blentai-module-python"
     },
     {
       name: "LLM Engineer",
@@ -363,6 +364,7 @@ function renderTraining() {
           <span class="training-module-name">${m.name}</span>
           <span class="training-module-desc">${m.description}</span>
           ${m.pdf ? `<a href="${m.pdf}" target="_blank" rel="noopener" class="training-module-link">&gt; VIEW MY PRESENTATION (PDF)</a>` : ""}
+          ${m.github ? `<a href="${m.github}" target="_blank" rel="noopener" class="training-module-link">&gt; VIEW THE CODE ON GITHUB</a>` : ""}
         </li>`).join("")}
     </ol>` : ""}
   `;
