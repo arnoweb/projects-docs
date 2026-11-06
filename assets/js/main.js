@@ -95,6 +95,10 @@ const labGroups = [
         status: "ARCHIVED",
         stack: ["LLM Fine-tuning", "Hugging Face", "RAG"],
         github: "https://github.com/arnoweb/gen-ai-faq",
+        apps: [
+          { label: "APP", title: "Live FAQ assistant (Streamlit)", url: "https://arnoweb-rag-llm-faq-finetuned-huggingface.streamlit.app/" },
+          { label: "COMPARE", title: "Base vs fine-tuned model comparison (Streamlit)", url: "https://arnoweb-rag-faq-compare-basevsfinetuned-huggingface.streamlit.app/" }
+        ],
         docsUrl: "gen-ai-faq/portfolio-business-value.html",
         architectureUrl: "gen-ai-faq/portfolio-architecture.html"
       },
@@ -110,7 +114,8 @@ const labGroups = [
       {
         id: "EDGE-021",
         name: "Google Coral Edge AI",
-        description: "Edge AI inference scripts for the Google Coral Dev Board.",
+        description: "Real-time object recognition from video on the Google Coral Dev Board: machine learning classification models run on the board's Edge TPU, frame by frame from the camera.",
+        stack: ["Machine Learning", "Image classification", "Object detection", "Edge TPU", "TensorFlow Lite"],
         status: "OPEN SOURCE",
         github: "https://github.com/arnoweb/googlecoral",
         video: "assets/videos/coral-vid-test.mp4"
@@ -285,6 +290,7 @@ function renderLabProjects() {
       <div class="lab-status">STATUS: ${p.status}</div>
       <div class="card-links card-links--icons" style="border-top: none; padding-top: 8px; margin-top: 8px;">
         ${p.liveUrl ? cardLink("site", "SITE", "Live site", `href="${p.liveUrl}" ${ext}`) : ""}
+        ${(p.apps || []).map((a) => cardLink("site", a.label, a.title, `href="${a.url}" ${ext}`)).join("")}
         ${p.github ? cardLink("github", "GITHUB", "Source code on GitHub", `href="${p.github}" ${ext}`) : ""}
         ${p.video ? cardLink("demo", "DEMO", "Watch the demo", `href="#" data-video="${p.video}" data-video-title="${p.name}"`) : ""}
         ${p.docsUrl ? cardLink("value", "VALUE", "Business value", `href="${p.docsUrl}" ${ext}`) : ""}
