@@ -279,6 +279,40 @@ function setupVideoModal() {
   window.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
 }
 
+// Calendly booking opens in a popup (iframe) instead of leaving the page.
+function setupCalendlyModal() {
+  const modal = document.getElementById("calendly-modal");
+  const frame = document.getElementById("calendly-modal-frame");
+  const closeBtn = document.getElementById("calendly-modal-close");
+  if (!modal || !frame) return;
+
+  const openModal = (url) => {
+    const u = new URL(url);
+    u.searchParams.set("embed_domain", location.hostname || "localhost");
+    u.searchParams.set("embed_type", "PopupText");
+    u.searchParams.set("hide_gdpr_banner", "1");
+    frame.src = u.toString();
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  };
+  const closeModal = () => {
+    modal.hidden = true;
+    document.body.style.overflow = "";
+    frame.src = "about:blank";
+  };
+
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-calendly]");
+    if (trigger) {
+      e.preventDefault();
+      openModal(trigger.href);
+    }
+  });
+  closeBtn && closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
+}
+
 function renderTechStack() {
   const body = document.getElementById("tech-stack-body");
   if (!body) return;
@@ -418,6 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupNavToggle();
   setupClickableCards();
   setupVideoModal();
+  setupCalendlyModal();
   setupScrollReveal(); // cards are injected above, so reveal runs after render
   runBootSequence();
 

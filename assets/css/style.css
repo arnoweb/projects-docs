@@ -342,6 +342,19 @@ button { font: inherit; cursor: pointer; }
   background: var(--panel);
 }
 .cta-row { display: flex; flex-wrap: wrap; gap: 14px; }
+.hero-cv-link {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  border-bottom: 1px dashed var(--accent);
+  margin: -14px 0 32px;
+  padding-bottom: 2px;
+  transition: opacity .15s var(--ease);
+}
+.hero-cv-link:hover { opacity: 0.75; }
 
 .btn {
   font-family: var(--font-mono);
@@ -683,6 +696,31 @@ button { font: inherit; cursor: pointer; }
   color: var(--text-dim);
   max-width: 480px;
   margin: 12px auto 28px;
+}
+
+/* ---- About me ------------------------------------------------------------------------ */
+.about-panel {
+  margin-top: 32px;
+  max-width: 760px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+}
+.about-panel p {
+  color: var(--text-dim);
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+.about-panel p + p { margin-top: 16px; }
+
+.contact-title {
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-top: 8px;
 }
 
 /* ---- Footer --------------------------------------------------------------------------- */
@@ -1059,6 +1097,9 @@ button { font: inherit; cursor: pointer; }
 }
 .video-modal-close:hover { color: var(--danger); border-color: var(--danger); }
 .video-modal-player { display: block; width: 100%; max-height: 72vh; background: #000; }
+
+.calendly-modal-content { max-width: 1000px; }
+.calendly-modal-frame { display: block; width: 100%; height: min(78vh, 720px); border: 0; background: #fff; }
 
 /* ---- Reduced motion ---------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {

@@ -33,7 +33,7 @@
     <button id="nav-toggle" class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
     <nav id="main-nav" class="main-nav">
       <a href="#projects">PROJECTS</a>
-      <a href="#about">ABOUT</a>
+      <a href="#about">ABOUT ME</a>
       <a href="https://github.com/arnoweb" target="_blank" rel="noopener">GITHUB</a>
       <a href="#contact">CONTACT</a>
     </nav>
@@ -42,7 +42,7 @@
   <main>
 
     <!-- HERO -->
-    <section class="hero" id="about">
+    <section class="hero" id="top">
       <div class="hero-kicker">Available now</div>
       <h1 class="hero-title">
         ARNAUD BRETON<br>
@@ -53,6 +53,7 @@
         product engineering, AI coding agents, LLM workflows, and business process
         automation — from concept to production.
       </p>
+      <a href="assets/pdf/Arnaud_BRETON_CV_ATS_2026_FR.pdf" target="_blank" rel="noopener" class="hero-cv-link">&gt; VIEW MY RESUME (PDF)</a>
       <div class="tag-row">
         <span class="tag-chip">Agentic Systems</span>
         <span class="tag-chip">Generative AI</span>
@@ -66,10 +67,37 @@
       </div>
     </section>
 
+    <!-- ABOUT ME -->
+    <section class="section" id="about">
+      <div class="section-head">
+        <span class="index">01 /</span>
+        <h2 class="section-title">ABOUT <span class="accent">ME</span></h2>
+      </div>
+      <p class="section-sub">// 20 YEARS IN DIGITAL — STILL CURIOUS</p>
+      <div class="about-panel reveal">
+        <p>
+          I've spent the last twenty years in digital, and honestly, the passion
+          hasn't faded one bit. I started out as a developer, became a lead, then a
+          technical project director — and along the way, digital culture became
+          much more than a job: it's the way I look at the world.
+        </p>
+        <p>
+          What drives me is bringing projects to life. Taking an idea, shaping it with
+          the people around it, and seeing it through all the way to production —
+          that's where I feel most at home.
+        </p>
+        <p>
+          I've always had an appetite for learning. I spend a lot of time on tech
+          watch, testing new tools, and getting my hands dirty — today with
+          generative AI and agentic development, tomorrow with whatever comes next.
+        </p>
+      </div>
+    </section>
+
     <!-- CURRENTLY TRAINING -->
     <section class="section" id="training">
       <div class="section-head">
-        <span class="index">01 /</span>
+        <span class="index">02 /</span>
         <h2 class="section-title">CURRENTLY <span class="accent">TRAINING</span></h2>
       </div>
       <p class="section-sub">// SKILL TREE — ACTIVE UPGRADE IN PROGRESS</p>
@@ -79,7 +107,7 @@
     <!-- PRIORITY PROJECTS -->
     <section class="section" id="projects">
       <div class="section-head">
-        <span class="index">02 /</span>
+        <span class="index">03 /</span>
         <h2 class="section-title">PRIORITY <span class="accent">PROJECTS</span></h2>
       </div>
       <p class="section-sub">// SELECTED MISSIONS — CLICK A CARD TO INSPECT</p>
@@ -89,7 +117,7 @@
     <!-- LAB / SIDE QUESTS -->
     <section class="section" id="lab">
       <div class="section-head">
-        <span class="index">03 /</span>
+        <span class="index">04 /</span>
         <h2 class="section-title">THE LAB <span class="accent">// SIDE QUESTS</span></h2>
       </div>
       <p class="section-sub">// PROTOTYPES, EXPERIMENTS AND OPEN SOURCE</p>
@@ -99,7 +127,7 @@
     <!-- TECH STACK -->
     <section class="section" id="stack">
       <div class="section-head">
-        <span class="index">04 /</span>
+        <span class="index">05 /</span>
         <h2 class="section-title">TECH <span class="accent">INVENTORY</span></h2>
       </div>
       <div class="terminal-panel reveal">
@@ -111,19 +139,24 @@
       </div>
     </section>
 
-    <!-- CONNECT: GITHUB / LINKEDIN / CV -->
+    <!-- CONNECT: LINKEDIN / CALENDLY / GITHUB -->
     <section class="section" id="contact">
       <div class="section-head">
-        <span class="index">05 /</span>
+        <span class="index">06 /</span>
         <h2 class="section-title">CONNECT <span class="accent">// LINKS</span></h2>
       </div>
       <div class="github-panel reveal">
         <p class="mono section-sub" style="font-size: 0.85rem;">// arnoweb</p>
-        <p>Explore repositories, connect professionally, or download my resume.</p>
+        <h3 class="contact-title">Let's build solutions that create value, together</h3>
+        <p>
+          Looking for a senior technical perspective, a partner to bring an idea to
+          life, or a developer to build your next solution? Book a call or reach out
+          on LinkedIn.
+        </p>
         <div class="cta-row" style="justify-content: center;">
-          <a href="https://github.com/arnoweb" target="_blank" rel="noopener" class="btn btn-primary">[ OPEN GITHUB ]</a>
+          <a href="https://calendly.com/a-breton-likyly/quel-est-votre-besoin-digital-ia" target="_blank" rel="noopener" class="btn btn-primary" data-calendly>[ BOOK A CALL ]</a>
           <a href="https://www.linkedin.com/in/bretonarnaud" target="_blank" rel="noopener" class="btn btn-secondary">[ LINKEDIN ]</a>
-          <a href="assets/pdf/Arnaud_BRETON_CV_ATS_2026_FR.pdf" target="_blank" rel="noopener" class="btn btn-secondary">[ DOWNLOAD CV ]</a>
+          <a href="https://github.com/arnoweb" target="_blank" rel="noopener" class="btn btn-secondary">[ GITHUB ]</a>
         </div>
       </div>
     </section>
@@ -145,6 +178,17 @@
         <button id="video-modal-close" class="video-modal-close" aria-label="Close video">[ X ]</button>
       </div>
       <video id="video-modal-player" class="video-modal-player" controls playsinline></video>
+    </div>
+  </div>
+
+  <!-- CALENDLY POPUP -->
+  <div id="calendly-modal" class="video-modal" hidden>
+    <div class="video-modal-content calendly-modal-content">
+      <div class="video-modal-bar">
+        <span class="video-modal-title mono">BOOK A CALL — CALENDLY</span>
+        <button id="calendly-modal-close" class="video-modal-close" aria-label="Close booking">[ X ]</button>
+      </div>
+      <iframe id="calendly-modal-frame" class="calendly-modal-frame" title="Book a call with Arnaud Breton"></iframe>
     </div>
   </div>
 
