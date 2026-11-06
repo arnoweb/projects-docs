@@ -104,7 +104,8 @@ const labGroups = [
         description: "Pure machine learning: predicts the carry distance of a 3-wood from launch-monitor data. Univariate and multivariate KNN regression and linear regression, compared with K-fold cross-validation, hyperparameter tuning and RMSE.",
         status: "OPEN SOURCE",
         stack: ["Machine Learning", "Linear Regression", "KNN Regression", "K-Fold CV", "scikit-learn"],
-        github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb"
+        github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb",
+        architectureUrl: "golf-performance/portfolio-architecture.html"
       },
       {
         id: "EDGE-021",

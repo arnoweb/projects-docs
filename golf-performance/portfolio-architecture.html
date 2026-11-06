@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golf &amp; Performance · Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="Golf &amp; Performance: a pure machine learning experiment that predicts the carry distance of a 3-wood from launch-monitor data, with KNN and linear regression.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+  </header>
+
+  <main class="doc-page">
+    <a href="../index.html#lab" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+    <div class="doc-kicker">// THE LAB: ML-014 · PURE MACHINE LEARNING</div>
+    <h1 class="doc-title">GOLF &amp; PERFORMANCE <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
+    <p class="doc-lede">A small experiment born on the driving range: can launch-monitor data predict how far a 3-wood
+      shot will carry, and which ball feature matters most?</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Python</span>
+      <span class="tag-chip">pandas</span>
+      <span class="tag-chip">scikit-learn</span>
+      <span class="tag-chip">KNN Regression</span>
+      <span class="tag-chip">Linear Regression</span>
+      <span class="tag-chip">seaborn</span>
+      <span class="tag-chip">Jupyter</span>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Pipeline</h2>
+      <div class="doc-steps">
+        <div class="doc-step">
+          <div class="doc-step-num">01</div>
+          <div>
+            <div class="doc-step-title">Data</div>
+            <div class="doc-step-desc">Launch-monitor exports (CSV): carry distance, ball speed, apex,
+            launch angle, dispersion and distance to flag. A first set of 10 real shots, then an
+            extended set of 1,000 shots with the 3-wood.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">02</div>
+          <div>
+            <div class="doc-step-title">Preparation</div>
+            <div class="doc-step-desc">Decimal commas converted to floats, rows filtered on the club
+            (n°3), missing carry values dropped, and features min-max normalized for the KNN models.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">03</div>
+          <div>
+            <div class="doc-step-title">KNN regression</div>
+            <div class="doc-step-desc">Univariate models first, one feature at a time, to rank the
+            features. Then multivariate models on the best 2, 3 and 4 features, with <span class="mono">k</span>
+            tuned from 1 to 3 and compared on RMSE.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">04</div>
+          <div>
+            <div class="doc-step-title">Feature selection</div>
+            <div class="doc-step-desc">On the extended set, a correlation matrix keeps only the
+            features with a correlation of at least 0.5 with the carry: ball speed (0.73) and launch
+            angle (0.57). Apex and dispersion are dropped.</div>
+          </div>
+        </div>
+        <div class="doc-step">
+          <div class="doc-step-num">05</div>
+          <div>
+            <div class="doc-step-title">Linear regression</div>
+            <div class="doc-step-desc">Trained on half of the shots and tested on the other half
+            (the training function also supports K-fold). The model is then used to predict the
+            carry of new shots and of five typical scenarios.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Results</h2>
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Model</th><th>Features</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>KNN, univariate (k=3)</td><td>Ball speed</td><td>RMSE 3.90 m</td></tr>
+            <tr><td>KNN, multivariate (k=1)</td><td>Ball speed + Launch angle</td><td>RMSE 4.29 m</td></tr>
+            <tr><td>KNN, multivariate (k=3)</td><td>Ball speed + Launch angle + Apex</td><td>RMSE 4.86 m</td></tr>
+            <tr><td>Linear regression (1,000 shots)</td><td>Ball speed + Launch angle</td><td>RMSE 2.40 m · R² 0.85</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 18px;">
+        On an average carry of 180 m, the linear model is off by about 2.4 m, around 1.3%.
+        Each extra unit of ball speed adds about 1.1 m of carry, and each extra degree of launch
+        angle about 1.6 m. Ball speed is the feature that explains the most, in every model.
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">Screenshots</h2>
+      <div class="doc-shots charts">
+        <figure class="doc-shot">
+          <a href="screens/knn-rmse-by-feature.png" target="_blank" rel="noopener"><img src="screens/knn-rmse-by-feature.png" alt="RMSE of the univariate KNN models by value of k, one curve per feature" loading="lazy"></a>
+          <figcaption>KNN: RMSE by k for each feature. Ball speed stays the lowest curve</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/correlation-heatmap.png" target="_blank" rel="noopener"><img src="screens/correlation-heatmap.png" alt="Correlation heatmap between carry distance and the ball features" loading="lazy"></a>
+          <figcaption>Correlation matrix used to select the features</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/carry-vs-features.png" target="_blank" rel="noopener"><img src="screens/carry-vs-features.png" alt="Carry distance against ball speed, apex, launch angle and dispersion, with trend lines" loading="lazy"></a>
+          <figcaption>Carry against each feature, with its trend line</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/train-vs-test.png" target="_blank" rel="noopener"><img src="screens/train-vs-test.png" alt="Training and testing shots overlaid on ball speed and launch angle" loading="lazy"></a>
+          <figcaption>Training and test sets share the same distribution</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/predicted-vs-actual.png" target="_blank" rel="noopener"><img src="screens/predicted-vs-actual.png" alt="Actual carry of the test shots compared with the predicted carry" loading="lazy"></a>
+          <figcaption>Linear regression: actual carry vs predicted carry on the test shots</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/user-vs-pga.png" target="_blank" rel="noopener"><img src="screens/user-vs-pga.png" alt="Average carry, ball speed, apex and launch angle compared with PGA players" loading="lazy"></a>
+          <figcaption>My averages compared with PGA players</figcaption>
+        </figure>
+        <figure class="doc-shot">
+          <a href="screens/test-scenarios.png" target="_blank" rel="noopener"><img src="screens/test-scenarios.png" alt="Predicted carry for five shot scenarios, from toe miss to perfect strike" loading="lazy"></a>
+          <figcaption>Predicted carry for 5 shot scenarios, from a toe miss to a perfect strike</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section-title">What I Took From It</h2>
+      <p>
+        This one is an experiment, not a product. It was a hands-on way to practise the basics of
+        machine learning on data I know well: preparing the data, ranking features, tuning a
+        hyperparameter, validating on unseen data and reading the error in meters rather than in
+        abstract numbers. The simplest model, a linear regression on two well-chosen features, ends
+        up being the most accurate.
+      </p>
+    </section>
+
+    <div class="doc-footer-links">
+      <a href="https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb" target="_blank" rel="noopener" class="btn btn-secondary">[ NOTEBOOK ON GITHUB ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON · TECH PORTFOLIO SYSTEM</div>
+  </footer>
+</body>
+</html>
