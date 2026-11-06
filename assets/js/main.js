@@ -116,47 +116,45 @@ const labGroups = [
         video: "assets/videos/coral-vid-test.mp4"
       }
     ]
+  }
+];
+
+// Client platforms, shown in the "PLATFORM PROJECTS" section.
+const platformProjects = [
+  {
+    id: "MZ-LOUVRE",
+    name: "Musée du Louvre",
+    description: "Technical direction of louvre.fr, the museum's website: quarterly releases with a team of 6.",
+    status: "DELIVERED",
+    stack: ["Technical direction", "Cultural institution", "Quarterly releases"]
   },
   {
-    title: "PLATFORMS",
-    sub: "Client platforms delivered at Mazarine over the last 10 years, as technical project manager then technical project director",
-    projects: [
-      {
-        id: "MZ-LOUVRE",
-        name: "Musée du Louvre",
-        description: "Technical direction of louvre.fr, the museum's website: quarterly releases with a team of 6.",
-        status: "DELIVERED · MAZARINE",
-        stack: ["Technical direction", "Cultural institution", "Quarterly releases"]
-      },
-      {
-        id: "MZ-OPERA",
-        name: "Opéra national de Paris",
-        description: "Technical direction of the Opéra's digital platform: quarterly releases with a team of 6, integrated with the ticketing and the client's information system.",
-        status: "DELIVERED · MAZARINE",
-        stack: ["Technical direction", "Ticketing APIs", "Cloud architecture"]
-      },
-      {
-        id: "MZ-OTB",
-        name: "OTB Group",
-        description: "Luxury brand website for Maison Margiela.",
-        status: "DELIVERED · MAZARINE",
-        stack: ["Luxury e-commerce", "Technical project management"]
-      },
-      {
-        id: "MZ-KERING",
-        name: "Kering Group",
-        description: "Luxury brand website for Bottega Veneta.",
-        status: "DELIVERED · MAZARINE",
-        stack: ["Luxury e-commerce", "Technical project management"]
-      },
-      {
-        id: "MZ-ACCOR",
-        name: "Accor Group",
-        description: "Digital platforms for Thalassa and for the Accor and LVMH partnership, connected to hospitality, booking and payment APIs.",
-        status: "DELIVERED · MAZARINE",
-        stack: ["Hospitality APIs", "Payments (Stripe)", "Technical direction"]
-      }
-    ]
+    id: "MZ-OPERA",
+    name: "Opéra national de Paris",
+    description: "Technical direction of the Opéra's digital platform: quarterly releases with a team of 6, integrated with the ticketing and the client's information system.",
+    status: "DELIVERED",
+    stack: ["Technical direction", "Ticketing APIs", "Cloud architecture"]
+  },
+  {
+    id: "MZ-OTB",
+    name: "OTB Group",
+    description: "Luxury brand website for Maison Margiela.",
+    status: "DELIVERED",
+    stack: ["Luxury e-commerce", "Technical project management"]
+  },
+  {
+    id: "MZ-KERING",
+    name: "Kering Group",
+    description: "Luxury brand website for Bottega Veneta.",
+    status: "DELIVERED",
+    stack: ["Luxury e-commerce", "Technical project management"]
+  },
+  {
+    id: "MZ-ACCOR",
+    name: "Accor Group",
+    description: "Digital platforms for Thalassa and for the Accor and LVMH partnership, connected to hospitality, booking and payment APIs.",
+    status: "DELIVERED",
+    stack: ["Hospitality APIs", "Payments (Stripe)", "Technical direction"]
   }
 ];
 
@@ -300,6 +298,20 @@ function renderLabProjects() {
       <p class="lab-group-sub">// ${g.sub}</p>
       <div class="lab-grid">${g.projects.map(card).join("")}</div>
     </div>
+  `).join("");
+}
+
+function renderPlatformProjects() {
+  const grid = document.getElementById("platform-projects-grid");
+  if (!grid) return;
+  grid.innerHTML = platformProjects.map((p) => `
+    <article class="lab-card platform-card reveal">
+      <div class="lab-id">[ ${p.id} ]</div>
+      <h4 class="lab-name">${p.name}</h4>
+      <p class="lab-desc">${p.description}</p>
+      ${p.stack ? `<div class="tech-tags lab-tags">${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}</div>` : ""}
+      <div class="lab-status">STATUS: ${p.status}</div>
+    </article>
   `).join("");
 }
 
@@ -517,6 +529,7 @@ function setupScrollReveal() {
 document.addEventListener("DOMContentLoaded", () => {
   renderPriorityProjects();
   renderLabProjects();
+  renderPlatformProjects();
   renderTechStack();
   renderTraining();
   setupNavToggle();

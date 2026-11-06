@@ -520,6 +520,10 @@ button { font: inherit; cursor: pointer; }
 }
 .lab-card { display: flex; flex-direction: column; }
 .lab-groups { display: flex; flex-direction: column; gap: 44px; }
+.platforms-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+@media (min-width: 1100px) { .platforms-grid { grid-template-columns: repeat(5, 1fr); } }
+.section-sub-link { color: var(--accent); border-bottom: 1px dashed var(--accent); }
+.section-sub-link:hover { opacity: 0.75; }
 .lab-group-title {
   font-family: var(--font-mono);
   font-size: 0.9rem;
