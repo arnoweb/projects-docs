@@ -116,6 +116,46 @@ const labGroups = [
         video: "assets/videos/coral-vid-test.mp4"
       }
     ]
+  },
+  {
+    title: "PLATFORMS",
+    sub: "Client platforms delivered at Mazarine over the last 10 years, as technical project manager then technical project director",
+    projects: [
+      {
+        id: "MZ-LOUVRE",
+        name: "Musée du Louvre",
+        description: "Digital platform for the Musée du Louvre.",
+        status: "DELIVERED · MAZARINE"
+      },
+      {
+        id: "MZ-OPERA",
+        name: "Opéra national de Paris",
+        description: "Technical direction of the Opéra's digital platform: quarterly releases with a team of 6, integrated with the ticketing and the client's information system.",
+        status: "DELIVERED · MAZARINE",
+        stack: ["Technical direction", "Ticketing APIs", "Cloud architecture"]
+      },
+      {
+        id: "MZ-OTB",
+        name: "OTB Group",
+        description: "Luxury brand website for Maison Margiela.",
+        status: "DELIVERED · MAZARINE",
+        stack: ["Luxury e-commerce", "Technical project management"]
+      },
+      {
+        id: "MZ-KERING",
+        name: "Kering Group",
+        description: "Luxury brand website for Bottega Veneta.",
+        status: "DELIVERED · MAZARINE",
+        stack: ["Luxury e-commerce", "Technical project management"]
+      },
+      {
+        id: "MZ-ACCOR",
+        name: "Accor Group",
+        description: "Digital platforms for Thalassa and for the Accor and LVMH partnership, connected to hospitality, booking and payment APIs.",
+        status: "DELIVERED · MAZARINE",
+        stack: ["Hospitality APIs", "Payments (Stripe)", "Technical direction"]
+      }
+    ]
   }
 ];
 
