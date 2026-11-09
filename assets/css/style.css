@@ -285,6 +285,35 @@ button { font: inherit; cursor: pointer; }
   .main-nav a { padding: 10px 0; width: 100%; }
 }
 
+/* ---- Language switch (EN / FR) ---- */
+.main-nav { margin-left: auto; }
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+.lang-switch button {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font: inherit;
+  letter-spacing: 0.06em;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: color .15s var(--ease), border-color .15s var(--ease);
+}
+.lang-switch button:hover { color: var(--accent); }
+.lang-switch button.is-active { color: var(--accent); border-color: var(--accent); }
+@media (max-width: 720px) {
+  .lang-switch { margin-left: auto; margin-right: 12px; }
+  .nav-toggle { order: 3; }
+}
+
 /* ---- Hero ------------------------------------------------------------------ */
 .hero {
   min-height: 92vh;
