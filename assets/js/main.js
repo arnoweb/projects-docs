@@ -373,8 +373,8 @@ const platformGroups = [
         name: "Viktor & Rolf · OTB Group",
         role: TECH_DIRECTION,
         description: {
-          en: "Technical direction of the Viktor & Rolf project.",
-          fr: "Direction technique du projet Viktor & Rolf."
+          en: "Technical direction of a digital experience for Viktor & Rolf.",
+          fr: "Direction technique d'une expérience digitale pour Viktor & Rolf."
         },
         stack: []
       },
