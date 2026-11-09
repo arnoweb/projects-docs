@@ -520,8 +520,21 @@ button { font: inherit; cursor: pointer; }
 }
 .lab-card { display: flex; flex-direction: column; }
 .lab-groups { display: flex; flex-direction: column; gap: 44px; }
-.platforms-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-@media (min-width: 1100px) { .platforms-grid { grid-template-columns: repeat(5, 1fr); } }
+.platform-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 4px 0 12px;
+  font-size: 0.82rem;
+}
+.platform-meta dt {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  padding-top: 2px;
+}
+.platform-meta dd { margin: 0; color: var(--text); }
 .section-sub-link { color: var(--accent); border-bottom: 1px dashed var(--accent); }
 .section-sub-link:hover { opacity: 0.75; }
 .lab-group-title {

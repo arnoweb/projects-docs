@@ -124,42 +124,63 @@ const labGroups = [
   }
 ];
 
-// Client platforms, shown in the "PLATFORM PROJECTS" section.
-const platformProjects = [
+// Client platforms, shown in the "PLATFORM PROJECTS" section, grouped by sector.
+// Per project: role, team, what I did (description) and the technologies (stack).
+const platformGroups = [
   {
-    id: "MZ-LOUVRE",
-    name: "Musée du Louvre",
-    description: "Technical direction of louvre.fr, the museum's website: quarterly releases with a team of 6.",
-    status: "DELIVERED",
-    stack: ["Technical direction", "Cultural institution", "Quarterly releases"]
+    title: "CULTURAL INSTITUTIONS",
+    projects: [
+      {
+        id: "MZ-LOUVRE",
+        name: "Musée du Louvre",
+        role: "Technical project director",
+        team: "6 people",
+        description: "Technical direction of louvre.fr, delivered in quarterly release cycles.",
+        stack: []
+      },
+      {
+        id: "MZ-OPERA",
+        name: "Opéra national de Paris",
+        role: "Technical project director",
+        team: "6 people",
+        description: "Technical direction of the Opéra's digital platform, delivered in quarterly releases and integrated with the ticketing and the Opéra's information system.",
+        stack: ["Ticketing APIs"]
+      }
+    ]
   },
   {
-    id: "MZ-OPERA",
-    name: "Opéra national de Paris",
-    description: "Technical direction of the Opéra's digital platform: quarterly releases with a team of 6, integrated with the ticketing and the client's information system.",
-    status: "DELIVERED",
-    stack: ["Technical direction", "Ticketing APIs", "Cloud architecture"]
+    title: "LUXURY BRANDS",
+    projects: [
+      {
+        id: "MZ-OTB",
+        name: "Maison Margiela · OTB Group",
+        role: "Technical project manager",
+        team: "4 developers",
+        description: "Technical management of the Maison Margiela brand website.",
+        stack: []
+      },
+      {
+        id: "MZ-KERING",
+        name: "Bottega Veneta · Kering Group",
+        role: "Technical project manager",
+        team: "4 developers",
+        description: "Technical management of the Bottega Veneta brand website.",
+        stack: []
+      }
+    ]
   },
   {
-    id: "MZ-OTB",
-    name: "OTB Group",
-    description: "Luxury brand website for Maison Margiela.",
-    status: "DELIVERED",
-    stack: ["Luxury e-commerce", "Technical project management"]
-  },
-  {
-    id: "MZ-KERING",
-    name: "Kering Group",
-    description: "Luxury brand website for Bottega Veneta.",
-    status: "DELIVERED",
-    stack: ["Luxury e-commerce", "Technical project management"]
-  },
-  {
-    id: "MZ-ACCOR",
-    name: "Accor Group",
-    description: "Digital platforms for Thalassa and for the Accor and LVMH partnership, connected to hospitality, booking and payment APIs.",
-    status: "DELIVERED",
-    stack: ["Hospitality APIs", "Payments (Stripe)", "Technical direction"]
+    title: "HOSPITALITY GROUPS",
+    projects: [
+      {
+        id: "MZ-ACCOR",
+        name: "Accor Group",
+        role: "Technical project director",
+        team: "5 people (Thalassa) · 4 people (Accor and LVMH)",
+        description: "Technical direction of two one-year projects: the Thalassa platform, and the Accor and LVMH partnership platform, connected to hospitality, payment and social APIs.",
+        stack: ["Hospitality APIs", "Stripe", "Meta APIs"]
+      }
+    ]
   }
 ];
 
@@ -310,14 +331,23 @@ function renderLabProjects() {
 function renderPlatformProjects() {
   const grid = document.getElementById("platform-projects-grid");
   if (!grid) return;
-  grid.innerHTML = platformProjects.map((p) => `
+  const card = (p) => `
     <article class="lab-card platform-card reveal">
       <div class="lab-id">[ ${p.id} ]</div>
       <h4 class="lab-name">${p.name}</h4>
+      <dl class="platform-meta">
+        <dt>ROLE</dt><dd>${p.role}</dd>
+        <dt>TEAM</dt><dd>${p.team}</dd>
+      </dl>
       <p class="lab-desc">${p.description}</p>
-      ${p.stack ? `<div class="tech-tags lab-tags">${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}</div>` : ""}
-      <div class="lab-status">STATUS: ${p.status}</div>
+      ${p.stack && p.stack.length ? `<div class="tech-tags lab-tags">${p.stack.map((t) => `<span class="tech-tag">${t}</span>`).join("")}</div>` : ""}
     </article>
+  `;
+  grid.innerHTML = platformGroups.map((g) => `
+    <div class="lab-group">
+      <h3 class="lab-group-title">${g.title}</h3>
+      <div class="lab-grid">${g.projects.map(card).join("")}</div>
+    </div>
   `).join("");
 }
 
