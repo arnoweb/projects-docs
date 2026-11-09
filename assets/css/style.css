@@ -603,6 +603,12 @@ button { font: inherit; cursor: pointer; }
 }
 .lab-card { display: flex; flex-direction: column; }
 .lab-groups { display: flex; flex-direction: column; gap: 44px; }
+.platform-brand {
+  margin: -2px 0 10px;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--text-faint);
+}
 .platform-meta {
   display: grid;
   grid-template-columns: auto 1fr;

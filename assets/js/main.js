@@ -349,6 +349,7 @@ const platformGroups = [
       {
         id: "MZ-LVMH",
         name: "Silenseas · LVMH",
+        brand: { en: "Orient Express luxury sailing yacht, the largest in the world.", fr: "Le voilier de croisière de luxe d'Orient Express, le plus grand au monde." },
         role: TECH_DIRECTION,
         team: { en: "4 people, over one year", fr: "4 personnes, sur un an" },
         description: {
@@ -360,6 +361,7 @@ const platformGroups = [
       {
         id: "MZ-OTB",
         name: "Maison Margiela · OTB Group",
+        brand: { en: "Paris fashion house founded by Martin Margiela.", fr: "Maison de mode parisienne fondée par Martin Margiela." },
         role: TECH_DIRECTION,
         team: { en: "4 developers", fr: "4 développeurs" },
         description: {
@@ -371,6 +373,7 @@ const platformGroups = [
       {
         id: "MZ-OTB-VR",
         name: "Viktor & Rolf · OTB Group",
+        brand: { en: "Dutch haute couture and fashion house.", fr: "Maison de haute couture néerlandaise." },
         role: TECH_DIRECTION,
         description: {
           en: "Technical direction of a digital experience for Viktor & Rolf.",
@@ -381,6 +384,7 @@ const platformGroups = [
       {
         id: "MZ-KERING",
         name: "Bottega Veneta · Kering Group",
+        brand: { en: "Italian luxury house known for its leather goods.", fr: "Maison de luxe italienne réputée pour sa maroquinerie." },
         role: TECH_DIRECTION,
         team: { en: "4 developers", fr: "4 développeurs" },
         description: {
@@ -576,6 +580,7 @@ function renderPlatformProjects() {
     <article class="lab-card platform-card reveal">
       <div class="lab-id">[ ${p.id} ]</div>
       <h4 class="lab-name">${p.name}</h4>
+      ${p.brand ? `<p class="platform-brand">${tr(p.brand)}</p>` : ""}
       <dl class="platform-meta">
         <dt>${t("role")}</dt><dd>${tr(p.role)}</dd>
         ${p.team ? `<dt>${t("team")}</dt><dd>${tr(p.team)}</dd>` : ""}
