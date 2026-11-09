@@ -106,7 +106,7 @@ const UI = {
     trainingSub: "// ARBRE DE COMPÉTENCES · MISE À NIVEAU EN COURS",
     priorityTitle: 'PROJETS <span class="accent">IA</span>',
     prioritySub: "// PROJETS PERSONNELS · CLIQUEZ SUR UNE CARTE POUR L'OUVRIR",
-    labTitle: 'LE LAB <span class="accent">// QUÊTES ANNEXES</span>',
+    labTitle: 'LE LAB <span class="accent">// PROJETS EXPÉRIMENTAUX</span>',
     labSub: "// PROTOTYPES, EXPÉRIMENTATIONS ET OPEN SOURCE",
     platformsTitle: 'PROJETS <span class="accent">PLATEFORMES</span>',
     platformsSub: '// PLATEFORMES CLIENTS LIVRÉES CHEZ <a href="https://www.mazarine.com" target="_blank" rel="noopener" class="section-sub-link">MAZARINE DIGITAL</a> CES 10 DERNIÈRES ANNÉES',
