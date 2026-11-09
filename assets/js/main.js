@@ -79,7 +79,9 @@ const UI = {
     viewProgram: "[ VIEW PROGRAM ]",
     module: "MODULE",
     viewPresentation: "&gt; VIEW MY PRESENTATION (PDF)",
-    viewCode: "&gt; VIEW THE CODE ON GITHUB"
+    viewCode: "&gt; VIEW THE CODE ON GITHUB",
+    toLight: "Switch to light theme",
+    toDark: "Switch to dark theme"
   },
   fr: {
     pageTitle: "ARNAUD.BRETON · Agentic AI Solutions Architect & Engineer",
@@ -128,7 +130,9 @@ const UI = {
     viewProgram: "[ VOIR LE PROGRAMME ]",
     module: "MODULE",
     viewPresentation: "&gt; VOIR MA PRÉSENTATION (PDF)",
-    viewCode: "&gt; VOIR LE CODE SUR GITHUB"
+    viewCode: "&gt; VOIR LE CODE SUR GITHUB",
+    toLight: "Passer au thème clair",
+    toDark: "Passer au thème sombre"
   }
 };
 
@@ -822,6 +826,31 @@ function applyStaticText() {
   });
 }
 
+// Theme (dark / light). The initial value is set by an inline script in <head>.
+function currentTheme() {
+  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+}
+
+function updateThemeToggle() {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  const label = currentTheme() === "light" ? t("toDark") : t("toLight");
+  btn.setAttribute("aria-label", label);
+  btn.setAttribute("title", label);
+}
+
+function setupThemeToggle() {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const next = currentTheme() === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) { /* storage unavailable */ }
+    updateThemeToggle();
+  });
+  updateThemeToggle();
+}
+
 function setLang(lang) {
   if (!LANGS.includes(lang) || lang === LANG) return;
   LANG = lang;
@@ -831,6 +860,7 @@ function setLang(lang) {
   history.replaceState(null, "", url);
   applyStaticText();
   renderAll();
+  updateThemeToggle();
   // Re-rendered cards are already on screen: show them without waiting for the scroll reveal.
   document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
 }
@@ -849,6 +879,7 @@ document.addEventListener("DOMContentLoaded", () => {
   applyStaticText();
   renderAll();
   setupLangSwitch();
+  setupThemeToggle();
   setupNavToggle();
   setupClickableCards();
   setupVideoModal();

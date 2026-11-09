@@ -30,6 +30,27 @@
   --ease: cubic-bezier(.16, .8, .3, 1);
 }
 
+/* Light theme: same tokens, light values. Set by data-theme="light" on <html>
+   (header toggle, saved in localStorage, defaults to the system preference). */
+:root[data-theme="light"] {
+  --bg: #f6f5f1;
+  --bg-alt: #efeee9;
+  --panel: #ffffff;
+  --panel-2: #f1f0eb;
+  --border: #d4d2ca;
+  --border-soft: #e3e1da;
+  --text: #16191c;
+  --text-dim: #4d555c;
+  --text-faint: #7a8188;
+  --accent: #0f8a4c;
+  --accent-dim: #3aa66d;
+  --accent-amber: #b0640a;
+  --danger: #c8372b;
+  --header-bg: rgba(246, 245, 241, 0.88);
+  color-scheme: light;
+}
+:root { --header-bg: rgba(10, 11, 12, 0.82); color-scheme: dark; }
+
 /* ---- Reset -------------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -187,7 +208,7 @@ button { font: inherit; cursor: pointer; }
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: rgba(10, 11, 12, 0.82);
+  background: var(--header-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-soft);
 }
@@ -284,6 +305,39 @@ button { font: inherit; cursor: pointer; }
   }
   .main-nav a { padding: 10px 0; width: 100%; }
 }
+
+/* ---- Theme toggle (dark / light) ---- */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 26px;
+  margin-left: 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  transition: color .15s var(--ease), border-color .15s var(--ease);
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.theme-toggle svg { width: 14px; height: 14px; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+@media (max-width: 720px) { .theme-toggle { order: 2; margin: 0 10px 0 0; } }
+
+/* Light theme: details that are not driven by the tokens */
+:root[data-theme="light"] .scanline-overlay { display: none; }
+:root[data-theme="light"] .btn-primary { color: #ffffff; }
+:root[data-theme="light"] .btn-primary:hover { background: #0b7440; }
+:root[data-theme="light"] ::selection { color: #ffffff; }
+:root[data-theme="light"] .tech-tag--highlight,
+:root[data-theme="light"] .btn-secondary:hover { background: rgba(15, 138, 76, 0.08); }
+:root[data-theme="light"] .project-card:hover,
+:root[data-theme="light"] .lab-card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+:root[data-theme="light"] .doc-terminal,
+:root[data-theme="light"] .doc-video { background: var(--panel-2); }
 
 /* ---- Language switch (EN / FR) ---- */
 .main-nav { margin-left: auto; }
@@ -833,7 +887,7 @@ button { font: inherit; cursor: pointer; }
   justify-content: space-between;
   height: var(--header-h);
   padding: 0 24px;
-  background: rgba(10, 11, 12, 0.9);
+  background: var(--header-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-soft);
 }

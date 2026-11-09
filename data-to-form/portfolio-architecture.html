@@ -21,6 +21,17 @@
     .dg .ln { stroke: var(--accent); stroke-width: 1.3; fill: none; }
     .dg .ah { fill: var(--accent); }
   </style>
+  <script>
+    // Theme before first paint (no flash): saved choice, else the system preference.
+    (function () {
+      var theme;
+      try { theme = localStorage.getItem("theme"); } catch (e) {}
+      if (theme !== "light" && theme !== "dark") {
+        theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
 </head>
 <body>
   <header class="doc-header">

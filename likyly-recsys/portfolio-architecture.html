@@ -25,6 +25,17 @@
     .dg .ah { fill: var(--accent); }
     .dg .ah-d { fill: var(--text-faint); }
   </style>
+  <script>
+    // Theme before first paint (no flash): saved choice, else the system preference.
+    (function () {
+      var theme;
+      try { theme = localStorage.getItem("theme"); } catch (e) {}
+      if (theme !== "light" && theme !== "dark") {
+        theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
 </head>
 <body>
   <header class="doc-header">
