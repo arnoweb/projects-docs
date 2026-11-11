@@ -594,6 +594,24 @@ button { font: inherit; cursor: pointer; }
   border-color: var(--accent-dim);
   background: rgba(61, 220, 132, 0.08);
 }
+.ai-stack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 0;
+}
+.ai-stack.lab-ai { margin: 10px 0 0; }
+.ai-stack + .tech-tags,
+.ai-stack + .lab-tags { margin-top: 8px; }
+.ai-stack-label {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-right: 4px;
+}
+.tech-tag--ai { color: var(--text); border-color: var(--accent-dim); }
 .tech-tag--highlight::before { content: '✦ '; }
 
 /* ---- Lab / secondary projects ------------------------------------------------ */

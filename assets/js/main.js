@@ -80,6 +80,7 @@ const UI = {
     module: "MODULE",
     viewPresentation: "&gt; VIEW MY PRESENTATION (PDF)",
     viewCode: "&gt; VIEW THE CODE ON GITHUB",
+    aiStack: "AI · ML",
     toLight: "Switch to light theme",
     toDark: "Switch to dark theme"
   },
@@ -131,6 +132,7 @@ const UI = {
     module: "MODULE",
     viewPresentation: "&gt; VOIR MA PRÉSENTATION (PDF)",
     viewCode: "&gt; VOIR LE CODE SUR GITHUB",
+    aiStack: "IA · ML",
     toLight: "Passer au thème clair",
     toDark: "Passer au thème sombre"
   }
@@ -177,6 +179,7 @@ const priorityProjects = [
     },
     status: "ACTIVE",
     highlight: { en: "Agentic Install Wizard", fr: "Assistant d'installation agentique" },
+    ai: ["implicit (ALS)", "sentence-transformers", "PyTorch", "scikit-learn"],
     stack: ["Embeddings", "Machine Learning (ALS)", "PostgreSQL + pgvector", "MCP", "FastAPI"],
     github: "https://github.com/Likyly/likyly-recsys",
     liveUrl: "https://likyly.com",
@@ -197,7 +200,8 @@ const priorityProjects = [
       fr: "Plateforme découplée (API FastAPI derrière APISIX, site Next.js, application desktop Tauri/Rust). Chaque skill passe une revue pilotée par n8n : scanners, cinq auditeurs LLM, une exécution Claude Code en bac à sable et un juge, le tout tracé dans Langfuse. Passerelle MCP en conception."
     },
     status: "PRE-LAUNCH",
-    stack: [{ en: "Multi-agent LLM review", fr: "Revue LLM multi-agents" }, "n8n", "Langfuse", "FastAPI + APISIX", "Tauri / Rust", "MCP"],
+    ai: ["Anthropic SDK (Claude)", "Ollama (Gemma)", "Claude Code", "Langfuse"],
+    stack: [{ en: "Multi-agent LLM review", fr: "Revue LLM multi-agents" }, "n8n", "FastAPI + APISIX", "Tauri / Rust", "MCP"],
     github: "https://github.com/skillzforest/skillzforest-skills",
     liveUrl: "https://skillzforest.com",
     docsUrl: "skillzforest/portfolio-business-value.html",
@@ -217,6 +221,7 @@ const priorityProjects = [
     },
     status: "ACTIVE",
     highlight: { en: "Live Browser Streaming (CDP Screencast)", fr: "Navigateur diffusé en direct (CDP Screencast)" },
+    ai: ["Transformers.js (MiniLM, ONNX)", "OpenAI", "Anthropic", "Ollama", "Langfuse"],
     stack: ["Node.js", "Playwright", "WebSocket", { en: "Local Encoder (ONNX)", fr: "Encodeur local (ONNX)" }, { en: "LLM (fallback)", fr: "LLM (dernier recours)" }, "SQLite"],
     // TODO: github.com/arnoweb/data-to-form currently 404s, confirm the real repo URL
     github: "https://github.com/arnoweb",
@@ -243,7 +248,8 @@ const labGroups = [
           fr: "Transforme une console rétro portable (Anbernic, Miyoo…) en console pilotée depuis l'ordinateur en Wi-Fi. Duke, l'assistant IA, connaît chaque jeu de la carte et pilote la console. Un serveur MCP permet à ChatGPT, Claude ou Google Home de lancer un jeu, et une recherche tolérante aux fautes retrouve n'importe quel titre."
         },
         status: "ACTIVE",
-        stack: [{ en: "AI Assistant", fr: "Assistant IA" }, { en: "MCP Server", fr: "Serveur MCP" }, { en: "Typesense Search", fr: "Recherche Typesense" }, { en: "Local LLM (Ollama)", fr: "LLM local (Ollama)" }, "FastAPI + React"],
+        ai: ["Ollama (Llama 3.2, Qwen 2.5)", "Anthropic", "OpenAI", "Mistral"],
+        stack: [{ en: "AI Assistant", fr: "Assistant IA" }, { en: "MCP Server", fr: "Serveur MCP" }, { en: "Typesense Search", fr: "Recherche Typesense" }, { en: "Local LLM", fr: "LLM local" }, "FastAPI + React"],
         liveUrl: "https://romkade.com",
         github: "https://github.com/RomKade/romkade-manager"
       },
@@ -275,7 +281,8 @@ const labGroups = [
           fr: "Expérimentation de fine-tuning de LLM : des modèles de langage Hugging Face fine-tunés alimentent un assistant FAQ à base de recherche qui répond aux questions des clients."
         },
         status: "ARCHIVED",
-        stack: ["LLM Fine-tuning", "Hugging Face", "RAG"],
+        ai: ["sentence-transformers", "PyTorch", "AutoTrain", "ONNX Runtime", "Hugging Face Hub", "Llama 3.1 8B"],
+        stack: ["LLM Fine-tuning", "RAG", { en: "Cross-encoder reranking", fr: "Reranking cross-encoder" }],
         github: "https://github.com/arnoweb/gen-ai-faq",
         apps: [
           { label: "APP", title: { en: "Live FAQ assistant (Streamlit)", fr: "Assistant FAQ en ligne (Streamlit)" }, url: "https://arnoweb-rag-llm-faq-finetuned-huggingface.streamlit.app/" },
@@ -292,7 +299,8 @@ const labGroups = [
           fr: "Du machine learning pur : prédire la distance de portée d'un bois 3 à partir des données d'un radar de golf. Régression KNN univariée et multivariée et régression linéaire, comparées par validation croisée K-fold, réglage des hyperparamètres et RMSE."
         },
         status: "OPEN SOURCE",
-        stack: ["Machine Learning", { en: "Linear Regression", fr: "Régression linéaire" }, { en: "KNN Regression", fr: "Régression KNN" }, "K-Fold CV", "scikit-learn"],
+        ai: ["scikit-learn", "pandas", "NumPy"],
+        stack: ["Machine Learning", { en: "Linear Regression", fr: "Régression linéaire" }, { en: "KNN Regression", fr: "Régression KNN" }, "K-Fold CV"],
         github: "https://github.com/arnoweb/machine-learning-linearreg-kneighbours-kfold/blob/master/ML-4-case-golf.ipynb",
         architectureUrl: "golf-performance/portfolio-architecture.html"
       },
@@ -303,7 +311,8 @@ const labGroups = [
           en: "Real-time object recognition from video on the Google Coral Dev Board: machine learning classification models run on the board's Edge TPU, frame by frame from the camera.",
           fr: "Reconnaissance d'objets en temps réel à partir de la vidéo, sur la carte Google Coral Dev Board : des modèles de classification en machine learning tournent sur l'Edge TPU de la carte, image par image depuis la caméra."
         },
-        stack: ["Machine Learning", { en: "Image classification", fr: "Classification d'images" }, { en: "Object detection", fr: "Détection d'objets" }, "Edge TPU", "TensorFlow Lite"],
+        ai: ["TensorFlow Lite", "Edge TPU API", "NumPy"],
+        stack: ["Machine Learning", { en: "Image classification", fr: "Classification d'images" }, { en: "Object detection", fr: "Détection d'objets" }, "Google Coral Dev Board"],
         status: "OPEN SOURCE",
         github: "https://github.com/arnoweb/googlecoral",
         video: "assets/videos/coral-vid-test.mp4"
@@ -483,6 +492,12 @@ const linkIcons = {
   architecture: '<rect x="1.5" y="1.5" width="5" height="4" rx=".5"/><rect x="9.5" y="1.5" width="5" height="4" rx=".5"/><rect x="5.5" y="10.5" width="5" height="4" rx=".5"/><path d="M4 5.5v2.5h8V5.5M8 8v2.5"/>'
 };
 
+// AI / ML frameworks and libraries of a project, on their own labelled row.
+function aiRow(ai, extraClass = "") {
+  if (!ai || !ai.length) return "";
+  return `<div class="ai-stack ${extraClass}"><span class="ai-stack-label">${t("aiStack")}</span>${ai.map((x) => `<span class="tech-tag tech-tag--ai">${tr(x)}</span>`).join("")}</div>`;
+}
+
 function tags(stack) {
   return (stack || []).map((x) => `<span class="tech-tag">${tr(x)}</span>`).join("");
 }
@@ -508,6 +523,7 @@ function renderPriorityProjects() {
       <h3 class="project-name"><a href="${target}" ${ext}>${title}</a></h3>
       <p class="project-value">${tr(p.value)}</p>
       <p class="project-desc">${tr(p.description)}</p>
+      ${aiRow(p.ai)}
       <div class="tech-tags">
         ${p.highlight ? `<span class="tech-tag tech-tag--highlight">${tr(p.highlight)}</span>` : ""}
         ${tags(p.stack)}
@@ -552,6 +568,7 @@ function renderLabProjects() {
       <div class="lab-id">[ ${p.id} ]</div>
       <h4 class="lab-name">${p.name}</h4>
       <p class="lab-desc">${tr(p.description)}</p>
+      ${aiRow(p.ai, "lab-ai")}
       ${p.stack ? `<div class="tech-tags lab-tags">${tags(p.stack)}</div>` : ""}
       <div class="lab-status">${t("status")}: ${statusLabel(p.status)}</div>
       <div class="card-links card-links--icons" style="border-top: none; padding-top: 8px; margin-top: 8px;">
