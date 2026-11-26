@@ -1,0 +1,101 @@
+{
+  "role": "Développeur IA senior · Agents IA, RAG, MCP",
+  "items": [
+    {
+      "slug": "01-likyly",
+      "kicker": "SaaS de recommandation",
+      "title": "LIKYLY",
+      "value": "Des recommandations personnalisées branchées sur n'importe quel catalogue, et intégrées dans votre code par votre assistant IA.",
+      "chips": ["FastAPI", "PyTorch · ALS", "pgvector", "Serveur MCP"],
+      "status": "En production",
+      "image": "src/likyly-assistant.jpg",
+      "frame": "likyly.com · installation par l'assistant de code",
+      "service": "Un moteur de recommandation sur mesure pour votre e-commerce ou votre média"
+    },
+    {
+      "slug": "02-skillzforest",
+      "kicker": "Marketplace de skills IA",
+      "title": "SKILLZFOREST",
+      "value": "Chaque skill passe une revue de sécurité automatisée : scanners, cinq auditeurs LLM, exécution en bac à sable, puis un juge.",
+      "chips": ["n8n", "Langfuse", "FastAPI", "Tauri / Rust"],
+      "status": "Pré-lancement",
+      "image": "src/sf-trust-crop.jpg",
+      "frame": "skillzforest.com · les 7 étapes de la revue",
+      "service": "Des pipelines multi-agents LLM évalués et observables"
+    },
+    {
+      "slug": "03-romkade",
+      "kicker": "Assistant IA et serveur MCP",
+      "title": "ROMKADE",
+      "value": "On le demande à ChatGPT ou à Claude, et la console lance le jeu. Un serveur MCP relie le produit aux assistants IA.",
+      "chips": ["Serveur MCP", "FastAPI + React", "Typesense", "LLM local"],
+      "status": "En production",
+      "image": "src/rk-chatgpt.jpg",
+      "frame": "ChatGPT · application ROMKADE",
+      "service": "Rendre votre produit utilisable depuis ChatGPT et Claude"
+    },
+    {
+      "slug": "04-datatoform",
+      "kicker": "SaaS d'automatisation",
+      "title": "DATA TO FORM",
+      "value": "Un tableur devient des formulaires web remplis automatiquement, sous les yeux de l'utilisateur.",
+      "chips": ["Playwright", "Modèle local ONNX", "LLM", "Node.js"],
+      "status": "En production",
+      "image": "src/dtf.png",
+      "frame": "datatoform.com",
+      "service": "Automatiser une saisie répétitive, même sans API"
+    },
+    {
+      "slug": "05-ai-factory",
+      "kicker": "Agents IA métier",
+      "title": "AI FACTORY",
+      "value": "Un cahier des charges devient un dossier d'avant-vente complet : analyse, architecture, planning et chiffrage.",
+      "chips": ["Claude", "Skills IA", "MCP", "Templates"],
+      "status": "En service",
+      "diagram": {
+        "in": ["Cahier des charges", "PDF · DOCX · email"],
+        "steps": ["Analyse du besoin", "Architecture", "Planning", "Chiffrage"],
+        "out": ["Dossier d'avant-vente", "Devis · roadmap · schémas"]
+      },
+      "frame": "Pipeline d'agents IA",
+      "service": "Industrialiser un processus métier avec des agents IA"
+    },
+    {
+      "slug": "06-qa-n8n",
+      "kicker": "Automatisation n8n + LLM",
+      "title": "QA AUTOMATISÉE",
+      "value": "Des scénarios de tests Web et Mobile générés par LLM, puis un rapport fonctionnel priorisé.",
+      "chips": ["n8n", "LLM", "Tests Web / Mobile", "Rapports"],
+      "status": "En service",
+      "diagram": {
+        "in": ["Spécifications", "URL · user stories"],
+        "steps": ["Analyse fonctionnelle", "Génération des scénarios", "Exécution", "Priorisation"],
+        "out": ["Rapport QA", "Anomalies classées"]
+      },
+      "frame": "Workflow n8n",
+      "service": "Des workflows n8n augmentés par l'IA"
+    },
+    {
+      "slug": "07-genai-faq",
+      "kicker": "RAG et fine-tuning",
+      "title": "GEN AI FAQ",
+      "value": "Un assistant FAQ qui retrouve la bonne réponse, avec un modèle fine-tuné mesuré face au modèle de base.",
+      "chips": ["RAG", "sentence-transformers", "AutoTrain", "Llama 3.1 8B"],
+      "status": "Open source",
+      "image": "src/faq-compare.png",
+      "frame": "Streamlit · modèle de base vs fine-tuné",
+      "service": "Un RAG sur vos documents, évalué et mesuré"
+    },
+    {
+      "slug": "08-xp-flightdeck",
+      "kicker": "Temps réel et gamification",
+      "title": "XP-FLIGHTDECK",
+      "value": "Un deck web sur tablette pilote le simulateur X-Plane 12 et lance des missions notées.",
+      "chips": ["WebSocket", "Node.js", "Plugin C++", "Web app"],
+      "status": "En production",
+      "image": "src/xp-deck.jpg",
+      "frame": "xp-flightdeck.com · cockpit sur tablette",
+      "service": "Des applications web temps réel connectées à vos logiciels"
+    }
+  ]
+}
