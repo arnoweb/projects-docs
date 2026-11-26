@@ -6,7 +6,7 @@
       "kicker": "SaaS de recommandation",
       "title": "LIKYLY",
       "value": "Des recommandations personnalisées branchées sur n'importe quel catalogue, et intégrées dans votre code par votre assistant IA.",
-      "chips": ["FastAPI", "PyTorch · ALS", "pgvector", "Serveur MCP"],
+      "chips": ["FastAPI", "PyTorch · ALS", "Supabase", "pgvector", "Serveur MCP"],
       "status": "En production",
       "image": "src/likyly-assistant.jpg",
       "frame": "likyly.com · installation par l'assistant de code",
@@ -88,14 +88,14 @@
     },
     {
       "slug": "08-xp-flightdeck",
-      "kicker": "Temps réel et gamification",
+      "kicker": "E-commerce par abonnement",
       "title": "XP-FLIGHTDECK",
-      "value": "Un deck web sur tablette pilote le simulateur X-Plane 12 et lance des missions notées.",
-      "chips": ["WebSocket", "Node.js", "Plugin C++", "Web app"],
+      "value": "Un site de missions pour X-Plane 12 : comptes, boutique et abonnement, missions et objets 3D créés avec l'IA et Blender.",
+      "chips": ["Supabase", "Stripe", "Node.js", "Blender + IA"],
       "status": "En production",
-      "image": "src/xp-deck.jpg",
-      "frame": "xp-flightdeck.com · cockpit sur tablette",
-      "service": "Des applications web temps réel connectées à vos logiciels"
+      "image": "src/xp-site.jpg",
+      "frame": "xp-flightdeck.com · le site des missions",
+      "service": "Un site e-commerce complet : comptes, paiement, abonnement et back-office"
     }
   ]
 }
