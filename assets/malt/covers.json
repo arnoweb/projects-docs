@@ -5,22 +5,33 @@
       "slug": "01-likyly",
       "kicker": "SaaS de recommandation",
       "title": "LIKYLY",
-      "value": "Des recommandations personnalisées branchées sur n'importe quel catalogue, et intégrées dans votre code par votre assistant IA.",
-      "chips": ["FastAPI", "PyTorch · ALS", "Supabase", "pgvector", "Serveur MCP"],
+      "value": "Des recommandations personnalisées branchées sur n'importe quel catalogue, intégrées dans votre code par votre assistant IA.",
+      "chips": [
+        "FastAPI",
+        "PyTorch · ALS",
+        "Supabase",
+        "pgvector",
+        "Serveur MCP"
+      ],
       "status": "En production",
-      "image": "src/likyly-assistant.jpg",
-      "frame": "likyly.com · installation par l'assistant de code",
+      "image": "src/likyly-dresses.jpg",
+      "frame": "Démo LIKYLY · boutique de robes",
       "service": "Un moteur de recommandation sur mesure pour votre e-commerce ou votre média"
     },
     {
       "slug": "02-skillzforest",
       "kicker": "Marketplace de skills IA",
       "title": "SKILLZFOREST",
-      "value": "Chaque skill passe une revue de sécurité automatisée : scanners, cinq auditeurs LLM, exécution en bac à sable, puis un juge.",
-      "chips": ["n8n", "Langfuse", "FastAPI", "Tauri / Rust"],
-      "status": "Pré-lancement",
+      "value": "En cours de développement : chaque skill passera une revue de sécurité automatisée (scanners, cinq auditeurs LLM, bac à sable, juge).",
+      "chips": [
+        "n8n",
+        "Langfuse",
+        "FastAPI",
+        "Tauri / Rust"
+      ],
+      "status": "Projet en cours",
       "image": "src/sf-trust-crop.jpg",
-      "frame": "skillzforest.com · les 7 étapes de la revue",
+      "frame": "SkillzForest · version en développement",
       "service": "Des pipelines multi-agents LLM évalués et observables"
     },
     {
@@ -28,7 +39,12 @@
       "kicker": "Assistant IA et serveur MCP",
       "title": "ROMKADE",
       "value": "On le demande à ChatGPT ou à Claude, et la console lance le jeu. Un serveur MCP relie le produit aux assistants IA.",
-      "chips": ["Serveur MCP", "FastAPI + React", "Typesense", "LLM local"],
+      "chips": [
+        "Serveur MCP",
+        "FastAPI + React",
+        "Typesense",
+        "LLM local"
+      ],
       "status": "En production",
       "image": "src/rk-chatgpt.jpg",
       "frame": "ChatGPT · application ROMKADE",
@@ -39,7 +55,12 @@
       "kicker": "SaaS d'automatisation",
       "title": "DATA TO FORM",
       "value": "Un tableur devient des formulaires web remplis automatiquement, sous les yeux de l'utilisateur.",
-      "chips": ["Playwright", "Modèle local ONNX", "LLM", "Node.js"],
+      "chips": [
+        "Playwright",
+        "Embeddings ONNX",
+        "LLM",
+        "Docker · DigitalOcean"
+      ],
       "status": "En production",
       "image": "src/dtf.png",
       "frame": "datatoform.com",
@@ -50,12 +71,28 @@
       "kicker": "Agents IA métier",
       "title": "AI FACTORY",
       "value": "Un cahier des charges devient un dossier d'avant-vente complet : analyse, architecture, planning et chiffrage.",
-      "chips": ["Claude", "Skills IA", "MCP", "Templates"],
+      "chips": [
+        "Claude",
+        "Skills IA",
+        "MCP",
+        "Templates"
+      ],
       "status": "En service",
       "diagram": {
-        "in": ["Cahier des charges", "PDF · DOCX · email"],
-        "steps": ["Analyse du besoin", "Architecture", "Planning", "Chiffrage"],
-        "out": ["Dossier d'avant-vente", "Devis · roadmap · schémas"]
+        "in": [
+          "Cahier des charges",
+          "PDF · DOCX · email"
+        ],
+        "steps": [
+          "Analyse du besoin",
+          "Architecture",
+          "Planning",
+          "Chiffrage"
+        ],
+        "out": [
+          "Dossier d'avant-vente",
+          "Devis · roadmap · schémas"
+        ]
       },
       "frame": "Pipeline d'agents IA",
       "service": "Industrialiser un processus métier avec des agents IA"
@@ -65,12 +102,28 @@
       "kicker": "Automatisation n8n + LLM",
       "title": "QA AUTOMATISÉE",
       "value": "Des scénarios de tests Web et Mobile générés par LLM, puis un rapport fonctionnel priorisé.",
-      "chips": ["n8n", "LLM", "Tests Web / Mobile", "Rapports"],
+      "chips": [
+        "n8n",
+        "LLM",
+        "Tests Web / Mobile",
+        "Rapports"
+      ],
       "status": "En service",
       "diagram": {
-        "in": ["Spécifications", "URL · user stories"],
-        "steps": ["Analyse fonctionnelle", "Génération des scénarios", "Exécution", "Priorisation"],
-        "out": ["Rapport QA", "Anomalies classées"]
+        "in": [
+          "Spécifications",
+          "URL · user stories"
+        ],
+        "steps": [
+          "Analyse fonctionnelle",
+          "Génération des scénarios",
+          "Exécution",
+          "Priorisation"
+        ],
+        "out": [
+          "Rapport QA",
+          "Anomalies classées"
+        ]
       },
       "frame": "Workflow n8n",
       "service": "Des workflows n8n augmentés par l'IA"
@@ -80,7 +133,12 @@
       "kicker": "RAG et fine-tuning",
       "title": "GEN AI FAQ",
       "value": "Un assistant FAQ qui retrouve la bonne réponse, avec un modèle fine-tuné mesuré face au modèle de base.",
-      "chips": ["RAG", "sentence-transformers", "AutoTrain", "Llama 3.1 8B"],
+      "chips": [
+        "RAG",
+        "sentence-transformers",
+        "AutoTrain",
+        "Llama 3.1 8B"
+      ],
       "status": "Open source",
       "image": "src/faq-compare.png",
       "frame": "Streamlit · modèle de base vs fine-tuné",
@@ -91,7 +149,12 @@
       "kicker": "E-commerce par abonnement",
       "title": "XP-FLIGHTDECK",
       "value": "Un site de missions pour X-Plane 12 : comptes, boutique et abonnement, missions et objets 3D créés avec l'IA et Blender.",
-      "chips": ["Supabase", "Stripe", "Node.js", "Blender + IA"],
+      "chips": [
+        "Supabase",
+        "Stripe",
+        "Node.js",
+        "Blender + IA"
+      ],
       "status": "En production",
       "image": "src/xp-site.jpg",
       "frame": "xp-flightdeck.com · le site des missions",
