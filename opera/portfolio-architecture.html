@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opéra national de Paris · Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="Opéra national de Paris: technical architecture of operadeparis.fr, a Laravel platform and API tied to the Secutix ticketing system, its caching, delivery and run.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    /* Diagram styles: colours come from the portfolio tokens */
+    .dg text { font-family: var(--font-mono); fill: var(--text-dim); font-size: 10px; }
+    .dg .t { fill: var(--text); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+    .dg .ta { fill: var(--accent); font-size: 11px; font-weight: 700; }
+    .dg .tb { fill: var(--accent-amber); font-size: 9.5px; letter-spacing: .06em; }
+    .dg .lbl { fill: var(--accent-amber); font-size: 9.5px; }
+    .dg .box { fill: var(--bg); stroke: var(--border); stroke-width: 1; }
+    .dg .box-a { fill: var(--bg); stroke: var(--accent-dim); stroke-width: 1.2; }
+    .dg .zone { fill: none; stroke: var(--border-soft); stroke-dasharray: 4 4; }
+    .dg .ln { stroke: var(--accent); stroke-width: 1.3; fill: none; }
+    .dg .ln-d { stroke: var(--text-faint); stroke-width: 1.2; fill: none; stroke-dasharray: 3 3; }
+    .dg .life { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 4; }
+    .dg .br { stroke: var(--border); stroke-width: 1.2; fill: none; }
+    .dg .ah { fill: var(--accent); }
+    .dg .ah-d { fill: var(--text-faint); }
+    .dg .c-f { fill: var(--accent); }
+    .dg .c-d { fill: var(--text-dim); }
+    .dg .c-r { fill: var(--accent-amber); }
+    .dg .c-h { fill: var(--danger); }
+    .dg .c-m { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
+  </style>
+  <script>
+    // Theme before first paint (no flash): saved choice, else the system preference.
+    (function () {
+      var theme;
+      try { theme = localStorage.getItem("theme"); } catch (e) {}
+      if (theme !== "light" && theme !== "dark") {
+        theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+  </header>
+
+  <main class="doc-page">
+    <a href="../index.html#platforms" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+    <div class="doc-kicker">// PLATFORM PROJECTS: MZ-OPERA · CULTURAL INSTITUTION</div>
+    <h1 class="doc-title">OPÉRA NATIONAL DE PARIS <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
+    <p class="doc-lede">operadeparis.fr: a Laravel platform with its own back office and public API,
+    tied minute by minute to the Opéra's ticketing system, and maintained release after release
+    for seven years.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Laravel · PHP</span>
+      <span class="tag-chip">Twig</span>
+      <span class="tag-chip">Native JS · TypeScript</span>
+      <span class="tag-chip">Secutix ticketing</span>
+      <span class="tag-chip">SAML SSO</span>
+      <span class="tag-chip">Varnish</span>
+      <span class="tag-chip">MariaDB · Redis</span>
+      <span class="tag-chip">Elasticsearch</span>
+      <span class="tag-chip">Cloudinary</span>
+      <span class="tag-chip">k6</span>
+    </div>
+
+    <div class="doc-tabs" role="tablist" aria-label="Architecture views">
+      <button class="doc-tab" role="tab" id="tab-overview" aria-controls="overview" aria-selected="true">01 · Overview</button>
+      <button class="doc-tab" role="tab" id="tab-arch" aria-controls="arch" aria-selected="false" tabindex="-1">02 · Architecture</button>
+      <button class="doc-tab" role="tab" id="tab-ticketing" aria-controls="ticketing" aria-selected="false" tabindex="-1">03 · Ticketing</button>
+      <button class="doc-tab" role="tab" id="tab-run" aria-controls="run" aria-selected="false" tabindex="-1">04 · Cache, delivery &amp; run</button>
+    </div>
+
+    <!-- ============================== 01 OVERVIEW ============================== -->
+    <div class="doc-panel" role="tabpanel" id="overview" aria-labelledby="tab-overview">
+      <section class="doc-section">
+        <h2 class="doc-section-title">The platform</h2>
+        <p>The Opéra national de Paris runs two venues, the Palais Garnier and the Opéra Bastille,
+        and sells its seasons, subscriptions and tours online. operadeparis.fr is where the public
+        discovers the programme and starts every purchase. At Mazarine Digital I led its technical
+        direction from 2018 to 2025, with a team of <strong>6 people</strong>, under a
+        maintenance and evolution contract with quarterly releases.</p>
+        <p>The site is made of three parts, all built on Laravel:</p>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-tag">WWW</div>
+            <div class="doc-card-title">Front end</div>
+            <p>Server-rendered pages with Twig, and a framework-free front end in native
+            JavaScript and TypeScript.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-tag">ADMIN</div>
+            <div class="doc-card-title">Back office</div>
+            <p>The Opéra's teams edit shows, pages, the magazine and the settings of features
+            such as seat alerts.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-tag">API</div>
+            <div class="doc-card-title">Opéra API</div>
+            <p>Selected content exposed in JSON for the Opéra's mobile app, the patrons' website
+            and partner sites.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-tag">TICKETING</div>
+            <div class="doc-card-title">Secutix, outside the platform</div>
+            <p>Catalog, seats, customer accounts, cart and payment live in Secutix, a ticketing
+            SaaS. The site depends on its web services at every step.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Main projects</h2>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Season launches</div>
+            <div class="doc-step-desc">Every year, a new season goes online with its programme,
+            subscriptions and the traffic peak that comes with the opening of sales.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Subscriptions and personal area</div>
+            <div class="doc-step-desc">Redesign of the subscription journey and of the visitor's
+            personal area, both fed by ticketing data.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Login, social login and SSO</div>
+            <div class="doc-step-desc">One account for the site and the ticketing, with email
+            or Facebook login, through Secutix's SAML SSO.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Seat availability alerts</div>
+            <div class="doc-step-desc">When a sold-out performance gets seats back, the
+            visitors who asked for it get an email, sent in batches the Opéra can tune.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">05</div><div>
+            <div class="doc-step-title">Search redesign</div>
+            <div class="doc-step-desc">A new search engine on Elasticsearch, with a new UX/UI,
+            replacing the older Solr index.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">06</div><div>
+            <div class="doc-step-title">Ticketing call reduction</div>
+            <div class="doc-step-desc">A full inventory of the calls to the ticketing web
+            services, then a release that cut them on login and sign-up (see Ticketing).</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">07</div><div>
+            <div class="doc-step-title">Digital programme</div>
+            <div class="doc-step-desc">The paper insert handed out before a performance replaced
+            by a page opened from a QR code, live only around the time of the show.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">08</div><div>
+            <div class="doc-step-title">Keeping the stack current</div>
+            <div class="doc-step-desc">Regular framework upgrades to keep technical debt low, up
+            to Laravel 10, PHP 8.2 and Redis 7.</div></div></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 02 ARCHITECTURE ============================== -->
+    <div class="doc-panel" role="tabpanel" id="arch" aria-labelledby="tab-arch" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Data flows</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 470" role="img" aria-labelledby="fl-title fl-desc">
+            <title id="fl-title">operadeparis.fr data flows</title>
+            <desc id="fl-desc">The Secutix ticketing system exposes contact and SSO, catalog, availability and order web services. A batch server syncs catalog, availability and orders by cron into MariaDB. The front end calls contact and SSO services live. The front end, back office and API share MariaDB, Redis and Elasticsearch. Visitors use the front end, the mobile app, the patrons' site and partner sites use the API. Images and video are served from Cloudinary.</desc>
+            <defs>
+              <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="a1d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-d" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="22" width="175" height="440" rx="3"/>
+            <text class="tb" x="20" y="16">TICKETING · SECUTIX SAAS</text>
+            <rect class="zone" x="200" y="22" width="360" height="440" rx="3"/>
+            <text class="tb" x="210" y="16">OPÉRA PLATFORM · LARAVEL</text>
+            <rect class="zone" x="580" y="22" width="170" height="440" rx="3"/>
+            <text class="tb" x="590" y="16">USERS &amp; SERVICES</text>
+
+            <!-- Secutix -->
+            <rect class="box-a" x="20" y="50" width="150" height="70" rx="3"/>
+            <text class="ta" x="32" y="72">CONTACTS · SSO</text>
+            <text x="32" y="90">SAML login</text>
+            <text x="32" y="104">social login, profile</text>
+
+            <rect class="box" x="20" y="150" width="150" height="55" rx="3"/>
+            <text class="t" x="32" y="172">CATALOG</text>
+            <text x="32" y="190">shows, prices, passes</text>
+
+            <rect class="box" x="20" y="220" width="150" height="50" rx="3"/>
+            <text class="t" x="32" y="242">AVAILABILITY</text>
+            <text x="32" y="258">seats per category</text>
+
+            <rect class="box" x="20" y="285" width="150" height="55" rx="3"/>
+            <text class="t" x="32" y="307">ORDERS</text>
+            <text x="32" y="325">donations, payments</text>
+
+            <text class="lbl" x="20" y="380">cart, checkout and</text>
+            <text class="lbl" x="20" y="394">payment stay on the</text>
+            <text class="lbl" x="20" y="408">ticketing sites</text>
+
+            <!-- live calls from the front -->
+            <path class="ln" d="M170 85 H192 V38 H467 V48" marker-start="url(#a1)" marker-end="url(#a1)"/>
+            <text class="lbl" x="250" y="33">live calls: login, profile, cart cookie</text>
+
+            <!-- sync bus -->
+            <path class="ln" d="M170 177 H190 M170 245 H190 M170 312 H190 M190 177 V312"/>
+            <line class="ln" x1="190" y1="218" x2="208" y2="218" marker-end="url(#a1)"/>
+
+            <!-- Platform: left column -->
+            <rect class="box-a" x="210" y="150" width="150" height="135" rx="3"/>
+            <text class="ta" x="222" y="172">BATCH SERVER</text>
+            <text x="222" y="192">Laravel crons</text>
+            <text x="222" y="208">catalog: 15 min</text>
+            <text x="222" y="224">seats: every minute</text>
+            <text x="222" y="240">donations: 15 min</text>
+            <text x="222" y="256">alert emails</text>
+            <text x="222" y="272">tax receipts</text>
+
+            <rect class="box" x="210" y="305" width="150" height="70" rx="3"/>
+            <text class="t" x="222" y="327">MARIADB</text>
+            <text x="222" y="345">shows, seats, users</text>
+            <text x="222" y="361">+ Redis cache</text>
+
+            <rect class="box" x="210" y="395" width="150" height="50" rx="3"/>
+            <text class="t" x="222" y="417">ELASTICSEARCH</text>
+            <text x="222" y="433">site search</text>
+
+            <line class="ln" x1="285" y1="285" x2="285" y2="303" marker-end="url(#a1)"/>
+
+            <!-- Platform: right column -->
+            <rect class="box-a" x="385" y="50" width="165" height="110" rx="3"/>
+            <text class="ta" x="397" y="72">FRONT · WWW</text>
+            <text x="397" y="92">Laravel + Twig</text>
+            <text x="397" y="108">native JS · TypeScript</text>
+            <text x="397" y="124">Varnish · Nginx</text>
+            <text x="397" y="140">3 front servers</text>
+
+            <rect class="box" x="385" y="180" width="165" height="60" rx="3"/>
+            <text class="t" x="397" y="202">BACK OFFICE</text>
+            <text x="397" y="220">editors, settings</text>
+            <text x="397" y="233">cache purge</text>
+
+            <rect class="box-a" x="385" y="260" width="165" height="75" rx="3"/>
+            <text class="ta" x="397" y="282">OPÉRA API</text>
+            <text x="397" y="300">Laravel · JSON</text>
+            <text x="397" y="316">cache from 0 s to 24 h</text>
+
+            <!-- shared data bus -->
+            <path class="ln" d="M360 340 H372 M360 420 H372 M372 105 V420"/>
+            <line class="ln" x1="372" y1="105" x2="383" y2="105" marker-end="url(#a1)"/>
+            <line class="ln" x1="372" y1="210" x2="383" y2="210" marker-end="url(#a1)"/>
+            <line class="ln" x1="372" y1="297" x2="383" y2="297" marker-end="url(#a1)"/>
+
+            <!-- Users & services -->
+            <rect class="box" x="590" y="50" width="150" height="70" rx="3"/>
+            <text class="t" x="602" y="72">VISITORS</text>
+            <text x="602" y="90">browsers, mobile</text>
+            <line class="ln" x1="552" y1="85" x2="588" y2="85" marker-start="url(#a1)" marker-end="url(#a1)"/>
+
+            <rect class="box" x="590" y="150" width="150" height="55" rx="3"/>
+            <text class="t" x="602" y="172">CLOUDINARY</text>
+            <text x="602" y="190">images, video, CDN</text>
+            <line class="ln-d" x1="665" y1="150" x2="665" y2="122" marker-end="url(#a1d)"/>
+            <path class="ln" d="M550 210 H572 V185 H588" marker-end="url(#a1)"/>
+
+            <rect class="box" x="590" y="255" width="150" height="40" rx="3"/>
+            <text class="t" x="602" y="279">MOBILE APP</text>
+            <rect class="box" x="590" y="305" width="150" height="40" rx="3"/>
+            <text class="t" x="602" y="329">PATRONS' SITE</text>
+            <rect class="box" x="590" y="355" width="150" height="40" rx="3"/>
+            <text class="t" x="602" y="379">PARTNER SITES</text>
+            <path class="ln" d="M550 297 H568 M568 275 V375"/>
+            <line class="ln" x1="568" y1="275" x2="588" y2="275" marker-end="url(#a1)"/>
+            <line class="ln" x1="568" y1="325" x2="588" y2="325" marker-end="url(#a1)"/>
+            <line class="ln" x1="568" y1="375" x2="588" y2="375" marker-end="url(#a1)"/>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 1 · Ticketing data is copied by cron. Only what must be live is called live.</div>
+        </div>
+        <p style="margin-top: 18px;">The key design rule: <strong>the site reads ticketing data
+        from its own database</strong>. Crons copy the catalog, seat availability and donations
+        from Secutix, so a page view never waits for the ticketing system. Only what belongs to
+        the visitor (login, profile, cart) is fetched live.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Search</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 185" role="img" aria-labelledby="se-title se-desc">
+            <title id="se-title">Search indexing and reading</title>
+            <desc id="se-desc">Editors save content in the back office. Laravel stores it with Eloquent in MariaDB and indexes it in Elasticsearch. Visitors type in the JavaScript search interface, which queries Elasticsearch through Laravel and shows results as they type.</desc>
+            <defs>
+              <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="box" x="10" y="30" width="150" height="55" rx="3"/>
+            <text class="t" x="22" y="52">BACK OFFICE</text>
+            <text x="22" y="70">editors save</text>
+
+            <rect class="box-a" x="200" y="30" width="160" height="55" rx="3"/>
+            <text class="ta" x="212" y="52">LARAVEL</text>
+            <text x="212" y="70">Eloquent models</text>
+
+            <rect class="box" x="200" y="115" width="160" height="50" rx="3"/>
+            <text class="t" x="212" y="137">MARIADB</text>
+            <text x="212" y="153">source of truth</text>
+
+            <rect class="box-a" x="400" y="30" width="150" height="135" rx="3"/>
+            <text class="ta" x="412" y="52">ELASTICSEARCH</text>
+            <text x="412" y="72">REST API</text>
+            <text x="412" y="88">shows, artists,</text>
+            <text x="412" y="104">magazine, pages</text>
+
+            <rect class="box" x="590" y="30" width="160" height="55" rx="3"/>
+            <text class="t" x="602" y="52">VISITOR</text>
+            <text x="602" y="70">types a query</text>
+
+            <rect class="box-a" x="590" y="115" width="160" height="50" rx="3"/>
+            <text class="ta" x="602" y="137">FRONT · JS</text>
+            <text x="602" y="153">results as you type</text>
+
+            <line class="ln" x1="160" y1="57" x2="198" y2="57" marker-end="url(#a2)"/>
+            <text class="lbl" x="166" y="50">save</text>
+            <line class="ln" x1="360" y1="57" x2="398" y2="57" marker-end="url(#a2)"/>
+            <text class="lbl" x="364" y="50">index</text>
+            <line class="ln" x1="280" y1="85" x2="280" y2="113" marker-start="url(#a2)" marker-end="url(#a2)"/>
+            <line class="ln" x1="670" y1="85" x2="670" y2="113" marker-end="url(#a2)"/>
+            <line class="ln" x1="588" y1="140" x2="552" y2="140" marker-start="url(#a2)" marker-end="url(#a2)"/>
+            <text class="lbl" x="556" y="133">query</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 2 · Index on save, read through a Laravel driver.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Stack</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+            <tbody>
+              <tr><td>Front end</td><td>Laravel, Twig, native JavaScript, TypeScript</td></tr>
+              <tr><td>Back office &amp; API</td><td>Laravel (5.8 to 10), PHP (7.3 to 8.2), JSON API</td></tr>
+              <tr><td>Ticketing</td><td>Secutix web services (SOAP/XML), SAML SSO, social login</td></tr>
+              <tr><td>Data</td><td>MariaDB, Redis</td></tr>
+              <tr><td>Search</td><td>Elasticsearch (after Solr)</td></tr>
+              <tr><td>Cache &amp; web</td><td>Varnish, Nginx, Linux servers, managed hosting</td></tr>
+              <tr><td>Media</td><td>Cloudinary (images and video, CDN)</td></tr>
+              <tr><td>Delivery &amp; tests</td><td>GitLab, Git Flow, Jira, k6 load tests with Grafana</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 03 TICKETING ============================== -->
+    <div class="doc-panel" role="tabpanel" id="ticketing" aria-labelledby="tab-ticketing" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Seats on the show page</h2>
+        <p>A show page lists its performances, and for each one, the seat categories with their
+        price and availability. A category with no seats left stays visible and turns grey. When
+        a whole performance is sold out, a message replaces the categories.</p>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Catalog sync</div>
+            <div class="doc-step-desc">Every 15 minutes, a cron reads the season catalog from
+            Secutix (shows, performances, categories, prices) and stores it in the site's
+            database.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Availability sync</div>
+            <div class="doc-step-desc">Every minute, another cron reads the seats left per
+            category and per performance. Only one run at a time is allowed. These numbers change
+            too often to be shown in the back office.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Seat alerts</div>
+            <div class="doc-step-desc">The same cron sends the alert emails. An email goes out
+            when seats go above a threshold, if the performance is at least 2 hours away and if
+            the visitor has not already been alerted. Emails leave in batches, every 15 minutes by
+            default, so the mail server is not flooded. The threshold, batch size and interval are
+            set in the back office.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">One login for the site and the ticketing</h2>
+        <p>Accounts live in Secutix. The site and the ticketing run on different subdomains,
+        and visitors must not have to log in twice.</p>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 330" role="img" aria-labelledby="sso-title sso-desc">
+            <title id="sso-title">Login and shared session</title>
+            <desc id="sso-desc">The visitor logs in on operadeparis.fr. The site posts a SAML request to Secutix SSO from the server, gets the SAML response and Secutix session cookies, then fetches the contact data. The site saves the user and sets the Secutix session cookie on the parent domain. When the visitor opens the ticketing site, they are already signed in. The cart summary cookie set by the ticketing lets the site show a cart icon.</desc>
+            <defs>
+              <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="box" x="20" y="10" width="120" height="30" rx="3"/>
+            <text class="t" x="34" y="30">VISITOR</text>
+            <rect class="box-a" x="215" y="10" width="150" height="30" rx="3"/>
+            <text class="ta" x="229" y="30">OPERADEPARIS.FR</text>
+            <rect class="box" x="430" y="10" width="140" height="30" rx="3"/>
+            <text class="t" x="444" y="30">SECUTIX WS</text>
+            <rect class="box" x="615" y="10" width="135" height="30" rx="3"/>
+            <text class="t" x="629" y="30">TICKETING SITE</text>
+
+            <line class="life" x1="80" y1="40" x2="80" y2="320"/>
+            <line class="life" x1="290" y1="40" x2="290" y2="320"/>
+            <line class="life" x1="500" y1="40" x2="500" y2="320"/>
+            <line class="life" x1="682" y1="40" x2="682" y2="320"/>
+
+            <line class="ln" x1="80" y1="70" x2="288" y2="70" marker-end="url(#a3)"/>
+            <text x="92" y="64">① email + password</text>
+
+            <line class="ln" x1="290" y1="100" x2="498" y2="100" marker-end="url(#a3)"/>
+            <text x="302" y="94">② POST SSO (SAML), server side</text>
+            <line class="ln" x1="500" y1="128" x2="292" y2="128" marker-end="url(#a3)"/>
+            <text x="302" y="122">③ SAML response + session cookie</text>
+
+            <line class="ln" x1="290" y1="160" x2="498" y2="160" marker-end="url(#a3)"/>
+            <text x="302" y="154">④ getContactData</text>
+            <line class="ln" x1="500" y1="188" x2="292" y2="188" marker-end="url(#a3)"/>
+            <text x="302" y="182">⑤ contact (XML)</text>
+
+            <line class="ln" x1="290" y1="220" x2="82" y2="220" marker-end="url(#a3)"/>
+            <text x="92" y="214">⑥ session cookie</text>
+            <text class="lbl" x="92" y="236">set on *.operadeparis.fr</text>
+
+            <line class="ln" x1="80" y1="268" x2="680" y2="268" marker-end="url(#a3)"/>
+            <text x="302" y="262">⑦ open the ticketing: already signed in</text>
+
+            <path class="ln-d" d="M682 300 H292"/>
+            <text x="302" y="294">⑧ cart summary cookie read by the site: cart icon</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 3 · The site logs in on the visitor's behalf, then hands the ticketing session over through a parent-domain cookie.</div>
+        </div>
+        <div class="doc-note"><strong>WHAT BROKE FIRST</strong> Secutix sets its session cookie
+        on its own subdomain. A visitor who logged in on the site arrived on the ticketing as a
+        stranger. The fix: the site runs the SAML exchange from the server, reads the session
+        cookie from Secutix's response headers, and sets it again on the parent domain, where
+        both sites can read it.</div>
+        <p style="margin-top: 16px;">Facebook login follows the same path with a few more calls:
+        find the contact by its social identifier, create it or link the social account if
+        needed, then authenticate. Sign-up itself is a form hosted by Secutix, with one flow for
+        individuals and another for groups, each with its own contact base.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Living with a rate limit</h2>
+        <p>In early 2023, after a cyberattack took down another major opera house's ticketing,
+        Secutix put a per-minute limit on its web services. That limit is shared by
+        operadeparis.fr, the Opéra's streaming platform and its Aria web app. Above it, pages
+        that need ticketing data start to fail.</p>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Map every call</div>
+            <div class="doc-step-desc">A note for the Opéra listing every web service call of the
+            three sites: which service and version, when it runs (cron, login, sign-up, profile),
+            with which parameters and why.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Measure</div>
+            <div class="doc-step-desc">Error tracking first, then the Opéra's own monitoring of
+            the calls, to see which journeys consumed the most.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Cut</div>
+            <div class="doc-step-desc">Read from the database or the session whenever possible,
+            ask Secutix only for the details a page really needs, avoid repeated calls in the same
+            journey. A 2024 release brought the login and sign-up journeys well under what they
+            used to cost.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Make it a rule</div>
+            <div class="doc-step-desc">Each call has a cost for the Opéra. Any new feature that
+            touches Secutix now starts with a technical design approved by the Opéra.</div></div></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 04 CACHE, DELIVERY & RUN ============================== -->
+    <div class="doc-panel" role="tabpanel" id="run" aria-labelledby="tab-run" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Cache, one duration per kind of content</h2>
+        <p>Varnish runs on each front server, for the site and for the API. Each API endpoint
+        gets a cache duration that matches how often its content really changes:</p>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Level</th><th>Duration</th><th>Examples</th></tr></thead>
+            <tbody>
+              <tr><td>None</td><td>0 s</td><td>Alerts, ticketing features</td></tr>
+              <tr><td>Very short</td><td>60 s</td><td>One show, customer data, ticketing availability</td></tr>
+              <tr><td>Short</td><td>15 min</td><td>All shows, all events, galas</td></tr>
+              <tr><td>Medium</td><td>3 h</td><td>Media, free pages, home page features</td></tr>
+              <tr><td>Long</td><td>6 h</td><td>Digital stage content, magazine features</td></tr>
+              <tr><td>Very long</td><td>24 h</td><td>Artists, partners, magazine articles, seasons, venues</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul class="doc-check-list" style="margin-top: 20px;">
+          <li>Cookies are stripped from cacheable requests, so one copy serves everyone.</li>
+          <li>Requests with a session or a back-office preview cookie skip the cache.</li>
+          <li>Editors can purge a page from the back office after a change.</li>
+          <li>A grace period lets Varnish serve the last good copy if the back end is slow or down.</li>
+        </ul>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Branches and environments</h2>
+        <p>Maintenance and projects share one repository. Each Jira ticket gets its own branch,
+        tickets are grouped into a sprint branch, and a release branch is validated by the Opéra
+        on pre-production, with Varnish on, before production.</p>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 320" role="img" aria-labelledby="gf-title gf-desc">
+            <title id="gf-title">Maintenance branching model</title>
+            <desc id="gf-desc">A hotfix branch starts from master and is merged back with a patch tag. Feature branches named after Jira tickets start from master and are merged into a sprint branch deployed on an integration site. A release branch is cut from the sprint and validated by the client on pre-production with Varnish, then merged into master with a version tag.</desc>
+            <defs>
+              <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <text class="t" x="10" y="54">feature/JIRA-123</text>
+            <text class="t" x="10" y="114">sprint/x.y.z</text>
+            <text class="t" x="10" y="174">release/x.y.z</text>
+            <text class="t" x="10" y="234">hotfix/…</text>
+            <text class="t" x="10" y="294">master</text>
+
+            <line class="br" x1="140" y1="50" x2="600" y2="50"/>
+            <line class="br" x1="140" y1="110" x2="600" y2="110"/>
+            <line class="br" x1="140" y1="170" x2="600" y2="170"/>
+            <line class="br" x1="140" y1="230" x2="600" y2="230"/>
+            <line class="br" x1="140" y1="290" x2="600" y2="290"/>
+
+            <line class="ln" x1="154" y1="285" x2="196" y2="236" marker-end="url(#a4)"/>
+            <line class="ln" x1="204" y1="236" x2="246" y2="285" marker-end="url(#a4)"/>
+            <line class="ln" x1="254" y1="284" x2="297" y2="57" marker-end="url(#a4)"/>
+            <line class="ln" x1="306" y1="50" x2="344" y2="50" marker-end="url(#a4)"/>
+            <line class="ln" x1="356" y1="50" x2="394" y2="50" marker-end="url(#a4)"/>
+            <line class="ln" x1="404" y1="56" x2="436" y2="104" marker-end="url(#a4)"/>
+            <line class="ln" x1="444" y1="116" x2="486" y2="164" marker-end="url(#a4)"/>
+            <line class="ln" x1="494" y1="176" x2="536" y2="284" marker-end="url(#a4)"/>
+
+            <circle class="c-m" cx="150" cy="290" r="6"/>
+            <circle class="c-h" cx="200" cy="230" r="6"/>
+            <circle class="c-m" cx="250" cy="290" r="6"/>
+            <circle class="c-f" cx="300" cy="50" r="6"/>
+            <circle class="c-f" cx="350" cy="50" r="6"/>
+            <circle class="c-f" cx="400" cy="50" r="6"/>
+            <circle class="c-d" cx="440" cy="110" r="6"/>
+            <circle class="c-r" cx="490" cy="170" r="6"/>
+            <circle class="c-m" cx="540" cy="290" r="6"/>
+
+            <text class="lbl" x="222" y="312">tag x.y.z.1</text>
+            <text class="lbl" x="516" y="312">tag x.y.z</text>
+            <text class="lbl" x="505" y="160">client validation</text>
+            <text class="lbl" x="452" y="96">merge tickets</text>
+
+            <text class="tb" x="615" y="54">LOCAL</text>
+            <text class="tb" x="615" y="114">INTEGRATION SITE</text>
+            <text class="tb" x="615" y="174">PRE-PRODUCTION</text>
+            <text class="tb" x="615" y="234">PRE-PRODUCTION</text>
+            <text class="tb" x="615" y="294">PRODUCTION</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 4 · Features start from master, so a ticket that is not validated never blocks the others.</div>
+        </div>
+        <div class="doc-table-wrap" style="margin-top: 24px;">
+          <table class="doc-table">
+            <thead><tr><th>Environment</th><th>Run by</th><th>Used for</th></tr></thead>
+            <tbody>
+              <tr><td>Integration sites</td><td>Agency</td><td>One per project or sprint, internal testing</td></tr>
+              <tr><td>Acceptance 1 &amp; 2</td><td>Host</td><td>Opéra testing, two projects in parallel</td></tr>
+              <tr><td>Pre-production</td><td>Host</td><td>Release validation, Varnish on, ticketing pre-production</td></tr>
+              <tr><td>Production</td><td>Host</td><td>Public site, back office and API</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top: 18px;">The ticketing has its own matching environments, so each
+        environment of the site talks to the ticketing environment of the same level.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Load tests</h2>
+        <p>Before big sales openings and infrastructure changes, we ran load tests with the
+        hosting provider and the Opéra.</p>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Real journeys</div>
+            <div class="doc-step-desc">Scenarios recorded in the browser with the Grafana k6
+            recorder, then scripted in k6: home page, show pages, login.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Ramp-up</div>
+            <div class="doc-step-desc">Stages up to 700, then 1,000 concurrent virtual users,
+            held for several minutes each.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Protect the ticketing</div>
+            <div class="doc-step-desc">During the test, production points to the ticketing
+            pre-production, with thousands of test accounts set up by the Opéra, so the real
+            ticketing is never loaded.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Clear roles</div>
+            <div class="doc-step-desc">Run early in the morning, outside business hours. The host
+            runs the injection and watches the servers, the agency owns the code, the switch of
+            ticketing endpoints and the maintenance page.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Operations</h2>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-title">Production servers</div>
+            <p>In the 2021 setup: load balancer with TLS, three front servers each with Varnish,
+            Nginx and PHP, two database servers and a batch server for the crons. The hosting
+            was rebuilt in 2022 and 2023.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Managed hosting</div>
+            <p>The agency holds the hosting contract and delegates it to a managed host:
+            monitoring, daily backups, 24/7 SLA on production.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Browser scope</div>
+            <p>The last two versions of Chrome, Edge, Firefox and Safari, iOS and Android, and
+            Internet Explorer 11 for as long as the Opéra needed it.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Documentation</div>
+            <p>A technical file kept up to date for the Opéra: components and versions, data
+            flows, every ticketing call, API endpoints and their cache, servers and environments.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="doc-footer-links">
+      <a href="https://www.operadeparis.fr" target="_blank" rel="noopener" class="btn btn-secondary">[ LIVE SITE ]</a>
+      <a href="../index.html#platforms" class="btn btn-secondary">[ ALL PLATFORM PROJECTS ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON · TECH PORTFOLIO SYSTEM</div>
+  </footer>
+
+  <script>
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.doc-tab'));
+      function show(id, focus) {
+        tabs.forEach(function (t) {
+          var on = t.getAttribute('aria-controls') === id;
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+          if (on && focus) t.focus();
+        });
+        if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () { show(t.getAttribute('aria-controls')); });
+        t.addEventListener('keydown', function (e) {
+          var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (!d) return;
+          var next = tabs[(i + d + tabs.length) % tabs.length];
+          show(next.getAttribute('aria-controls'), true);
+        });
+      });
+      var initial = location.hash.slice(1);
+      if (['overview', 'arch', 'ticketing', 'run'].indexOf(initial) !== -1) show(initial);
+    })();
+  </script>
+</body>
+</html>

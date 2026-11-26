@@ -360,7 +360,8 @@ const platformGroups = [
           en: "Technical direction of the Opéra's digital platform, built on Laravel with a framework-free front end in native JavaScript and TypeScript, integrated with the ticketing and the Opéra's information system, delivered in quarterly releases.",
           fr: "Direction technique de la plateforme digitale de l'Opéra, construite sur Laravel avec un front sans framework en JavaScript natif et TypeScript, intégrée à la billetterie et au système d'information de l'Opéra, livrée en cycles trimestriels."
         },
-        stack: ["Laravel", "PHP", { en: "Native JavaScript", fr: "JavaScript natif" }, "TypeScript", { en: "Ticketing APIs", fr: "API billetterie" }]
+        stack: ["Laravel", "PHP", { en: "Native JavaScript", fr: "JavaScript natif" }, "TypeScript", { en: "Ticketing APIs", fr: "API billetterie" }],
+        architectureUrl: "opera/portfolio-architecture.html"
       }
     ]
   },
