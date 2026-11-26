@@ -348,7 +348,8 @@ const platformGroups = [
           en: "Technical direction of louvre.fr, a headless architecture: a Next.js and React front end on top of a Drupal back end, delivered in quarterly release cycles.",
           fr: "Direction technique de louvre.fr, en architecture headless : un front Next.js et React au-dessus d'un back-office Drupal, livré en cycles trimestriels."
         },
-        stack: ["Headless", "Next.js", "React", "Drupal"]
+        stack: ["Headless", "Next.js", "React", "Drupal"],
+        architectureUrl: "louvre/portfolio-architecture.html"
       },
       {
         id: "MZ-OPERA",
@@ -615,6 +616,9 @@ function renderPlatformProjects() {
       </dl>
       <p class="lab-desc">${tr(p.description)}</p>
       ${p.stack && p.stack.length ? `<div class="tech-tags lab-tags">${tags(p.stack)}</div>` : ""}
+      ${p.architectureUrl ? `<div class="card-links card-links--icons" style="border-top: none; padding-top: 8px; margin-top: 8px;">
+        ${cardLink("architecture", t("linkArchitecture"), t("linkArchitectureTitle"), `href="${p.architectureUrl}" target="_blank" rel="noopener"`)}
+      </div>` : ""}
     </article>
   `;
   grid.innerHTML = platformGroups.map((g) => `

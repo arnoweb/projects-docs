@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Musée du Louvre · Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="Musée du Louvre: technical architecture of the louvre.fr redesign, a headless Drupal back office behind a Next.js front end, its environments, delivery pipeline and run.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    /* Diagram styles: colours come from the portfolio tokens */
+    .dg text { font-family: var(--font-mono); fill: var(--text-dim); font-size: 10px; }
+    .dg .t { fill: var(--text); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+    .dg .ta { fill: var(--accent); font-size: 11px; font-weight: 700; }
+    .dg .tb { fill: var(--accent-amber); font-size: 9.5px; letter-spacing: .06em; }
+    .dg .lbl { fill: var(--accent-amber); font-size: 9.5px; }
+    .dg .box { fill: var(--bg); stroke: var(--border); stroke-width: 1; }
+    .dg .box-a { fill: var(--bg); stroke: var(--accent-dim); stroke-width: 1.2; }
+    .dg .zone { fill: none; stroke: var(--border-soft); stroke-dasharray: 4 4; }
+    .dg .sub { fill: var(--panel); stroke: var(--border-soft); }
+    .dg .ln { stroke: var(--accent); stroke-width: 1.3; fill: none; }
+    .dg .ln-d { stroke: var(--text-faint); stroke-width: 1.2; fill: none; stroke-dasharray: 3 3; }
+    .dg .br { stroke: var(--border); stroke-width: 1.2; fill: none; }
+    .dg .ah { fill: var(--accent); }
+    .dg .ah-d { fill: var(--text-faint); }
+    .dg .c-f { fill: var(--accent); }
+    .dg .c-d { fill: var(--text-dim); }
+    .dg .c-r { fill: var(--accent-amber); }
+    .dg .c-m { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
+  </style>
+  <script>
+    // Theme before first paint (no flash): saved choice, else the system preference.
+    (function () {
+      var theme;
+      try { theme = localStorage.getItem("theme"); } catch (e) {}
+      if (theme !== "light" && theme !== "dark") {
+        theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+</head>
+<body>
+  <header class="doc-header">
+    <div class="header-brand"><span class="name">ARNAUD.BRETON</span></div>
+  </header>
+
+  <main class="doc-page">
+    <a href="../index.html#platforms" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
+    <div class="doc-kicker">// PLATFORM PROJECTS: MZ-LOUVRE · CULTURAL INSTITUTION</div>
+    <h1 class="doc-title">MUSÉE DU LOUVRE <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
+    <p class="doc-lede">The redesign of louvre.fr: a headless Drupal back office that serves a JSON API,
+    a Next.js engine that renders the pages, three managed environments and a release shipped at the
+    end of each sprint.</p>
+    <div class="doc-badges">
+      <span class="tag-chip">Headless CMS</span>
+      <span class="tag-chip">Drupal 8</span>
+      <span class="tag-chip">Next.js · React</span>
+      <span class="tag-chip">Node.js · PM2</span>
+      <span class="tag-chip">Varnish</span>
+      <span class="tag-chip">Redis</span>
+      <span class="tag-chip">Elasticsearch</span>
+      <span class="tag-chip">MariaDB</span>
+      <span class="tag-chip">Cloudinary</span>
+      <span class="tag-chip">GitLab CI/CD</span>
+    </div>
+
+    <div class="doc-tabs" role="tablist" aria-label="Architecture views">
+      <button class="doc-tab" role="tab" id="tab-overview" aria-controls="overview" aria-selected="true">01 · Overview</button>
+      <button class="doc-tab" role="tab" id="tab-arch" aria-controls="arch" aria-selected="false" tabindex="-1">02 · Architecture</button>
+      <button class="doc-tab" role="tab" id="tab-delivery" aria-controls="delivery" aria-selected="false" tabindex="-1">03 · Delivery</button>
+      <button class="doc-tab" role="tab" id="tab-run" aria-controls="run" aria-selected="false" tabindex="-1">04 · Run &amp; quality</button>
+    </div>
+
+    <!-- ============================== 01 OVERVIEW ============================== -->
+    <div class="doc-panel" role="tabpanel" id="overview" aria-labelledby="tab-overview">
+      <section class="doc-section">
+        <h2 class="doc-section-title">The project</h2>
+        <p>The Louvre decided to rebuild louvre.fr from the ground up: new application layer, new
+        infrastructure. Mazarine Digital won the public tender for the redesign and its maintenance.
+        I led the technical side: the architecture, the technical file shared with the museum and
+        its hosting provider, the delivery pipeline and a team of <strong>6 people</strong>.</p>
+        <p>The site serves tens of millions of page views a year, with peaks around the major
+        exhibitions. It has to be fast everywhere, accessible to every visitor and easy to edit for
+        the people who publish on it every day.</p>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-title">Editors first</div>
+            <p>37 contributors in 6 departments publish exhibitions, events and visitor
+            information. The back office gives each role access only to the fields it needs.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Fast pages, indexed pages</div>
+            <p>Pages are rendered on the server for search engines and first load, then the site
+            navigates like an app. Two cache layers sit in front of the application.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Accessible by design</div>
+            <p>Target: RGAA 4, level AA. Each component is reviewed with an accessibility expert
+            from the design stage, before it is coded.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Ready for other channels</div>
+            <p>Content lives behind an API, not inside page templates, so a mobile app or a
+            partner service can use the same content later.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Why headless</h2>
+        <p>A classic CMS renders its own pages: the editing tool and the public site are one
+        system. We split them in two. Drupal manages content and exposes it as a JSON API. Next.js
+        consumes that API and renders the site.</p>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Criterion</th><th>Classic CMS</th><th>Headless (chosen)</th></tr></thead>
+            <tbody>
+              <tr><td>Any device or channel</td><td>No</td><td>Yes, through the API</td></tr>
+              <tr><td>Front and back can change technology</td><td>No</td><td>Yes, the API contract is the only link</td></tr>
+              <tr><td>Upgrade the CMS without touching the site</td><td>No</td><td>Yes</td></tr>
+              <tr><td>Front and back maintained on their own</td><td>No</td><td>Yes, two repositories, two teams</td></tr>
+              <tr><td>Fits short agile iterations</td><td>Partly</td><td>Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:18px">The trade-off: editors lose the native page preview of a coupled
+        CMS. We rebuilt it, so a contributor can still see a draft as it will look on the site.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Project milestones</h2>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Architecture and sizing</div>
+            <div class="doc-step-desc">Technical architecture file shared by the museum, Mazarine
+            and the hosting provider, with a RACI for every infrastructure task. Sizing based on
+            several years of traffic data.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Platform installation</div>
+            <div class="doc-step-desc">Three new, independent environments (acceptance,
+            pre-production, production). The legacy platform was left untouched until launch.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Continuous deployment</div>
+            <div class="doc-step-desc">GitLab CI jobs on our side, deployment scripts on the
+            host's side, one version number from commit to production.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Content migration</div>
+            <div class="doc-step-desc">The museum chose which content to carry over. Files and
+            media were synchronised from the old production servers to the new ones.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">05</div><div>
+            <div class="doc-step-title">Sprints, then maintenance</div>
+            <div class="doc-step-desc">An MVP built over nine sprints with the museum as product
+            owner, then quarterly release cycles.</div></div></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 02 ARCHITECTURE ============================== -->
+    <div class="doc-panel" role="tabpanel" id="arch" aria-labelledby="tab-arch" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Runtime architecture</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 510" role="img" aria-labelledby="rt-title rt-desc">
+            <title id="rt-title">louvre.fr runtime architecture</title>
+            <desc id="rt-desc">Visitors reach a load balancer, then the Varnish HTTP cache, then Nginx. Nginx routes to the Next.js front end and to the headless Drupal back office. Next.js calls the Drupal JSON API through the cache. Drupal stores data in MariaDB with Redis and Elasticsearch, uploads media to Cloudinary, and imports third-party collection feeds. Contributors reach the back office from an IP allowlist. Media and video are served to visitors directly from CDNs.</desc>
+            <defs>
+              <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+              <marker id="a1d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-d" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="22" width="160" height="478" rx="3"/>
+            <text class="tb" x="20" y="16">USERS &amp; FEEDS</text>
+            <rect class="zone" x="195" y="22" width="150" height="478" rx="3"/>
+            <text class="tb" x="205" y="16">EDGE</text>
+            <rect class="zone" x="370" y="22" width="200" height="478" rx="3"/>
+            <text class="tb" x="380" y="16">APPLICATION</text>
+            <rect class="zone" x="595" y="22" width="155" height="478" rx="3"/>
+            <text class="tb" x="605" y="16">DATA &amp; SERVICES</text>
+
+            <!-- CDN delivery, straight to the visitor -->
+            <path class="ln-d" d="M672 60 V40 H90 V58" marker-end="url(#a1d)"/>
+            <text class="lbl" x="205" y="54">media + video from CDN</text>
+
+            <!-- Users -->
+            <rect class="box" x="20" y="60" width="140" height="80" rx="3"/>
+            <text class="t" x="32" y="82">VISITORS</text>
+            <text x="32" y="100">browsers · mobile</text>
+            <text x="32" y="116">search engine bots</text>
+
+            <rect class="box" x="20" y="270" width="140" height="85" rx="3"/>
+            <text class="t" x="32" y="292">CONTRIBUTORS</text>
+            <text x="32" y="310">37 editors</text>
+            <text x="32" y="325">6 departments</text>
+            <text x="32" y="340">IP allowlist</text>
+
+            <rect class="box" x="20" y="400" width="140" height="70" rx="3"/>
+            <text class="t" x="32" y="422">THIRD-PARTY FEEDS</text>
+            <text x="32" y="440">collections data</text>
+            <text x="32" y="455">imported by cron</text>
+
+            <!-- Edge -->
+            <rect class="box-a" x="205" y="60" width="130" height="60" rx="3"/>
+            <text class="ta" x="217" y="82">LOAD BALANCER</text>
+            <text x="217" y="98">HTTPS · HTTP/2</text>
+            <text x="217" y="112">wildcard TLS cert</text>
+
+            <rect class="box-a" x="205" y="150" width="130" height="70" rx="3"/>
+            <text class="ta" x="217" y="172">VARNISH</text>
+            <text x="217" y="190">HTTP cache</text>
+            <text x="217" y="205">HTML pages + API</text>
+
+            <rect class="box" x="205" y="250" width="130" height="70" rx="3"/>
+            <text class="t" x="217" y="272">NGINX</text>
+            <text x="217" y="290">reverse proxy</text>
+            <text x="217" y="305">HTTP/2 · Brotli</text>
+
+            <line class="ln" x1="160" y1="90" x2="203" y2="90" marker-end="url(#a1)"/>
+            <line class="ln" x1="270" y1="120" x2="270" y2="148" marker-end="url(#a1)"/>
+            <line class="ln" x1="270" y1="220" x2="270" y2="248" marker-end="url(#a1)"/>
+            <line class="ln" x1="160" y1="310" x2="203" y2="310" marker-end="url(#a1)"/>
+
+            <!-- Application -->
+            <rect class="box-a" x="380" y="60" width="180" height="150" rx="3"/>
+            <text class="ta" x="392" y="82">FRONT · NEXT.JS</text>
+            <text x="392" y="102">React · Node.js · PM2</text>
+            <text x="392" y="120">server-side rendering</text>
+            <text x="392" y="135">for SEO, then client</text>
+            <text x="392" y="150">side navigation</text>
+            <rect class="sub" x="392" y="165" width="156" height="32" rx="2"/>
+            <text x="402" y="185">components in Storybook</text>
+
+            <rect class="box-a" x="380" y="260" width="180" height="165" rx="3"/>
+            <text class="ta" x="392" y="282">BACK OFFICE · DRUPAL 8</text>
+            <text x="392" y="302">headless CMS</text>
+            <text x="392" y="318">REST API, JSON</text>
+            <text x="392" y="334">contract in Swagger</text>
+            <text x="392" y="350">field rights per role</text>
+            <text x="392" y="366">cron batch jobs</text>
+            <text x="392" y="382">draft preview</text>
+
+            <path class="ln" d="M335 270 H357 V135 H378" marker-end="url(#a1)"/>
+            <line class="ln" x1="335" y1="300" x2="378" y2="300" marker-end="url(#a1)"/>
+            <line class="ln" x1="430" y1="210" x2="430" y2="258" marker-end="url(#a1)"/>
+            <text class="lbl" x="438" y="230">JSON API,</text>
+            <text class="lbl" x="438" y="243">via Varnish</text>
+            <path class="ln" d="M160 445 H470 V427" marker-end="url(#a1)"/>
+
+            <!-- Data & services -->
+            <rect class="box" x="605" y="60" width="135" height="80" rx="3"/>
+            <text class="t" x="617" y="82">CLOUDINARY</text>
+            <text x="617" y="100">images + PDF</text>
+            <text x="617" y="115">resized on the fly</text>
+            <text x="617" y="130">multi-CDN</text>
+
+            <rect class="box" x="605" y="155" width="135" height="45" rx="3"/>
+            <text class="t" x="617" y="175">YOUTUBE</text>
+            <text x="617" y="190">video hosting</text>
+
+            <rect class="box" x="605" y="260" width="135" height="50" rx="3"/>
+            <text class="t" x="617" y="280">MARIADB</text>
+            <text x="617" y="297">primary / replica</text>
+
+            <rect class="box" x="605" y="322" width="135" height="45" rx="3"/>
+            <text class="t" x="617" y="342">REDIS</text>
+            <text x="617" y="357">cache, replicated</text>
+
+            <rect class="box" x="605" y="380" width="135" height="55" rx="3"/>
+            <text class="t" x="617" y="400">ELASTICSEARCH</text>
+            <text x="617" y="417">search, replicated</text>
+
+            <path class="ln" d="M560 345 H580 M580 285 V407"/>
+            <line class="ln" x1="580" y1="285" x2="603" y2="285" marker-end="url(#a1)"/>
+            <line class="ln" x1="580" y1="345" x2="603" y2="345" marker-end="url(#a1)"/>
+            <line class="ln" x1="580" y1="407" x2="603" y2="407" marker-end="url(#a1)"/>
+
+            <path class="ln" d="M545 260 V240 H586 V100 H603" marker-end="url(#a1)"/>
+            <text class="lbl" x="547" y="234">upload</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 1 · Two applications behind two cache layers. Media never goes through the servers on the way out.</div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">The layers</h2>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Front: Next.js on Node.js</div>
+            <div class="doc-step-desc">React components rendered on the server for the first
+            load and for search engines, then client-side navigation between pages. The front
+            calls the API both from the Node.js server (SSR) and from the browser. PM2 keeps the
+            Node.js processes alive. Components are built and reviewed in Storybook.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Back office: headless Drupal 8</div>
+            <div class="doc-step-desc">Drupal handles editing, roles, translations and SEO fields,
+            and exposes everything as REST services in JSON. The API contract is documented in
+            Swagger, so front and back can work in parallel. Cron runs the background jobs, such as
+            imports from the collections feeds.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Edge: load balancer, Varnish, Nginx</div>
+            <div class="doc-step-desc">HTTPS and HTTP/2 end at the load balancer. Varnish caches
+            HTML pages and API answers. Nginx routes to the right application, with HTTP/2 and Brotli
+            compression.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">04</div><div>
+            <div class="doc-step-title">Data: MariaDB, Redis, Elasticsearch</div>
+            <div class="doc-step-desc">MariaDB as the relational database, Redis as a key/value
+            cache in front of it, Elasticsearch for search and instant suggestions. All three run as
+            primary/replica, on SSD storage.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">05</div><div>
+            <div class="doc-step-title">Media: Cloudinary and YouTube</div>
+            <div class="doc-step-desc">Drupal uploads images and PDFs to Cloudinary, which resizes
+            them for each device and serves them from several CDNs. The front only builds the URLs.
+            Videos are hosted on YouTube.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Stack</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Layer</th><th>Technology</th></tr></thead>
+            <tbody>
+              <tr><td>Front</td><td>Next.js, React, Node.js 12, PM2, Sass, Storybook</td></tr>
+              <tr><td>Back office &amp; API</td><td>Drupal 8, PHP 7.4, REST/JSON, Swagger</td></tr>
+              <tr><td>Cache</td><td>Varnish 6 (pages and API), Redis 6 (data)</td></tr>
+              <tr><td>Search</td><td>Elasticsearch 7</td></tr>
+              <tr><td>Database</td><td>MariaDB, primary/replica</td></tr>
+              <tr><td>Web servers</td><td>Nginx (HTTP/2, Brotli), Linux servers, managed hosting</td></tr>
+              <tr><td>Media</td><td>Cloudinary (DAM, transformations, multi-CDN), YouTube</td></tr>
+              <tr><td>Delivery</td><td>GitLab CI/CD, Docker, Git Flow</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 03 DELIVERY ============================== -->
+    <div class="doc-panel" role="tabpanel" id="delivery" aria-labelledby="tab-delivery" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Five environments</h2>
+        <p>Each step of production has its own environment. The agency runs the first two. The
+        hosting provider runs the three that matter to the museum, each with its own front end,
+        back office, API and Storybook (no Storybook in production).</p>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 230" role="img" aria-labelledby="env-title env-desc">
+            <title id="env-title">louvre.fr environments</title>
+            <desc id="env-desc">Local Docker and an integration server at the agency, then acceptance, pre-production and production at the hosting provider. Git branches map to environments: develop to integration and acceptance, release branches to pre-production, master to production.</desc>
+            <defs>
+              <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="22" width="220" height="200" rx="3"/>
+            <text class="tb" x="20" y="16">AGENCY</text>
+            <rect class="zone" x="250" y="22" width="500" height="200" rx="3"/>
+            <text class="tb" x="260" y="16">HOSTING PROVIDER · MANAGED, 24/7 WATCH</text>
+
+            <rect class="box" x="20" y="45" width="95" height="120" rx="3"/>
+            <text class="t" x="30" y="67">LOCAL</text>
+            <text x="30" y="87">Docker stack</text>
+            <text x="30" y="102">same versions</text>
+            <text x="30" y="117">as production</text>
+
+            <rect class="box" x="125" y="45" width="95" height="120" rx="3"/>
+            <text class="t" x="135" y="67">INTEGRATION</text>
+            <text x="135" y="87">agency VM</text>
+            <text x="135" y="102">front · API</text>
+            <text x="135" y="117">back office</text>
+            <text x="135" y="132">Storybook</text>
+
+            <rect class="box-a" x="262" y="45" width="150" height="120" rx="3"/>
+            <text class="ta" x="274" y="67">ACCEPTANCE</text>
+            <text x="274" y="87">museum testing</text>
+            <text x="274" y="102">debug configuration</text>
+            <text x="274" y="117">test data</text>
+            <text x="274" y="132">IP allowlist</text>
+
+            <rect class="box-a" x="426" y="45" width="150" height="120" rx="3"/>
+            <text class="ta" x="438" y="67">PRE-PRODUCTION</text>
+            <text x="438" y="87">mirror of production</text>
+            <text x="438" y="102">real data</text>
+            <text x="438" y="117">Varnish on</text>
+            <text x="438" y="132">IP allowlist</text>
+
+            <rect class="box-a" x="590" y="45" width="150" height="120" rx="3"/>
+            <text class="ta" x="602" y="67">PRODUCTION</text>
+            <text x="602" y="87">public, indexed</text>
+            <text x="602" y="102">SLA, 24/7 watch</text>
+            <text x="602" y="117">back office behind</text>
+            <text x="602" y="132">IP allowlist</text>
+
+            <line class="ln" x1="115" y1="150" x2="123" y2="150" marker-end="url(#a2)"/>
+            <line class="ln" x1="220" y1="105" x2="260" y2="105" marker-end="url(#a2)"/>
+            <line class="ln" x1="412" y1="105" x2="424" y2="105" marker-end="url(#a2)"/>
+            <line class="ln" x1="576" y1="105" x2="588" y2="105" marker-end="url(#a2)"/>
+
+            <text class="lbl" x="135" y="195">develop</text>
+            <text class="lbl" x="274" y="195">develop</text>
+            <text class="lbl" x="438" y="195">release/x.y.z</text>
+            <text class="lbl" x="602" y="195">master + tag x.y.z</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 2 · One Git branch per stage. Nothing reaches production without passing acceptance and pre-production.</div>
+        </div>
+        <div class="doc-table-wrap" style="margin-top: 24px;">
+          <table class="doc-table">
+            <thead><tr><th></th><th>Acceptance</th><th>Pre-production</th><th>Production</th></tr></thead>
+            <tbody>
+              <tr><td>Configuration</td><td>Debug</td><td>Production</td><td>Production</td></tr>
+              <tr><td>Availability</td><td>On schedule</td><td>On schedule</td><td>Very high (SLA)</td></tr>
+              <tr><td>Data</td><td>Test data</td><td>Real</td><td>Real</td></tr>
+              <tr><td>Monitoring</td><td>None</td><td>Medium</td><td>Full</td></tr>
+              <tr><td>Indexed by search engines</td><td>No</td><td>No</td><td>Yes</td></tr>
+              <tr><td>Access</td><td>Restricted</td><td>Restricted</td><td>Public</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Deployment pipeline</h2>
+        <p>The agency builds, the host installs. Our GitLab CI jobs compile each application and
+        push a tagged, ready-to-run release to the host's Git. The host's deployment script then
+        installs it on the target environment.</p>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 330" role="img" aria-labelledby="dp-title dp-desc">
+            <title id="dp-title">louvre.fr deployment pipeline</title>
+            <desc id="dp-desc">GitLab CI jobs build the Next.js front end and the Drupal back end, package each as a compiled release and push it with a version tag. Media and SQL dumps are transferred separately. On the host, a deployment script takes a release number and a target environment, runs a full install in a new release folder with media on shared storage, then switches a symbolic link and restarts PM2 or runs Drush.</desc>
+            <defs>
+              <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <rect class="zone" x="10" y="22" width="470" height="300" rx="3"/>
+            <text class="tb" x="20" y="16">AGENCY · GITLAB CI JOBS</text>
+            <rect class="zone" x="500" y="22" width="250" height="300" rx="3"/>
+            <text class="tb" x="510" y="16">HOSTING PROVIDER · OVER SSH</text>
+
+            <!-- Front lane -->
+            <rect class="box" x="20" y="50" width="95" height="55" rx="3"/>
+            <text class="t" x="30" y="72">FRONT REPO</text>
+            <text x="30" y="90">Next.js</text>
+            <rect class="box" x="130" y="50" width="105" height="55" rx="3"/>
+            <text class="t" x="140" y="72">BUILD</text>
+            <text x="140" y="90">npm build</text>
+            <text x="140" y="100" style="font-size:9px">+ Storybook</text>
+            <rect class="box" x="250" y="50" width="100" height="55" rx="3"/>
+            <text class="t" x="260" y="72">IMAGE</text>
+            <text x="260" y="90">compiled</text>
+            <rect class="box-a" x="365" y="50" width="105" height="55" rx="3"/>
+            <text class="ta" x="375" y="72">PUSH TAG</text>
+            <text x="375" y="90">release x.y.z</text>
+
+            <!-- Back lane -->
+            <rect class="box" x="20" y="140" width="95" height="55" rx="3"/>
+            <text class="t" x="30" y="162">BACK REPO</text>
+            <text x="30" y="180">Drupal · PHP</text>
+            <rect class="box" x="130" y="140" width="105" height="55" rx="3"/>
+            <text class="t" x="140" y="162">BUILD</text>
+            <text x="140" y="180">composer install</text>
+            <rect class="box" x="250" y="140" width="100" height="55" rx="3"/>
+            <text class="t" x="260" y="162">IMAGE</text>
+            <text x="260" y="180">compiled</text>
+            <rect class="box-a" x="365" y="140" width="105" height="55" rx="3"/>
+            <text class="ta" x="375" y="162">PUSH TAG</text>
+            <text x="375" y="180">release x.y.z</text>
+
+            <line class="ln" x1="115" y1="77" x2="128" y2="77" marker-end="url(#a3)"/>
+            <line class="ln" x1="235" y1="77" x2="248" y2="77" marker-end="url(#a3)"/>
+            <line class="ln" x1="350" y1="77" x2="363" y2="77" marker-end="url(#a3)"/>
+            <line class="ln" x1="115" y1="167" x2="128" y2="167" marker-end="url(#a3)"/>
+            <line class="ln" x1="235" y1="167" x2="248" y2="167" marker-end="url(#a3)"/>
+            <line class="ln" x1="350" y1="167" x2="363" y2="167" marker-end="url(#a3)"/>
+
+            <!-- Media lane -->
+            <rect class="box" x="20" y="235" width="215" height="55" rx="3"/>
+            <text class="t" x="30" y="257">MEDIA + SQL DUMPS</text>
+            <text x="30" y="275">images, PDF, database</text>
+            <rect class="box" x="250" y="235" width="220" height="55" rx="3"/>
+            <text class="t" x="260" y="257">RSYNC / SCP</text>
+            <text x="260" y="275">to the delivery folder</text>
+            <line class="ln" x1="235" y1="262" x2="248" y2="262" marker-end="url(#a3)"/>
+
+            <!-- Host -->
+            <rect class="box-a" x="510" y="50" width="230" height="60" rx="3"/>
+            <text class="ta" x="522" y="72">DEPLOY SCRIPT</text>
+            <text x="522" y="90">--release=x.y.z</text>
+            <text x="522" y="104">--target=&lt;environment&gt;</text>
+
+            <rect class="box" x="510" y="135" width="230" height="70" rx="3"/>
+            <text class="t" x="522" y="157">FULL INSTALL</text>
+            <text x="522" y="175">new release folder</text>
+            <text x="522" y="190">media on shared NAS</text>
+
+            <rect class="box-a" x="510" y="230" width="230" height="60" rx="3"/>
+            <text class="ta" x="522" y="252">SYMLINK SWITCH</text>
+            <text x="522" y="270">then PM2 reload / Drush</text>
+
+            <line class="ln" x1="470" y1="77" x2="508" y2="77" marker-end="url(#a3)"/>
+            <path class="ln" d="M470 167 H488 V95 H508" marker-end="url(#a3)"/>
+            <path class="ln" d="M470 262 H490 V180 H508" marker-end="url(#a3)"/>
+            <line class="ln" x1="625" y1="110" x2="625" y2="133" marker-end="url(#a3)"/>
+            <line class="ln" x1="625" y1="205" x2="625" y2="228" marker-end="url(#a3)"/>
+            <text class="lbl" x="522" y="310">rollback = point the link back</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 3 · Build once at the agency, install the same release on every environment.</div>
+        </div>
+        <ul class="doc-check-list" style="margin-top: 20px;">
+          <li>Every install is a full install. Nothing is patched in place.</li>
+          <li>A release goes live only once it is fully installed, by switching a symbolic link. Rolling back is switching it back.</li>
+          <li>Code, media and database travel separately. Media stays on storage shared by all servers.</li>
+          <li>The release number is collected by the deployment tool and hidden in the HTML, so anyone can check what runs where.</li>
+          <li>No production release on a Friday.</li>
+        </ul>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Git Flow, one release branch per sprint</h2>
+        <div class="doc-diagram">
+          <svg class="dg" viewBox="0 0 760 270" role="img" aria-labelledby="gf-title gf-desc">
+            <title id="gf-title">Branching model</title>
+            <desc id="gf-desc">User story branches start from develop and merge back into it. At the end of a sprint a release branch is cut from develop and shown at the sprint review. Fixes are made on the release branch, merged back into develop, and the release is merged into master with a version tag.</desc>
+            <defs>
+              <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+            </defs>
+            <text class="t" x="10" y="54">US/XX</text>
+            <text x="10" y="68">user story</text>
+            <text class="t" x="10" y="114">develop</text>
+            <text class="t" x="10" y="174">release/x.y.z</text>
+            <text x="10" y="188">sprint branch</text>
+            <text class="t" x="10" y="234">master</text>
+
+            <line class="br" x1="120" y1="50" x2="620" y2="50"/>
+            <line class="br" x1="120" y1="110" x2="620" y2="110"/>
+            <line class="br" x1="120" y1="170" x2="620" y2="170"/>
+            <line class="br" x1="120" y1="230" x2="620" y2="230"/>
+
+            <line class="ln" x1="166" y1="110" x2="204" y2="110" marker-end="url(#a4)"/>
+            <line class="ln" x1="216" y1="110" x2="254" y2="110" marker-end="url(#a4)"/>
+            <line class="ln" x1="263" y1="104" x2="296" y2="56" marker-end="url(#a4)"/>
+            <line class="ln" x1="306" y1="50" x2="344" y2="50" marker-end="url(#a4)"/>
+            <line class="ln" x1="354" y1="56" x2="396" y2="104" marker-end="url(#a4)"/>
+            <line class="ln" x1="404" y1="116" x2="436" y2="164" marker-end="url(#a4)"/>
+            <line class="ln" x1="446" y1="170" x2="484" y2="170" marker-end="url(#a4)"/>
+            <line class="ln" x1="496" y1="170" x2="534" y2="170" marker-end="url(#a4)"/>
+            <line class="ln" x1="544" y1="164" x2="566" y2="116" marker-end="url(#a4)"/>
+            <line class="ln" x1="544" y1="176" x2="586" y2="224" marker-end="url(#a4)"/>
+
+            <circle class="c-d" cx="160" cy="110" r="6"/>
+            <circle class="c-d" cx="210" cy="110" r="6"/>
+            <circle class="c-d" cx="260" cy="110" r="6"/>
+            <circle class="c-f" cx="300" cy="50" r="6"/>
+            <circle class="c-f" cx="350" cy="50" r="6"/>
+            <circle class="c-d" cx="400" cy="110" r="6"/>
+            <circle class="c-r" cx="440" cy="170" r="6"/>
+            <circle class="c-r" cx="490" cy="170" r="6"/>
+            <circle class="c-r" cx="540" cy="170" r="6"/>
+            <circle class="c-d" cx="570" cy="110" r="6"/>
+            <circle class="c-m" cx="590" cy="230" r="6"/>
+
+            <text class="lbl" x="414" y="198">sprint review</text>
+            <text class="lbl" x="478" y="155">fixes</text>
+            <text class="lbl" x="530" y="96">merge back</text>
+            <text class="lbl" x="566" y="254">tag x.y.z</text>
+
+            <text class="tb" x="640" y="114">INTEGRATION</text>
+            <text class="tb" x="640" y="127">ACCEPTANCE</text>
+            <text class="tb" x="640" y="174">PRE-PRODUCTION</text>
+            <text class="tb" x="640" y="234">PRODUCTION</text>
+          </svg>
+          <div class="doc-diagram-caption">FIG. 4 · Hotfix branches (from master, merged into master and develop) are left out for clarity.</div>
+        </div>
+        <p style="margin-top: 18px;">The sprint review decides what happens to the release branch.
+        The rule was agreed with the museum before the first review:</p>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-tag">100% VALIDATED</div>
+            <div class="doc-card-title">Ship it</div>
+            <p>The release branch is merged into master and tagged. It goes to production.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-tag">OVER 80%</div>
+            <div class="doc-card-title">Fix on the release</div>
+            <p>Fixes go on the release branch, are tested again, then merged into master
+            (tagged) and back into develop.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-tag">UNDER 80%</div>
+            <div class="doc-card-title">Back to develop</div>
+            <p>Fixes go on develop or on the feature branches, and a new release branch is cut
+            for a new round of testing.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">CI/CD stages</h2>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>#</th><th>Stage</th><th>What happens</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Code</td><td>Developers work in the local Docker stack and test before pushing</td></tr>
+              <tr><td>2</td><td>Commit</td><td>Push to the GitLab repository, on a user story branch</td></tr>
+              <tr><td>3</td><td>CI · Build</td><td>The code is compiled into a release</td></tr>
+              <tr><td>4</td><td>CI · Unit tests</td><td>Linting and unit tests</td></tr>
+              <tr><td>5</td><td>CI · Integration tests</td><td>Components checked together</td></tr>
+              <tr><td>6</td><td>CD · Review</td><td>Deployed to acceptance for the museum's teams</td></tr>
+              <tr><td>7</td><td>CD · Staging</td><td>Functional and performance checks, quality report</td></tr>
+              <tr><td>8</td><td>CD · Production</td><td>Pre-production, then production, with the museum's go</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================== 04 RUN & QUALITY ============================== -->
+    <div class="doc-panel" role="tabpanel" id="run" aria-labelledby="tab-run" hidden>
+      <section class="doc-section">
+        <h2 class="doc-section-title">Performance</h2>
+        <p>Performance was a requirement from the first sprint, measured with Lighthouse on every
+        release: time to first byte, first contentful paint, Speed Index (target under 1,000),
+        time to interactive and full load.</p>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Cache what can be cached</div>
+            <div class="doc-step-desc">Generated HTML and API answers in Varnish, data in Redis,
+            images resized and served by a CDN, CSS and JavaScript split per component and loaded
+            on demand.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Load tests during the sprints</div>
+            <div class="doc-step-desc">Load test scenarios on the API and the front, written with
+            the museum and run on the production platform before launch, while the host watched
+            the infrastructure. Capacity problems show up during development, not at launch.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Real devices</div>
+            <div class="doc-step-desc">A device lab of 24 phones, tablets and computers, plus
+            BrowserStack, so the site is also tested on slow hardware.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">A cache header that said two things</h2>
+        <p>During the setup, the application sent this header:</p>
+        <div class="doc-terminal"><span class="dim">before</span>  Cache-Control: s-maxage=10800, private, max-age=0, must-revalidate
+<span class="dim">after </span>  Cache-Control: s-maxage=10800, public, max-age=0</div>
+        <p><code>s-maxage</code> asked the shared cache (Varnish) to keep pages for 3 hours, but
+        <code>private</code> told it not to store them at all. And <code>must-revalidate</code>
+        meant that if the back end stopped answering, visitors would get an error page instead of
+        the last good copy. The fix keeps 3 hours in Varnish, nothing in the browser, and lets
+        Varnish serve a stale page when it has to.</p>
+        <div class="doc-note"><strong>LESSON</strong> One routing setup per environment. Acceptance
+        had no Varnish, so the load balancer could not route it like pre-production and production:
+        it had to go through Nginx. We drew the routing for each environment before going further.</div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Accessibility</h2>
+        <p>The museum asked for RGAA 4, level AA. The work starts before any code:</p>
+        <div class="doc-steps">
+          <div class="doc-step"><div class="doc-step-num">01</div><div>
+            <div class="doc-step-title">Design review</div>
+            <div class="doc-step-desc">An external accessibility expert reviews the designs
+            against each RGAA criterion and flags problems while they are cheap to fix.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">02</div><div>
+            <div class="doc-step-title">Component specs</div>
+            <div class="doc-step-desc">For each component, the expert describes how it must be
+            built to stay accessible. Developers follow these specs and can ask the expert
+            directly.</div></div></div>
+          <div class="doc-step"><div class="doc-step-num">03</div><div>
+            <div class="doc-step-title">Audit and statement</div>
+            <div class="doc-step-desc">Checks with WAVE and Tanaguru during development, then an
+            audit and the accessibility statement required by law.</div></div></div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section-title">Operations</h2>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <div class="doc-card-title">Shared responsibility</div>
+            <p>A RACI split each task between the museum, the agency and the host: sizing,
+            certificates, backups, CI/CD, load tests, content migration, monitoring.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Managed hosting</div>
+            <p>The host runs systems, network and monitoring, 24/7 on production, with weekly
+            full and daily incremental backups.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Locked-down access</div>
+            <p>Acceptance and pre-production are reachable from an IP allowlist only. So is the
+            production back office. One wildcard certificate covers all subdomains.</p>
+          </div>
+          <div class="doc-card">
+            <div class="doc-card-title">Maintenance</div>
+            <p>After launch, the platform moved to quarterly release cycles, mixing new features,
+            fixes and upgrades in the same sprints.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="doc-footer-links">
+      <a href="https://www.louvre.fr" target="_blank" rel="noopener" class="btn btn-secondary">[ LIVE SITE ]</a>
+      <a href="../index.html#platforms" class="btn btn-secondary">[ ALL PLATFORM PROJECTS ]</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>ARNAUD.BRETON · TECH PORTFOLIO SYSTEM</div>
+  </footer>
+
+  <script>
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.doc-tab'));
+      function show(id, focus) {
+        tabs.forEach(function (t) {
+          var on = t.getAttribute('aria-controls') === id;
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+          if (on && focus) t.focus();
+        });
+        if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () { show(t.getAttribute('aria-controls')); });
+        t.addEventListener('keydown', function (e) {
+          var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (!d) return;
+          var next = tabs[(i + d + tabs.length) % tabs.length];
+          show(next.getAttribute('aria-controls'), true);
+        });
+      });
+      var initial = location.hash.slice(1);
+      if (['overview', 'arch', 'delivery', 'run'].indexOf(initial) !== -1) show(initial);
+    })();
+  </script>
+</body>
+</html>
