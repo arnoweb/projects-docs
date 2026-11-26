@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Likyly — Architecture | ARNAUD.BRETON</title>
-  <meta name="description" content="Likyly — features, developer experience (npx install wizard + MCP server) and technical architecture of a multi-tenant recommendation API.">
+  <title>Likyly: Architecture | ARNAUD.BRETON</title>
+  <meta name="description" content="Likyly: features, developer experience (npx install wizard + MCP server) and technical architecture of a multi-tenant recommendation API.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -44,7 +44,7 @@
 
   <main class="doc-page">
     <a href="../index.html#projects" class="doc-back-link">&larr; BACK TO PORTFOLIO</a>
-    <div class="doc-kicker">// PROJECT ID: 001 — SAAS RECOMMENDATION SYSTEM</div>
+    <div class="doc-kicker">// PROJECT ID: 001 · SAAS RECOMMENDATION SYSTEM</div>
     <h1 class="doc-title">LIKYLY <span class="mono" style="color: var(--text-dim);">// ARCHITECTURE</span></h1>
     <p class="doc-lede">A multi-tenant recommendation API, installed with one <code>npx</code> command
     and integrated by the developer's own AI coding assistant through an MCP server.</p>
@@ -249,7 +249,7 @@
             <text x="432" y="402">runtime: recommendations</text>
             <text x="432" y="430">+ events (public key)</text>
           </svg>
-          <div class="doc-diagram-caption">FIG. 1 — npx wizard, MCP server and API. The developer key never goes into a config file.</div>
+          <div class="doc-diagram-caption">FIG. 1 · npx wizard, MCP server and API. The developer key never goes into a config file.</div>
         </div>
       </section>
 
@@ -300,19 +300,19 @@
         it needs. If an MCP tool can give the information, the developer doesn't have to read
         the documentation.</p>
         <div class="doc-prompt">
-          <span class="doc-prompt-label">PROMPT — CONNECT MY CATALOG</span>
+          <span class="doc-prompt-label">PROMPT · CONNECT MY CATALOG</span>
           "Connect my Shopify catalog to Likyly. Use product.id as the identifier, title and
           description for content, and pull price, categories, image and stock. Run a first sync."
           <span class="doc-prompt-result">→ list_source_types · create_data_source · test_data_source · preview_data_source · configure_field_mapping · sync_data_source · get_catalog_stats</span>
         </div>
         <div class="doc-prompt">
-          <span class="doc-prompt-label">PROMPT — CONFIGURE RECOMMENDATIONS</span>
+          <span class="doc-prompt-label">PROMPT · CONFIGURE RECOMMENDATIONS</span>
           "On a product page, show 4 recommendations. For an anonymous visitor, use the current
           product and the session. For a logged-in user, add their history. Exclude unavailable products."
           <span class="doc-prompt-result">→ create_placement (strategy auto, in_stock_only) · preview_placement · get_placement_requirements</span>
         </div>
         <div class="doc-prompt">
-          <span class="doc-prompt-label">PROMPT — INTEGRATE AND VALIDATE</span>
+          <span class="doc-prompt-label">PROMPT · INTEGRATE AND VALIDATE</span>
           "Add the pdp-related placement to this React product page. Show 4 cards that match the
           existing design and add every event Likyly needs to learn."
           <span class="doc-prompt-result">→ get_integration_recipe · get_tracking_requirements · writes &lt;LikylyRecommendations&gt; + events · validate_integration</span>
@@ -419,7 +419,7 @@
             <line class="ln" x1="568" y1="290" x2="537" y2="290" marker-end="url(#a2)"/>
             <line class="ln" x1="535" y1="365" x2="568" y2="365" marker-end="url(#a2)"/>
           </svg>
-          <div class="doc-diagram-caption">FIG. 2 — One API service and one database. Embeddings live in Postgres, so there is no separate vector database to run.</div>
+          <div class="doc-diagram-caption">FIG. 2 · One API service and one database. Embeddings live in Postgres, so there is no separate vector database to run.</div>
         </div>
       </section>
 
@@ -466,7 +466,7 @@
             <path class="ln" d="M585 52 H 600 V 100 H 618" marker-end="url(#a3)"/>
             <text class="lbl" x="206" y="122">retrains when enough new interactions</text>
           </svg>
-          <div class="doc-diagram-caption">FIG. 3 — Two kinds of models, blended at request time.</div>
+          <div class="doc-diagram-caption">FIG. 3 · Two kinds of models, blended at request time.</div>
         </div>
         <div class="doc-steps">
           <div class="doc-step"><div class="doc-step-num">01</div><div>
@@ -533,7 +533,7 @@
   </main>
 
   <footer class="site-footer">
-    <div>ARNAUD.BRETON — TECH PORTFOLIO SYSTEM</div>
+    <div>ARNAUD.BRETON · TECH PORTFOLIO SYSTEM</div>
   </footer>
 
   <script>
