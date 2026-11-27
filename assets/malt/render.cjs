@@ -45,6 +45,9 @@ h1{font:700 70px/1.02 "Space Grotesk",sans-serif;letter-spacing:-.02em;margin-to
 .value{font-size:25px;line-height:1.45;color:#C3C9E0;margin-top:24px}
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
 .chip{font:500 16px "JetBrains Mono",monospace;color:#E0E7FF;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 12px}
+.logos{margin-top:30px}.logos small{display:block;font:500 13px "JetBrains Mono",monospace;letter-spacing:.16em;color:#8B93B5;margin-bottom:12px}
+.logos>div{display:flex;gap:14px}.logo{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16)}
+.logo b{font:700 22px Inter,sans-serif;color:#fff}.logo em{font:500 12px "JetBrains Mono",monospace;font-style:normal;color:#A7F3D0}
 .service{margin-top:auto;padding:18px 22px;border-radius:14px;background:linear-gradient(90deg,rgba(99,102,241,.22),rgba(34,211,238,.08));border:1px solid rgba(129,140,248,.35);position:relative}
 .service small{display:block;font:500 13px "JetBrains Mono",monospace;letter-spacing:.16em;color:#67E8F9;margin-bottom:6px}
 .service p{font:600 21px/1.35 Inter,sans-serif;color:#fff}
@@ -76,6 +79,7 @@ h1{font:700 70px/1.02 "Space Grotesk",sans-serif;letter-spacing:-.02em;margin-to
   <h1>${esc(item.title)}</h1>
   <p class="value">${esc(item.value)}</p>
   <div class="chips">${item.chips.map((c) => `<span class="chip">${esc(c)}</span>`).join("")}</div>
+  ${item.logos ? `<div class="logos"><small>DISPONIBLE DANS</small><div>${item.logos.map((l) => `<span class="logo">${fs.readFileSync(path.join(DIR, l.svg), "utf8").replace(/height="1em"/, 'height="44"').replace(/width="1em"/, 'width="44"').replace(/fill="currentColor"/, 'fill="#ffffff"')}<b>${esc(l.label)}</b>${l.note ? `<em${/revue|review/i.test(l.note) ? ' style="color:#FCD34D"' : ""}>${esc(l.note)}</em>` : ""}</span>`).join("")}</div></div>` : ""}
   <div class="service"><small>CE QUE JE PEUX FAIRE POUR VOUS</small><p>${esc(item.service)}</p></div>
 </div>
 <div class="window"><div class="bar"><i></i><i></i><i></i><span>${esc(item.frame)}</span></div><div class="shot">${visual}</div></div>

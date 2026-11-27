@@ -164,17 +164,29 @@
       "slug": "09-mcp",
       "kicker": "Serveurs MCP en production",
       "title": "SERVEURS MCP",
-      "value": "Deux serveurs MCP distants, avec OAuth : vos utilisateurs agissent sur votre produit depuis ChatGPT ou Claude.",
+      "value": "Le serveur MCP de LIKYLY ouvre le moteur de recommandation à Claude et ChatGPT : catalogue, emplacements, performances.",
       "chips": [
         "MCP",
         "OAuth 2.1",
         "Supabase Auth",
-        "Apps SDK"
+        "29 outils"
       ],
-      "status": "Publié dans ChatGPT",
-      "image": "src/mcp-duo.jpg",
-      "frame": "ChatGPT · LIKYLY et ROMKADE",
-      "service": "Rendre votre produit utilisable depuis ChatGPT et Claude"
+      "status": "Publié dans Claude",
+      "image": "src/mcp-likyly.jpg",
+      "frame": "LIKYLY · serveur MCP dans Claude et ChatGPT",
+      "service": "Rendre votre produit utilisable depuis ChatGPT et Claude",
+      "logos": [
+        {
+          "svg": "src/logos/claude.svg",
+          "label": "Claude",
+          "note": "publié"
+        },
+        {
+          "svg": "src/logos/openai.svg",
+          "label": "ChatGPT",
+          "note": "en revue"
+        }
+      ]
     }
   ]
 }
