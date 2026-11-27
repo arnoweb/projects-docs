@@ -38,17 +38,17 @@
       "slug": "03-romkade",
       "kicker": "Assistant IA et serveur MCP",
       "title": "ROMKADE",
-      "value": "On le demande à ChatGPT ou à Claude, et la console lance le jeu. Un serveur MCP relie le produit aux assistants IA.",
+      "value": "Duke, l'assistant IA du Manager, connaît chaque jeu et pilote la console. Le serveur MCP est publié dans ChatGPT.",
       "chips": [
+        "Agent IA local",
         "Serveur MCP",
         "FastAPI + React",
-        "Typesense",
-        "LLM local"
+        "Typesense"
       ],
       "status": "En production",
-      "image": "src/rk-chatgpt.jpg",
-      "frame": "ChatGPT · application ROMKADE",
-      "service": "Rendre votre produit utilisable depuis ChatGPT et Claude"
+      "image": "src/rk-manager-duke.jpg",
+      "frame": "ROMKADE Manager · Duke, l'assistant IA",
+      "service": "Un assistant IA intégré à votre application, en local ou en ligne"
     },
     {
       "slug": "04-datatoform",
@@ -159,6 +159,22 @@
       "image": "src/xp-site.jpg",
       "frame": "xp-flightdeck.com · le site des missions",
       "service": "Un site e-commerce complet : comptes, paiement, abonnement et back-office"
+    },
+    {
+      "slug": "09-mcp",
+      "kicker": "Serveurs MCP en production",
+      "title": "SERVEURS MCP",
+      "value": "Deux serveurs MCP distants, avec OAuth : vos utilisateurs agissent sur votre produit depuis ChatGPT ou Claude.",
+      "chips": [
+        "MCP",
+        "OAuth 2.1",
+        "Supabase Auth",
+        "Apps SDK"
+      ],
+      "status": "Publié dans ChatGPT",
+      "image": "src/mcp-duo.jpg",
+      "frame": "ChatGPT · LIKYLY et ROMKADE",
+      "service": "Rendre votre produit utilisable depuis ChatGPT et Claude"
     }
   ]
 }
