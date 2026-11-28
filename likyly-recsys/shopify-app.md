@@ -126,8 +126,8 @@ encore).
 ## Plan Free : tout le catalogue, limité en commandes
 
 Depuis le 2026-11-28, les plans ne se distinguent plus par le nombre de produits (aucune app
-concurrente ne le limite) mais par la taille de la boutique : **100 commandes par mois en Free**,
-2 000 en Pro. La limite est souple tant qu'il n'y a pas de facturation : au-delà, rien n'est
+concurrente ne le limite) mais par la taille de la boutique : **50 commandes par mois en Free**,
+500 en Pro. La limite est souple tant qu'il n'y a pas de facturation : au-delà, rien n'est
 coupé, la console et l'app indiquent que Pro est nécessaire. `product_limit` reste un garde-fou
 technique de 50 000 produits, identique en Free et en Pro.
 
