@@ -123,14 +123,13 @@ encore).
 4. **Plus tard** : réécrire le connecteur `shopify` en GraphQL. Il n'est pas bloquant pour l'app,
    mais REST finira par disparaître aussi pour les apps personnalisées.
 
-## Plan Free : le point produit à trancher
+## Plan Free : tout le catalogue, limité en commandes
 
-Le plan Free garde **50 produits**, et beaucoup de boutiques Shopify en ont davantage. WordPress
-envoie les meilleures ventes d'abord. Sur Shopify, l'API Admin ne trie pas les produits par ventes :
-il faut soit lire les commandes récentes (scope `read_orders`, plus délicat à justifier en revue),
-soit prendre les produits les plus récents ou une collection choisie par le marchand. Je propose au
-départ une **collection choisie par le marchand** (par défaut : toute la boutique, les 50 plus
-récents), sans demander `read_orders`.
+Depuis le 2026-11-28, les plans ne se distinguent plus par le nombre de produits (aucune app
+concurrente ne le limite) mais par la taille de la boutique : **100 commandes par mois en Free**,
+2 000 en Pro. La limite est souple tant qu'il n'y a pas de facturation : au-delà, rien n'est
+coupé, la console et l'app indiquent que Pro est nécessaire. `product_limit` reste un garde-fou
+technique de 50 000 produits, identique en Free et en Pro.
 
 ## Étapes
 

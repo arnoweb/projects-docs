@@ -54,8 +54,9 @@ exactly this, nothing more:
   universal way to detect these across an arbitrary stack. Find the actual place in the
   project's own code where each happens and add the call there (see Phase 3).
 - **Never** work around a plan limit. A `403` saying `plan limit reached` (a second catalog,
-  a second data source, more products) or a `429` on a sync means the workspace's plan does
-  not include that - the free plan is 1 catalog, 1 data source, 50 products and 1 sync per day.
+  a second data source) or a `429` on a sync means the workspace's plan does not include
+  that - the free plan is 1 catalog, 1 data source and 1 sync per day, for up to 100 orders a
+  month, with the whole catalog.
   Do not retry, rename the catalog, split the catalog or push through another route: stop, tell
   the developer which limit was hit, and give them the upgrade link from the error message
   (there is no online payment yet - Pro is requested with a form in their LIKYLY console).
